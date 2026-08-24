@@ -196,7 +196,15 @@ export default function App() {
     return saved ? saved : (mockStudents[0]?.id || null);
   });
 
-  const [activeTab, setActiveTab] = useState<string>(''); // Will be set on login
+  const [activeTab, setActiveTab] = useState<string>('students'); // Will be set on login
+  
+  // Safe active tab getter
+  const getSafeActiveTab = () => {
+    if (!currentRole) return '';
+    if (allowedTabs.includes(activeTab)) return activeTab;
+    return allowedTabs[0] || 'students';
+  };
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const prevMessagesRef = React.useRef(0);
@@ -1159,8 +1167,8 @@ export default function App() {
   const filteredMenuItems = menuItems.filter(item => allowedTabs.includes(item.id));
 
   const renderActiveComponent = () => {
-    switch (activeTab) {
-
+    const safeTab = getSafeActiveTab();
+    switch (safeTab) {
       case 'students':
         return (
           <StudentList 
