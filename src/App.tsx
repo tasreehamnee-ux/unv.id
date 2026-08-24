@@ -946,9 +946,6 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('AL_AHLIYA_COMMS', JSON.stringify(messages));
-    if (messages.length > 0) {
-      setDoc(doc(db, "appData", "messages"), { list: messages }).catch(console.error);
-    }
   }, [messages]);
   useEffect(() => {
     if (selectedStudentId) {
@@ -1078,7 +1075,12 @@ export default function App() {
 
   // إرسال رسالة بريد داخلي
   const handleSendMessage = (newMessage: InternalMessage) => {
-    setMessages(prev => [newMessage, ...prev]);
+    setMessages(prev => {
+      const newArray = [newMessage, ...prev];
+      // نرسل الرسائل لقاعدة البيانات فقط عند الإرسال اليدوي لمنع التكرار اللانهائي
+      setDoc(doc(db, "appData", "messages"), { list: newArray }).catch(console.error);
+      return newArray;
+    });
   };
 
   // إعادة تهيئة قاعدة البيانات بالقيم الأساسية لسهولة التحرير والتثبيت
