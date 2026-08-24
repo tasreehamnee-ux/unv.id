@@ -196,7 +196,7 @@ export default function App() {
     return saved ? saved : (mockStudents[0]?.id || null);
   });
 
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTab] = useState<string>(''); // Will be set on login
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // حالات خاصة بإضافة موظف جديد
@@ -1100,14 +1100,14 @@ export default function App() {
       setLetters(mockLetters);
       setMessages(mockMessages);
       setSelectedStudentId(mockStudents[0]?.id || null);
-      setActiveTab('dashboard');
+      setActiveTab('students');
       alert('تمت إعادة التهيئة بنجاح!');
     }
   };
 
   // هيكلية التبويبات باللغة العربية مع الأيقونات المرادفة
   const menuItems = [
-    { id: 'dashboard', label: 'لوحة التحكم الرئيسية', icon: LayoutDashboard },
+    
     { id: 'students', label: 'شؤون وتسجيل الطلبة', icon: Users, badge: filteredStudentsForRole.filter(s => s.status === 'pending_documents').length },
     { id: 'portal', label: 'بوابة وقسم الطالب', icon: GraduationCap },
     { id: 'finance', label: 'قسم الحسابات والقبض المالي', icon: CreditCard },
@@ -1122,31 +1122,19 @@ export default function App() {
 
   const allowedTabs = (() => {
     if (!currentRole) return [];
-    if (currentRole === 'admin') return ['dashboard', 'students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
-    if (currentRole === 'registration_director') return ['dashboard', 'students', 'portal', 'letters', 'comms'];
-    if (currentRole === 'finance_director') return ['dashboard', 'finance', 'portal', 'comms'];
+    if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
+    if (currentRole === 'registration_director') return ['students', 'portal', 'letters', 'comms'];
+    if (currentRole === 'finance_director') return ['finance', 'portal', 'comms'];
     // عمداء الكليات (رئاسة القسم العلمي) - مشاهدة فقط لقسمهم (لا حسابات ولا أرشيف كتب ولا أكواد إدارية سيادية)
-    if (currentRole.startsWith('head_')) return ['dashboard', 'students', 'portal', 'comms'];
-    return ['dashboard', 'students', 'portal', 'comms'];
+    if (currentRole.startsWith('head_')) return ['students', 'portal', 'comms'];
+    return ['students', 'portal', 'comms'];
   })();
 
   const filteredMenuItems = menuItems.filter(item => allowedTabs.includes(item.id));
 
   const renderActiveComponent = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return (
-          <Dashboard 
-            students={filteredStudentsForRole}
-            payments={filteredPaymentsForRole}
-            letters={letters}
-            departments={filteredDepartmentsForRole}
-            messages={messages}
-            setActiveTab={setActiveTab}
-            setSelectedStudentId={setSelectedStudentId}
-            currentRole={currentRole}
-          />
-        );
+
       case 'students':
         return (
           <StudentList 
@@ -2719,7 +2707,7 @@ export default function App() {
             type="button"
             onClick={() => {
               setCurrentRole(null);
-              setActiveTab('dashboard');
+              setActiveTab('students');
             }}
             className="w-full flex items-center justify-center gap-2 bg-red-950/20 text-red-400 hover:bg-red-950/40 border border-red-900/40 p-2 rounded-xl transition-all font-bold text-[11px] cursor-pointer"
           >
@@ -2833,7 +2821,7 @@ export default function App() {
                   onClick={() => {
                     setMobileMenuOpen(false);
                     setCurrentRole(null);
-                    setActiveTab('dashboard');
+                    setActiveTab('students');
                   }}
                   className="w-full bg-red-950/40 text-red-300 hover:bg-red-950/65 font-bold text-xs p-2.5 rounded-lg text-center cursor-pointer border border-red-900/40"
                 >
