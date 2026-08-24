@@ -214,22 +214,38 @@ export default function App() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  const prevMessagesRef = React.useRef(0);
+  const prevLatestMsgIdRef = React.useRef<string | null>(null);
   useEffect(() => {
-    if (messages.length > prevMessagesRef.current && prevMessagesRef.current > 0) {
+    if (messages.length > 0) {
       const latestMsg = messages[0];
-      if (latestMsg && latestMsg.sender !== currentRole && currentRole) {
-        const isRecipient = latestMsg.recipients.includes(currentRole) || 
-                            latestMsg.recipients.includes('all_departments') ||
-                            currentRole === 'admin';
-        if (isRecipient) {
-          const senderObj = rolesList.find(r => r.role === latestMsg.sender);
-          const senderName = senderObj ? senderObj.title : latestMsg.sender;
-          alert(`🔔 تنبيه نظام المراسلة:\nيوجد لديك رسالة جديدة من: ${senderName}\nالموضوع: ${latestMsg.subject}`);
+      if (prevLatestMsgIdRef.current && prevLatestMsgIdRef.current !== latestMsg.id) {
+        if (latestMsg.sender !== currentRole && currentRole) {
+          const isRecipient = latestMsg.recipients.includes(currentRole) || 
+                              latestMsg.recipients.includes('all_departments') ||
+                              currentRole === 'admin';
+          if (isRecipient) {
+            const senderObj = rolesList.find(r => r.role === latestMsg.sender);
+            const senderName = senderObj ? senderObj.title : latestMsg.sender;
+            // Play a simple beep using Web Audio API if possible
+            try {
+              const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+              const osc = ctx.createOscillator();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(880, ctx.currentTime);
+              osc.connect(ctx.destination);
+              osc.start();
+              osc.stop(ctx.currentTime + 0.2);
+            } catch(e) {}
+            
+            // Show alert after a tiny delay so audio can play
+            setTimeout(() => {
+              alert(`🔔 تنبيه نظام المراسلة:\nيوجد لديك رسالة جديدة من: ${senderName}\nالموضوع: ${latestMsg.subject}`);
+            }, 100);
+          }
         }
       }
+      prevLatestMsgIdRef.current = latestMsg.id;
     }
-    prevMessagesRef.current = messages.length;
   }, [messages, currentRole, rolesList]);
 
 
