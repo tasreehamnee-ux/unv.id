@@ -1202,8 +1202,8 @@ export default function App() {
     { id: 'portal', label: 'بوابة وقسم الطالب', icon: GraduationCap },
     { id: 'finance', label: 'قسم الحسابات والقبض المالي', icon: CreditCard },
     { id: 'letters', label: 'أرشيف الكتب والقرارات', icon: FolderLock, badge: letters.filter(l => l.status === 'expired' || l.status === 'expiring_soon').length },
-    { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: messages.filter(m => currentRole && m.sender !== currentRole && (m.recipients.includes(currentRole) || m.recipients.includes('all_departments') || currentRole === 'admin')).length },
-    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock, badge: messages.filter(m => m.recipients.includes('labs_director') || m.recipients.includes('all_departments')).length },
+    { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: unreadMessagesCount > 0 ? unreadMessagesCount : undefined },
+    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock, badge: (messages.filter(m => m.sender !== 'labs_director' && (m.recipients.includes('labs_director') || m.recipients.includes('all_departments')) && !(m.readBy || []).includes('labs_director')).length) || undefined },
         { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
     ...(currentRole === 'admin' ? [
       { id: 'admin_security', label: 'التحكم الإداري والأمني 🛡️', icon: ShieldAlert },

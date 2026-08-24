@@ -642,9 +642,18 @@ export default function InternalComms({
 
                   {/* ختم القراءة */}
                   {!isMine && (
-                    <div className="text-left text-[10px] text-emerald-700 font-bold flex items-center justify-end gap-1">
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      <span>قيد القراءة والتحقق والمباشرة</span>
+                    <div className="text-left text-[10px] font-bold flex items-center justify-end gap-1">
+                      {(msg.readBy || []).includes(currentUserRole) ? (
+                        <span className="text-slate-400 flex items-center gap-1">
+                          <CheckCircle className="w-3.5 h-3.5 text-slate-400" />
+                          تمت القراءة والمطالعة
+                        </span>
+                      ) : (
+                        <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                          رسالة جديدة غير مقروءة 🟢
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
