@@ -288,9 +288,10 @@ export default function StudentPortal({
                 type="button"
                 onClick={() => {
                   const valCode = getStudentVerificationCode(currentStudent.id, currentStudent.registrationDate);
-                  const printWin = window.open('', '_blank');
+                  const printWin = window.open('', '_blank_' + Date.now());
                   if (!printWin) return;
-                  printWin.document.write(`
+                  printWin.document.open();
+                      printWin.document.write(`
                     <html>
                       <head>
                         <title>وثيقة صحة صدور القيد الدراسي - ${currentStudent.name}</title>
@@ -677,8 +678,9 @@ export default function StudentPortal({
                     const actions = cloned.querySelector('.no-print');
                     if (actions) actions.remove();
 
-                    const printWin = window.open('', '_blank');
+                    const printWin = window.open('', '_blank_' + Date.now());
                     if (printWin) {
+                      printWin.document.open();
                       printWin.document.write(`
                         <html>
                           <head>

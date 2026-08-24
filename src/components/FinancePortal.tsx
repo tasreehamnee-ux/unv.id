@@ -541,8 +541,9 @@ export default function FinancePortal({
                     const actions = cloned.querySelector('.no-print');
                     if (actions) actions.remove();
 
-                    const printWin = window.open('', '_blank');
+                    const printWin = window.open('', '_blank_' + Date.now());
                     if (printWin) {
+                      printWin.document.open();
                       printWin.document.write(`
                         <html>
                           <head>

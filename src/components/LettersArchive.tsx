@@ -689,9 +689,10 @@ export default function LettersArchive({
                           <button
                             type="button"
                             onClick={() => {
-                              const printWin = window.open('', '_blank');
+                              const printWin = window.open('', '_blank_' + Date.now());
                               if (!printWin) return;
-                              printWin.document.write(`
+                              printWin.document.open();
+                      printWin.document.write(`
                                 <html>
                                   <head>
                                     <title>وثيقة صحة الصدور الرسمية - ${scannedCert.studentName}</title>
