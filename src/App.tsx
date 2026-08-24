@@ -1161,14 +1161,35 @@ export default function App() {
   };
 
   // هيكلية التبويبات باللغة العربية مع الأيقونات المرادفة
+  const unreadMessagesCount = messages.filter(m => {
+    if (!currentRole) return false;
+    if (m.sender === currentRole) return false;
+    const isRecipient = m.recipients.includes(currentRole) || m.recipients.includes('all_departments');
+    if (!isRecipient) return false;
+    return !m.readBy?.includes(currentRole);
+  }).length;
+
+  useEffect(() => {
+    if ((activeTab === 'comms' || activeTab === 'labs_portal') && unreadMessagesCount > 0 && currentRole) {
+      const updatedList = messages.map(m => {
+        const isRecipient = m.recipients.includes(currentRole) || m.recipients.includes('all_departments');
+        if (m.sender !== currentRole && isRecipient && !m.readBy?.includes(currentRole)) {
+          return { ...m, readBy: [...(m.readBy || []), currentRole] };
+        }
+        return m;
+      });
+      setDoc(doc(db, "appData", "messages"), { list: updatedList }, { merge: true }).catch(console.error);
+    }
+  }, [activeTab, messages, currentRole, unreadMessagesCount]);
+
   const menuItems = [
     
     { id: 'students', label: 'شؤون وتسجيل الطلبة', icon: Users, badge: filteredStudentsForRole.filter(s => s.status === 'pending_documents').length },
     { id: 'portal', label: 'بوابة وقسم الطالب', icon: GraduationCap },
     { id: 'finance', label: 'قسم الحسابات والقبض المالي', icon: CreditCard },
     { id: 'letters', label: 'أرشيف الكتب والقرارات', icon: FolderLock, badge: letters.filter(l => l.status === 'expired' || l.status === 'expiring_soon').length },
-    { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: messages.filter(m => m.priority === 'high').length },
-    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock },
+    { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: unreadMessagesCount > 0 ? unreadMessagesCount : messages.filter(m => m.priority === 'high').length, isUnread: unreadMessagesCount > 0 },
+    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock, badge: unreadMessagesCount > 0 ? unreadMessagesCount : undefined, isUnread: unreadMessagesCount > 0 },
     { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
     ...(currentRole === 'admin' ? [
       { id: 'admin_security', label: 'التحكم الإداري والأمني 🛡️', icon: ShieldAlert },
@@ -2689,12 +2710,12 @@ export default function App() {
                   className={`w-full flex items-center justify-between p-3 rounded-xl text-right text-xs xl:text-sm font-semibold transition-all group cursor-pointer ${
                     isActive 
                       ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10 scale-[1.02]' 
-                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100'
+                      : 'text-slate-200 hover:bg-slate-800/50 hover:text-white font-bold'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className={`w-4 h-4 xl:w-4.5 h-4.5 shrink-0 transition-transform ${
-                      isActive ? 'text-white' : 'text-slate-400 group-hover:scale-110'
+                      isActive ? 'text-white' : 'text-slate-300 group-hover:scale-110'
                     }`} />
                     <span>{item.label}</span>
                   </div>
@@ -2812,7 +2833,7 @@ export default function App() {
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center justify-between p-3 rounded-lg text-right text-xs font-bold transition-all ${
-                      isActive ? 'bg-amber-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                      isActive ? 'bg-amber-600 text-white' : 'text-slate-200 hover:bg-slate-800 hover:text-white font-bold'
                     }`}
                   >
                     <div className="flex items-center gap-2">
