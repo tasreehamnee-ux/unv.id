@@ -286,6 +286,7 @@ export default function InternalComms({
     setMailContent('');
     removeAttachment();
     setShowCompose(false);
+    alert('تم إرسال الرسالة بنجاح!');
     setSuccessMsg('✔ تم إرسال وبث البريد الموجه الفوري إلى الجهات المعنية عبر الشبكة المغلقة للجامعة!');
 
     setTimeout(() => {
