@@ -49,6 +49,12 @@ export default function StudentList({
 }: StudentListProps) {
   
   // حالات التحكم بالفلاتر والمكعبات البصرية
+
+  // Role-based restrictions
+  const isSuperUser = currentRole === 'admin' || currentRole === 'registration_director' || currentRole === 'finance_director';
+  const userDeptId = currentRole?.startsWith('head_') ? currentRole.replace('head_', '') : null;
+  const canAddEditStudents = currentRole === 'admin' || currentRole === 'registration_director';
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -419,7 +425,8 @@ export default function StudentList({
                           student.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           student.phone.includes(searchTerm) ||
                           student.nationalId.includes(searchTerm);
-    const matchesDept = filterDepartment === 'all' || student.departmentId === filterDepartment;
+    const effectiveFilterDept = isSuperUser ? filterDepartment : userDeptId;
+    const matchesDept = effectiveFilterDept === 'all' || student.departmentId === effectiveFilterDept;
     const matchesStatus = filterStatus === 'all' || student.status === filterStatus;
     const matchesShift = filterShift === 'all' || student.shift === filterShift;
     
@@ -776,7 +783,8 @@ export default function StudentList({
             <div className="flex items-center gap-1.5 shrink-0 bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
               <Filter className="w-4 h-4 text-slate-700 shrink-0" />
               <select 
-                value={filterDepartment}
+                disabled={!isSuperUser}
+                value={isSuperUser ? filterDepartment : userDeptId || ''}
                 onChange={(e) => setFilterDepartment(e.target.value)}
                 className="outline-hidden text-slate-700 cursor-pointer font-bold"
               >

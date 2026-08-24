@@ -328,6 +328,26 @@ export default function App() {
     localStorage.setItem('AL_AHLIYA_RECEIPT_NOTE_TEXT', receiptNoteText);
   }, [receiptUniversityName, receiptUniversityEmail, receiptSubText, receiptNoteText]);
 
+
+  // Sync Students and Departments from Firebase
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "appData", "students"), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().list) {
+        setStudents(docSnap.data().list);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "appData", "departments"), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().list) {
+        setDepartments(docSnap.data().list);
+      }
+    });
+    return () => unsub();
+  }, []);
+
   // 1.10 حالات وإعدادات خدمة الإشعارات المنبثقة للتنبيه بسلامة وثائق الطلاب المستهدفة
   const [alertsEnabled, setAlertsEnabled] = useState<boolean>(() => {
     const saved = localStorage.getItem('AL_AHLIYA_ALERTS_ENABLED');
@@ -760,7 +780,7 @@ export default function App() {
       return;
     }
 
-    setDepartments(prev => prev.filter(d => d.id !== deptId));
+    setDepartments(prev => { const arr = prev.filter(d => d.id !== deptId); syncDepartments(arr); return arr; });
     
     // إزالة الصلاحية
     setRolesList(prev => prev.filter(r => r.departmentId !== deptId));
@@ -817,7 +837,7 @@ export default function App() {
 
     if (editingDeptId) {
       // تعديل واستبدال الكلية الحالية
-      setDepartments(prev => prev.map(d => {
+      setDepartments(prev => { const arr = prev.map(d => {
         if (d.id === editingDeptId) {
           return {
             ...d,
@@ -829,7 +849,7 @@ export default function App() {
           };
         }
         return d;
-      }));
+      }); syncDepartments(arr); return arr; });
 
       setCollegeIps(prev => ({
         ...prev,
@@ -854,7 +874,7 @@ export default function App() {
         totalEnrolled: 0
       };
 
-      setDepartments(prev => [...prev, newDept]);
+      setDepartments(prev => { const arr = [...prev, newDept]; syncDepartments(arr); return arr; });
       setCollegeIps(prev => ({
         ...prev,
         [newId]: cleanIp
@@ -991,10 +1011,10 @@ export default function App() {
   
   // تسجيل طالب جديد
   const handleAddStudent = (newStudent: Student) => {
-    setStudents(prev => [newStudent, ...prev]);
+    setStudents(prev => { const arr = [newStudent, ...prev]; syncStudents(arr); return arr; });
     
     // تحديث المقاعد المشغولة بالقسم تلقائياً
-    setDepartments(prevDepts => prevDepts.map(dept => {
+    setDepartments(prev => { const arr = prev.map(dept => {
       if (dept.id === newStudent.departmentId) {
         return {
           ...dept,
@@ -1002,7 +1022,7 @@ export default function App() {
         };
       }
       return dept;
-    }));
+    }); syncDepartments(arr); return arr; });
 
     const deptObj = departments.find(d => d.id === newStudent.departmentId);
     addAuditLog('student_add', 'تسجيل وقبول طالب جديد', `تم تسجيل وقبول الطالب [${newStudent.name}] بكود [${newStudent.id}] بكلية [${deptObj?.name || newStudent.departmentId}] وشعبة [${newStudent.shift === 'morning' ? 'صباحي' : 'مسائي'}]`);
@@ -1012,11 +1032,11 @@ export default function App() {
   const handleDeleteStudent = (id: string) => {
     const targetStudent = students.find(s => s.id === id);
     addAuditLog('student_delete', 'إلغاء وشطب قيد طالب مالي', `تم كلياً شطب وإلغاء قيد الطالب [${targetStudent?.name}] الكود الجاري [${id}] مع مسح كافة الوصولات المبرمة لتصفية السلسة الحسابية في النظام الموحد`);
-    setStudents(prev => prev.filter(s => s.id !== id));
+    setStudents(prev => { const arr = prev.filter(s => s.id !== id); syncStudents(arr); return arr; });
     
     // تحرير المقعد في القسم
     if (targetStudent) {
-      setDepartments(prevDepts => prevDepts.map(dept => {
+      setDepartments(prev => { const arr = prev.map(dept => {
         if (dept.id === targetStudent.departmentId) {
           return {
             ...dept,
@@ -1024,7 +1044,7 @@ export default function App() {
           };
         }
         return dept;
-      }));
+      }); syncDepartments(arr); return arr; });
     }
 
     // حذف كافة وصولات الدفع التي تخص هذا الطالب لتنظيف السلسلة الحسابية
@@ -1042,7 +1062,7 @@ export default function App() {
 
     // إذا كان بند المقبوض هو قسط تسجيل أولي، يمكن تحديث حالة الطالب ليصبح "نشط" فوراً
     if (newPayment.category === 'tuition' || newPayment.category === 'registration_fee') {
-      setStudents(prevStudents => prevStudents.map(student => {
+      setStudents(prev => { const arr = prev.map(student => {
         if (student.id === newPayment.studentId && student.status === 'pending_documents') {
           return {
             ...student,
@@ -1050,7 +1070,7 @@ export default function App() {
           };
         }
         return student;
-      }));
+      }); syncStudents(arr); return arr; });
     }
   };
 
@@ -1074,8 +1094,8 @@ export default function App() {
     }
     if (confirm('هل أنت متأكد من إعادة تهيئة كافة السجلات وتصفير التعديلات للقيم الافتراضية للجامعة؟\nسيتم حذف الوصولات والقرارات التي أضفتها.')) {
       localStorage.clear();
-      setDepartments(mockDepartments);
-      setStudents(mockStudents);
+      syncDepartments(mockDepartments);
+      syncStudents(mockStudents);
       setPayments(mockPayments);
       setLetters(mockLetters);
       setMessages(mockMessages);
