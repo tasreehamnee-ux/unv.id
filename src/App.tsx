@@ -2927,7 +2927,7 @@ export default function App() {
                   className={`font-bold text-[10px] px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
                     currentRole === r.role
                       ? 'bg-amber-600 text-white border-amber-600'
-                      : 'bg-slate-950 text-slate-700 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
+                      : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800 hover:text-white'
                   }`}
                   title="تبديل الهوية الفعالة فوراً"
                 >
