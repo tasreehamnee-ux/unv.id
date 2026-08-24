@@ -338,34 +338,36 @@ export default function InternalComms({
     <div className="space-y-6 text-right">
       
       {/* مشغل محاكاة تفاعلية للأدوار (Interactive Demo Switcher) */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-150 shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="space-y-1">
-            <span className="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-sm font-bold uppercase">مركز تشغيل ومحاكاة الشبكة الداخلية للكليات</span>
-            <h3 className="font-bold text-slate-850 text-xs md:text-sm">
-              محاكاة البوابة بصفتك: <span className="text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-md">{rolesMap[currentUserRole]}</span>
-            </h3>
+      {currentRole === 'admin' && (
+        <div className="bg-white p-5 rounded-2xl border border-slate-150 shadow-xs space-y-3 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="space-y-1">
+              <span className="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-sm font-bold uppercase">مركز تشغيل ومحاكاة الشبكة الداخلية للكليات (خاص بالمدير)</span>
+              <h3 className="font-bold text-slate-850 text-xs md:text-sm">
+                مراقبة البوابة بصفتك: <span className="text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-md">{rolesMap[currentUserRole]}</span>
+              </h3>
+            </div>
+            <div className="text-xs text-slate-700 font-bold flex items-center gap-2">
+              <span>تبديل الجهة العارضة:</span>
+              <select 
+                value={currentUserRole}
+                onChange={(e) => {
+                  setCurrentUserRole(e.target.value as MessageRole);
+                  setShowCompose(false);
+                }}
+                className="bg-slate-50 border border-slate-200 p-2 rounded-lg text-slate-850 cursor-pointer font-bold outline-hidden"
+              >
+                {Object.entries(rolesMap).map(([key, value]) => (
+                  <option key={key} value={key}>{value}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="text-xs text-slate-700 font-bold flex items-center gap-2">
-            <span>تبديل الجهة العارضة:</span>
-            <select 
-              value={currentUserRole}
-              onChange={(e) => {
-                setCurrentUserRole(e.target.value as MessageRole);
-                setShowCompose(false);
-              }}
-              className="bg-slate-50 border border-slate-200 p-2 rounded-lg text-slate-850 cursor-pointer font-bold outline-hidden"
-            >
-              {Object.entries(rolesMap).map(([key, value]) => (
-                <option key={key} value={key}>{value}</option>
-              ))}
-            </select>
-          </div>
+          <p className="text-slate-400 text-xs">
+            * تتيح لك ميزة تبديل الجهة مراقبة المراسلات وقراءة التعاميم بصفتك جهة أخرى (صلاحية مدير النظام فقط).
+          </p>
         </div>
-        <p className="text-slate-400 text-xs">
-          * تتيح لك ميزة تبديل الجهة تبادل المراسلات والرد الفوري وقراءة Circulars بين المكاتب بصيغة حية.
-        </p>
-      </div>
+      )}
 
       {/* 📁 شريط التبويبات الرئيسي لنظام المراسلات لجامعة الكوت */}
       <div className="flex border-b border-slate-200 bg-slate-900 text-white rounded-xl overflow-hidden p-1 shadow-sm gap-1 mb-6">
