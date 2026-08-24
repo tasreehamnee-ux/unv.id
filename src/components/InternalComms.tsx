@@ -162,6 +162,10 @@ export default function InternalComms({
   const [dragOver, setDragOver] = useState(false);
 
   const readAndSetFile = (file: File) => {
+    if (file.size > 250 * 1024) {
+      alert("حجم الملف كبير جداً! يرجى اختيار ملف بحجم أقل من 250 كيلوبايت لضمان سرعة المراسلة.");
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (event) => {
       setAttachmentName(file.name);

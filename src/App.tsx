@@ -1080,10 +1080,16 @@ export default function App() {
   };
 
   const handleSendMessage = (newMessage: InternalMessage) => {
-    const newArray = [newMessage, ...messages];
+    // Slice to 50 to avoid Firestore 1MB limits
+    const newArray = [newMessage, ...messages].slice(0, 50);
     setMessages(newArray);
-    // نرسل الرسائل لقاعدة البيانات فقط عند الإرسال اليدوي لمنع التكرار اللانهائي
-    setDoc(doc(db, "appData", "messages"), { list: newArray }).catch(console.error);
+    
+    setDoc(doc(db, "appData", "messages"), { list: newArray }).then(() => {
+      console.log('Message synced');
+    }).catch((e) => {
+      console.error(e);
+      alert('تعذر إرسال الرسالة السحابية. قد يكون حجم المرفق كبيراً جداً.');
+    });
   };
 
   // إعادة تهيئة قاعدة البيانات بالقيم الأساسية لسهولة التحرير والتثبيت
