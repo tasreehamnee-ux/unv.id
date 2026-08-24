@@ -175,10 +175,22 @@ export default function App() {
     return saved ? JSON.parse(saved) : mockPayments;
   });
 
-  const [letters, setLetters] = useState<OfficialLetter[]>(() => {
-    const saved = localStorage.getItem('AL_AHLIYA_LETTERS');
-    return saved ? JSON.parse(saved) : mockLetters;
-  });
+  const [letters, setLetters] = useState<OfficialLetter[]>([]);
+
+  // مزامنة حية للكتب الرسمية من Firebase
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "appData", "letters"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.list) {
+          setLetters(data.list);
+        }
+      } else {
+        setLetters([]);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   const [messages, setMessages] = useState<InternalMessage[]>(() => {
     const saved = localStorage.getItem('AL_AHLIYA_COMMS');
@@ -1125,7 +1137,9 @@ export default function App() {
 
   // أرشفة كتاب رسمي جديد
   const handleAddLetter = (newLetter: OfficialLetter) => {
-    setLetters(prev => [newLetter, ...prev]);
+    const newArr = [newLetter, ...letters].slice(0, 50);
+    setLetters(newArr);
+    setDoc(doc(db, "appData", "letters"), { list: newArr }).catch(console.error);
   };
 
   const handleSendMessage = (newMessage: InternalMessage) => {
@@ -1188,9 +1202,9 @@ export default function App() {
     { id: 'portal', label: 'بوابة وقسم الطالب', icon: GraduationCap },
     { id: 'finance', label: 'قسم الحسابات والقبض المالي', icon: CreditCard },
     { id: 'letters', label: 'أرشيف الكتب والقرارات', icon: FolderLock, badge: letters.filter(l => l.status === 'expired' || l.status === 'expiring_soon').length },
-    { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: unreadMessagesCount > 0 ? unreadMessagesCount : messages.filter(m => m.priority === 'high').length, isUnread: unreadMessagesCount > 0 },
-    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock, badge: unreadMessagesCount > 0 ? unreadMessagesCount : undefined, isUnread: unreadMessagesCount > 0 },
-    { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
+    { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: messages.filter(m => currentRole && m.sender !== currentRole && (m.recipients.includes(currentRole) || m.recipients.includes('all_departments') || currentRole === 'admin')).length },
+    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock, badge: messages.filter(m => m.recipients.includes('labs_director') || m.recipients.includes('all_departments')).length },
+        { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
     ...(currentRole === 'admin' ? [
       { id: 'admin_security', label: 'التحكم الإداري والأمني 🛡️', icon: ShieldAlert },
       { id: 'audit_log', label: 'سجل العمليات والمراقبة 🔒', icon: Database }
@@ -2724,7 +2738,7 @@ export default function App() {
                     <span className={`text-[9px] xl:text-[10px] font-black font-mono px-2 py-0.5 rounded-full ${
                       isActive 
                         ? 'bg-white text-amber-900 border border-amber-150' 
-                        : (item.id === 'letters' || item.id === 'comms' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400')
+                        : (item.id === 'comms' || item.id === 'labs_portal' ? 'bg-emerald-500 text-white font-black shadow-md shadow-emerald-500/50 animate-pulse' : (item.id === 'letters' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-300'))
                     }`}>
                       {item.badge}
                     </span>

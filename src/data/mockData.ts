@@ -350,68 +350,7 @@ export const mockPayments: Payment[] = [
   }
 ];
 
-export const mockLetters: OfficialLetter[] = [
-  {
-    id: 'LET-2026-0001',
-    letterNumber: 'وزاري / ت ق / 2394',
-    title: 'تسهيل قبول الطلاب الأوائل بالمنحة المجانية الخاصة بكليات الطب والأسنان والصيدلة',
-    source: 'وزارة التعليم العالي والبحث العلمي - دائرة الدراسات والتخطيط',
-    destination: 'رئاسة الجامعة الأهلية / أمانة مجلس الجامعة',
-    dateIssued: '2026-01-10',
-    dateReceived: '2026-01-12',
-    expiryDate: '2026-12-31', // صالحة للتجربة
-    category: 'ministry_directive',
-    summary: 'إطلاق دليل وقواعد المنحة المجانية والمقاعد الحرة للعام الدراسي ٢٠٢٦ مع الإعفاء الكامل من أجور السكن السنوية للمحافظات.',
-    attachedFileName: 'MHE_Scholarship_Directive_2026.pdf',
-    archivedBy: 'سمير عبيد الصرخي - رئيس الأرشيف المركزي',
-    status: 'active'
-  },
-  {
-    id: 'LET-2026-0002',
-    letterNumber: 'ر ج / إد / 112',
-    title: 'الرمز السري المعتمد والكتب الإدارية لإغلاق بوابة التسجيل للمرحلة الأولى',
-    source: 'رئاسة الجامعة - مكتب رئيس الجامعة الأكاديمي',
-    destination: 'مركز تسجيل الطلبة وشؤون التسجيل المركزي',
-    dateIssued: '2026-05-15',
-    dateReceived: '2026-05-16',
-    expiryDate: '2026-06-05', // تنتهي قريبا جداً!
-    category: 'administrative_order',
-    summary: 'تحديد يوم ٥ حزيران ٢٠٢٦ كآخر موعد تمديدي لتسجيل الطلبة المتخلفين عن الترحيل الإلكتروني وبخلافه يلغى قبولهم المؤقت.',
-    attachedFileName: 'Admin_Order_Registration_Lock_2026.pdf',
-    archivedBy: 'سرى جاسم حمودي',
-    status: 'expiring_soon'
-  },
-  {
-    id: 'LET-2026-0003',
-    letterNumber: 'أ م / ت ع / 54',
-    title: 'طلب الفحص الطبي للمقبولين الجدد وخطة الصلاحية الصحية الفورية',
-    source: 'وزارة الصحة - دائرة الوقاية ومكافحة الأوبئة والاستدامة',
-    destination: 'رئاسة الجامعة الأهلية / مركز الرعاية ومركز التسجيل',
-    dateIssued: '2026-02-01',
-    dateReceived: '2026-02-02',
-    expiryDate: '2026-05-01', // منتهية الصلاحية للتجربة!
-    category: 'ministry_directive',
-    summary: 'وجوب إخضاع كافة طلبة المجموعة الطبية لفحص سلامة اللقاح والقدرات البدنية الفورية خلال ثلاثة أشهر من تاريخ المباشرة واستبعاد المخالفين.',
-    attachedFileName: 'Health_Ministry_Checks_Expired.pdf',
-    archivedBy: 'سمير عبيد الصرخي - رئيس الأرشيف المركزي',
-    status: 'expired'
-  },
-  {
-    id: 'LET-2026-0004',
-    letterNumber: 'ع هـ / 879',
-    title: 'أمر عمادي بإجراء الامتحانات البديلة التقويمية ومستند الاستمرارية الدراسية',
-    source: 'عمادة كلية الهندسة التقنية',
-    destination: 'قسم هندسة البرمجيات وقسم الحسابات والتسجيل',
-    dateIssued: '2026-05-20',
-    dateReceived: '2026-05-20',
-    expiryDate: '2026-09-01',
-    category: 'internal_circular',
-    summary: 'تحديد آليات ومواعيد الدورة التكميلية لطلبة البرمجيات المستوفين للضوابط وتنسيق مع مسؤولي النظم المباشرة.',
-    attachedFileName: 'Computer_Eng_Circular_Exams.pdf',
-    archivedBy: 'زينب كمال العلي - سكرتيرة العميد',
-    status: 'active'
-  }
-];
+export const mockLetters: OfficialLetter[] = [];
 
 export const mockMessages: InternalMessage[] = [
   {
