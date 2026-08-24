@@ -1059,14 +1059,11 @@ export default function App() {
     setLetters(prev => [newLetter, ...prev]);
   };
 
-  // إرسال رسالة بريد داخلي
   const handleSendMessage = (newMessage: InternalMessage) => {
-    setMessages(prev => {
-      const newArray = [newMessage, ...prev];
-      // نرسل الرسائل لقاعدة البيانات فقط عند الإرسال اليدوي لمنع التكرار اللانهائي
-      setDoc(doc(db, "appData", "messages"), { list: newArray }).catch(console.error);
-      return newArray;
-    });
+    const newArray = [newMessage, ...messages];
+    setMessages(newArray);
+    // نرسل الرسائل لقاعدة البيانات فقط عند الإرسال اليدوي لمنع التكرار اللانهائي
+    setDoc(doc(db, "appData", "messages"), { list: newArray }).catch(console.error);
   };
 
   // إعادة تهيئة قاعدة البيانات بالقيم الأساسية لسهولة التحرير والتثبيت
