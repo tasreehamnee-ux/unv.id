@@ -198,6 +198,25 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<string>(''); // Will be set on login
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const prevMessagesRef = React.useRef(0);
+  useEffect(() => {
+    if (messages.length > prevMessagesRef.current && prevMessagesRef.current > 0) {
+      const latestMsg = messages[0];
+      if (latestMsg && latestMsg.sender !== currentRole && currentRole) {
+        const isRecipient = latestMsg.recipients.includes(currentRole) || 
+                            latestMsg.recipients.includes('all_departments') ||
+                            currentRole === 'admin';
+        if (isRecipient) {
+          const senderObj = rolesList.find(r => r.role === latestMsg.sender);
+          const senderName = senderObj ? senderObj.title : latestMsg.sender;
+          alert(`🔔 تنبيه نظام المراسلة:\nيوجد لديك رسالة جديدة من: ${senderName}\nالموضوع: ${latestMsg.subject}`);
+        }
+      }
+    }
+    prevMessagesRef.current = messages.length;
+  }, [messages, currentRole, rolesList]);
+
 
   // حالات خاصة بإضافة موظف جديد
   const [newStaffRole, setNewStaffRole] = useState('');
@@ -1131,6 +1150,7 @@ export default function App() {
     if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
     if (currentRole === 'registration_director') return ['students', 'portal', 'letters', 'comms'];
     if (currentRole === 'finance_director') return ['finance', 'portal', 'comms'];
+    if (currentRole === 'labs_director') return ['portal', 'letters', 'comms'];
     // عمداء الكليات (رئاسة القسم العلمي) - مشاهدة فقط لقسمهم (لا حسابات ولا أرشيف كتب ولا أكواد إدارية سيادية)
     if (currentRole.startsWith('head_')) return ['students', 'portal', 'comms'];
     return ['students', 'portal', 'comms'];
