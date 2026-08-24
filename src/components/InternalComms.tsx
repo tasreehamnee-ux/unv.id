@@ -39,6 +39,58 @@ interface InternalCommsProps {
   universityEmail?: string;
 }
 
+// دالة رفع سحابية مجانية تدعم ملفات حتى 1 غيغابايت (1000 ميغابايت) مع شريط النسبة
+const uploadToFreeCloud = async (file: File, onProgress: (pct: number) => void): Promise<string> => {
+  // 1. جلب أفضل خادم متاح
+  let serverName = 'store1';
+  try {
+    const sRes = await fetch('https://api.gofile.io/servers');
+    const sData = await sRes.json();
+    if (sData.status === 'ok' && sData.data?.servers?.length > 0) {
+      serverName = sData.data.servers[0].name;
+    }
+  } catch (e) {
+    console.warn('Using default cloud server fallback:', e);
+  }
+
+  // 2. رفع الملف عبر XMLHttpRequest لمتابعة نسبة التحميل المباشرة
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        const pct = (e.loaded / e.total) * 100;
+        onProgress(pct);
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.status === 'ok' && res.data?.downloadPage) {
+            resolve(res.data.downloadPage);
+          } else {
+            reject(new Error(res.status || 'فشل في الحصول على رابط التنزيل'));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      } else {
+        reject(new Error(`رمز الخطأ من الخادم: ${xhr.status}`));
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('خطأ في الاتصال بالشبكة السحابية')));
+    xhr.addEventListener('abort', () => reject(new Error('تم إلغاء رفع الملف')));
+
+    xhr.open('POST', `https://${serverName}.gofile.io/contents/uploadfile`);
+    xhr.send(formData);
+  });
+};
+
 export default function InternalComms({ 
   messages, 
   letters, 
@@ -263,41 +315,62 @@ export default function InternalComms({
     }, 400);
   };
 
-  const handleComposeSubmit = (e: React.FormEvent) => {
+  const handleComposeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mailSubject || !mailContent) {
       alert('الرجاء تعبئة موضوع الرسالة وتفاصيل نص المراسلة الداخلية!');
       return;
     }
 
-    const newMessage: InternalMessage = {
-      id: `msg-${Date.now()}`,
-      sender: currentUserRole,
-      senderName: rolesMap[currentUserRole],
-      recipients: mailRecipient === 'all_departments' ? rolesList.map(r => r.role).filter(r => r !== currentUserRole) : [mailRecipient],
-      subject: mailSubject,
-      content: mailContent,
-      timestamp: new Date().toISOString(),
-      priority: mailPriority,
-      readBy: [currentUserRole],
-      relatedLetterId: mailRelatedLetter || null,
-      attachmentName: attachmentName || null,
-      attachmentData: attachmentData || null
+    const dispatchMessage = (downloadUrl: string | null) => {
+      const newMessage: InternalMessage = {
+        id: `msg-${Date.now()}`,
+        sender: currentUserRole,
+        senderName: rolesMap[currentUserRole],
+        recipients: mailRecipient === 'all_departments' ? rolesList.map(r => r.role).filter(r => r !== currentUserRole) : [mailRecipient],
+        subject: mailSubject,
+        content: mailContent,
+        timestamp: new Date().toISOString(),
+        priority: mailPriority,
+        readBy: [currentUserRole],
+        relatedLetterId: mailRelatedLetter || null,
+        attachmentName: attachmentName || null,
+        attachmentData: downloadUrl
+      };
+
+      onSendMessage(newMessage);
+      
+      // تصفير وتهنئة
+      setMailSubject('');
+      setMailContent('');
+      removeAttachment();
+      setShowCompose(false);
+      alert('تم إرسال الرسالة والملف السحابي بنجاح!');
+      setSuccessMsg('✔ تم إرسال وبث البريد الموجه الفوري إلى الجهات المعنية عبر الشبكة السحابية للجامعة!');
+
+      setTimeout(() => {
+        setSuccessMsg('');
+      }, 4000);
     };
 
-    onSendMessage(newMessage);
-    
-    // تصفير وتهنئة
-    setMailSubject('');
-    setMailContent('');
-    removeAttachment();
-    setShowCompose(false);
-    alert('تم إرسال الرسالة بنجاح!');
-    setSuccessMsg('✔ تم إرسال وبث البريد الموجه الفوري إلى الجهات المعنية عبر الشبكة المغلقة للجامعة!');
-
-    setTimeout(() => {
-      setSuccessMsg('');
-    }, 4000);
+    // إذا كان هناك ملف مرفق، نرفعه سحابياً بحجم يصل حتى 1 غيغابايت مجاناً
+    if (selectedFile) {
+      setIsUploading(true);
+      setUploadProgress(0);
+      try {
+        const downloadUrl = await uploadToFreeCloud(selectedFile, (progress) => {
+          setUploadProgress(progress);
+        });
+        setIsUploading(false);
+        dispatchMessage(downloadUrl);
+      } catch (err: any) {
+        console.error("Cloud upload error:", err);
+        setIsUploading(false);
+        alert("⚠️ تعذر رفع الملف السحابي: " + (err.message || 'خطأ في الاتصال') + "\nيرجى المحاولة مجدداً.");
+      }
+    } else {
+      dispatchMessage(null);
+    }
   };
 
   // دالة للتحقق من تطابق الأدوار وحل التداخل والتطابق بين التسميات القديمة والجديدة والعمادات
@@ -637,10 +710,12 @@ export default function InternalComms({
                       {msg.attachmentData && (
                         <a 
                           href={msg.attachmentData} 
+                          target="_blank"
+                          rel="noopener noreferrer"
                           download={msg.attachmentName}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] px-2 py-1 rounded transition-colors shrink-0"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-colors shrink-0 flex items-center gap-1 shadow-xs cursor-pointer"
                         >
-                          تحميل المرفق 📥
+                          تحميل وتنزيل المرفق السحابي 📥
                         </a>
                       )}
                     </div>
