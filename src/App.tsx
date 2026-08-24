@@ -2534,24 +2534,7 @@ export default function App() {
             <span>نظام محمي متوافق مع الأمن المركزي 🔒</span>
           </div>
 
-          {/* ⭐ خيار الدخول السريع الفوري لمدير النظام لتفادي أي عوائق */}
-          <div className="pt-4 border-t border-slate-805 text-center space-y-2">
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentRole('admin');
-                setEnteredCode('');
-                setLoginError(null);
-                addAuditLog('admin_quick_login', 'دخول مباشر كأدمن', 'تم الدخول الفوري بصفة مدير النظام الشاملة لغرض التطوير والمعاينة');
-              }}
-              className="w-full py-3 px-4 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white border border-amber-500 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-amber-600/10"
-            >
-              ⭐ الدخول السريع المباشر كمدير للنظام (كل الصلاحيات)
-            </button>
-            <p className="text-[10px] text-slate-450 leading-relaxed">
-              بصفتك مدير النظام، يمكنك النقر على الزر الذهبي للولوج المباشر وبدء تخصيص الكليات، مسح الأقسام، صحة الصدور والتواصل.
-            </p>
-          </div>
+
 
         </div>
 
