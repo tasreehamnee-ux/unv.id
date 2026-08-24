@@ -2690,12 +2690,12 @@ export default function App() {
                   className={`w-full flex items-center justify-between p-3 rounded-xl text-right text-xs xl:text-sm font-semibold transition-all group cursor-pointer ${
                     isActive 
                       ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10 scale-[1.02]' 
-                      : 'text-slate-700 hover:bg-slate-800/50 hover:text-slate-200'
+                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className={`w-4 h-4 xl:w-4.5 h-4.5 shrink-0 transition-transform ${
-                      isActive ? 'text-white' : 'text-slate-700 group-hover:scale-110'
+                      isActive ? 'text-white' : 'text-slate-400 group-hover:scale-110'
                     }`} />
                     <span>{item.label}</span>
                   </div>
@@ -2813,7 +2813,7 @@ export default function App() {
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center justify-between p-3 rounded-lg text-right text-xs font-bold transition-all ${
-                      isActive ? 'bg-amber-600 text-white' : 'text-slate-700 hover:bg-slate-800'
+                      isActive ? 'bg-amber-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
                     }`}
                   >
                     <div className="flex items-center gap-2">
