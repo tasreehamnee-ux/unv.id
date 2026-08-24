@@ -63,12 +63,12 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
         
         <div className="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-lg flex flex-col justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold block mb-1">إجمالي العمليات الموثقة:</span>
+            <span className="text-slate-700 text-xs font-bold block mb-1">إجمالي العمليات الموثقة:</span>
             <div className="text-3xl font-black text-amber-400 font-mono">
               {logs.length} <span className="text-sm font-sans font-medium text-slate-300">سجل</span>
             </div>
           </div>
-          <div className="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
+          <div className="text-[10px] text-slate-700 mt-2 flex items-center gap-1">
             <Database className="w-3.5 h-3.5 text-amber-500" />
             <span>تسجيل مشفر محمي بالسيرفر الأساسي</span>
           </div>
@@ -76,7 +76,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
 
         <div className="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-lg flex flex-col justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold block mb-1">تعديلات الصلاحيات والموظفين:</span>
+            <span className="text-slate-700 text-xs font-bold block mb-1">تعديلات الصلاحيات والموظفين:</span>
             <div className="text-3xl font-black text-indigo-400 font-mono">
               {permissionCount} <span className="text-sm font-sans font-medium text-slate-300">تعديل</span>
             </div>
@@ -89,7 +89,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
 
         <div className="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-lg flex flex-col justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold block mb-1">عمليات الشطب والحذف الكلي:</span>
+            <span className="text-slate-700 text-xs font-bold block mb-1">عمليات الشطب والحذف الكلي:</span>
             <div className="text-3xl font-black text-red-400 font-mono">
               {deleteCount} <span className="text-sm font-sans font-medium text-slate-300 font-black">حذف</span>
             </div>
@@ -102,7 +102,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
 
         <div className="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-lg flex flex-col justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold block mb-1">تعديل وإضافة كليات وأقسام:</span>
+            <span className="text-slate-700 text-xs font-bold block mb-1">تعديل وإضافة كليات وأقسام:</span>
             <div className="text-3xl font-black text-emerald-400 font-mono">
               {collegeCount} <span className="text-sm font-sans font-medium text-slate-305 font-black">عملية</span>
             </div>
@@ -126,7 +126,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
             </div>
             <div>
               <h2 className="text-lg md:text-xl font-black text-amber-400 tracking-tight">سجل العمليات المركزي ومراقبة النظام (Audit Log)</h2>
-              <p className="text-slate-400 text-xs mt-0.5">الصفحة الأمنية الحصرية لمدير النظام لتتبع كفاءة الصلاحيات وحماية السجلات من التلاعب</p>
+              <p className="text-slate-700 text-xs mt-0.5">الصفحة الأمنية الحصرية لمدير النظام لتتبع كفاءة الصلاحيات وحماية السجلات من التلاعب</p>
             </div>
           </div>
 
@@ -148,7 +148,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
           
           {/* مربع البحث */}
           <div className="relative">
-            <Search className="absolute right-3.5 top-3 w-4 h-4 text-slate-400" />
+            <Search className="absolute right-3.5 top-3 w-4 h-4 text-slate-700" />
             <input 
               type="text" 
               placeholder="ابحث بالعنوان، التفاصيل، أو اسم الموظف..."
@@ -182,7 +182,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
           </div>
 
           <div className="bg-slate-900 text-amber-400 text-xs px-4 py-3 rounded-xl border border-slate-850 font-sans font-bold flex items-center justify-between">
-            <span className="text-slate-400">حالة تدقيق المحطات الأمنية:</span>
+            <span className="text-slate-700">حالة تدقيق المحطات الأمنية:</span>
             <span className="flex items-center gap-1.5 text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <span>مراقبة نشطة وآمنة بنسبة 100% 🔒</span>
@@ -195,7 +195,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
         <div className="overflow-x-auto rounded-2xl border border-slate-850 bg-slate-950/50">
           <table className="w-full text-right border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-900/80 border-b border-slate-800 text-slate-400 font-bold">
+              <tr className="bg-slate-900/80 border-b border-slate-800 text-slate-700 font-bold">
                 <th className="p-4 font-sans font-black">كود التتبع</th>
                 <th className="p-4">الحدث</th>
                 <th className="p-4 font-sans font-black">الوصف والملابسات التاريخية</th>
@@ -219,7 +219,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
 
                 return (
                   <tr key={log.id} className="hover:bg-slate-900/40 transition-colors">
-                    <td className="p-4 font-mono font-bold text-slate-400">{log.id}</td>
+                    <td className="p-4 font-mono font-bold text-slate-700">{log.id}</td>
                     <td className="p-4">
                       <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase inline-block ${badgeColor}`}>
                         {log.title}
@@ -237,7 +237,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
                     <td className="p-4 text-center font-mono font-bold text-amber-500">
                       {log.timestamp}
                     </td>
-                    <td className="p-4 text-center font-mono font-bold text-slate-400">
+                    <td className="p-4 text-center font-mono font-bold text-slate-700">
                       {log.ip}
                     </td>
                   </tr>
@@ -246,8 +246,8 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
 
               {filteredLogs.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-slate-500">
-                    <AlertOctagon className="w-10 h-10 text-slate-600 mx-auto mb-2 animate-pulse" />
+                  <td colSpan={6} className="text-center py-10 text-slate-700">
+                    <AlertOctagon className="w-10 h-10 text-slate-800 mx-auto mb-2 animate-pulse" />
                     <p className="font-black text-xs">لا يوجد أي سجل مراقبة حالياً يطابق فلاتر الصلاحية النشطة اليوم.</p>
                   </td>
                 </tr>
@@ -257,7 +257,7 @@ export default function AuditLog({ logs, onClearLogs, currentRole }: AuditLogPro
         </div>
 
         {/* شريطة الموثوقية للتصديق البصري */}
-        <div className="p-4 bg-slate-900 rounded-2xl flex items-center justify-between text-[11px] text-slate-400 border border-slate-850 leading-relaxed font-bold">
+        <div className="p-4 bg-slate-900 rounded-2xl flex items-center justify-between text-[11px] text-slate-700 border border-slate-850 leading-relaxed font-bold">
           <span className="flex items-center gap-1">
             <Clock className="w-4 h-4 text-indigo-400 animate-spin" />
             <span>تحديث في خادم الأمن: {logs[0]?.timestamp || SYSTEM_CURRENT_DATE}</span>

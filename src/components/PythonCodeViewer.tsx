@@ -44,7 +44,7 @@ export default function PythonCodeViewer() {
           <Terminal className="w-6 h-6 text-amber-600" />
           <span>القسم البرمجي لـ لغة بايثون للجامعة الأهلية (SQLite local db)</span>
         </h2>
-        <p className="text-slate-500 text-xs md:text-sm mt-1 leading-relaxed">
+        <p className="text-slate-700 text-xs md:text-sm mt-1 leading-relaxed">
           تنفيذاً لطلبك، قمنا ببرمجة تطبيق بايثون متكامل ومغلق المصدر مع واجهات قائمة تفاعلية (Command-Line Interface Menu) وقاعدة بيانات SQLite مدمجة. يقوم النظام بالاحتفاظ بمسؤوليات الطلاب، الفحوصات المنتهية، الحسابات والوصولات، أرشفة الكتب الرسمية مع تتبع تواريخ الصلاحية وبريد التواصل الرئاسي.
         </p>
 
@@ -73,7 +73,7 @@ export default function PythonCodeViewer() {
             <div className="w-3 h-3 bg-red-500 rounded-full" />
             <div className="w-3 h-3 bg-yellow-500 rounded-full" />
             <div className="w-3 h-3 bg-green-500 rounded-full" />
-            <span className="text-slate-400 font-mono text-xs font-semibold mr-2 select-none">al_ahliya_university_system.py</span>
+            <span className="text-slate-700 font-mono text-xs font-semibold mr-2 select-none">al_ahliya_university_system.py</span>
           </div>
 
           <div className="flex gap-2 shrink-0">
@@ -105,7 +105,7 @@ export default function PythonCodeViewer() {
         </div>
 
         {/* حاشية تفصيلية سريعة لكيفية التنفيذ والتشغيل */}
-        <div className="bg-slate-950 p-4 border-t border-slate-800 text-right text-xs text-slate-400 space-y-2">
+        <div className="bg-slate-950 p-4 border-t border-slate-800 text-right text-xs text-slate-700 space-y-2">
           <h4 className="font-bold text-yellow-500 flex items-center gap-1">
             <span>⚙️ طريقة التشغيل والتشغيل المحلي على حاسوبك:</span>
           </h4>

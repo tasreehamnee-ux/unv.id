@@ -433,7 +433,7 @@ export default function StudentList({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-xl md:text-2xl font-black text-indigo-950 font-sans">مركز تسجيل وإدارة شؤون الطلبة 🎓</h2>
-          <p className="text-slate-500 text-xs md:text-sm mt-1">تحديد وتسجيل القيود الجديدة وتثبيت المستندات والوصيلات المالية الموثقة</p>
+          <p className="text-slate-700 text-xs md:text-sm mt-1">تحديد وتسجيل القيود الجديدة وتثبيت المستندات والوصيلات المالية الموثقة</p>
         </div>
         {(currentRole === 'admin' || currentRole === 'registration_director') && (
           <button 
@@ -650,7 +650,7 @@ export default function StudentList({
                   </div>
                   {doc2Provided && (
                     <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 font-bold block">تاريخ انتهاء صلاحية الهوية الوطنية / الجواز:</label>
+                      <label className="text-[10px] text-slate-700 font-bold block">تاريخ انتهاء صلاحية الهوية الوطنية / الجواز:</label>
                       <input 
                         type="date"
                         value={doc2Expiry}
@@ -678,7 +678,7 @@ export default function StudentList({
                   </div>
                   {doc3Provided && (
                     <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 font-bold block">تاريخ انتهاء الفحص الطبي (صلاحية ٦ أشهر):</label>
+                      <label className="text-[10px] text-slate-700 font-bold block">تاريخ انتهاء الفحص الطبي (صلاحية ٦ أشهر):</label>
                       <input 
                         type="date"
                         value={doc3Expiry}
@@ -736,9 +736,9 @@ export default function StudentList({
               </div>
 
               <div className="md:col-span-4 text-center space-y-2">
-                <div className="text-slate-500 text-xs font-bold font-sans">القسط السنوي المحسوب للطالب:</div>
+                <div className="text-slate-700 text-xs font-bold font-sans">القسط السنوي المحسوب للطالب:</div>
                 <div className="text-lg md:text-xl font-extrabold text-slate-900 font-mono">
-                  {getSelectedDepartmentFee().toLocaleString()} <span className="text-xs font-sans font-medium text-slate-500">د.ع</span>
+                  {getSelectedDepartmentFee().toLocaleString()} <span className="text-xs font-sans font-medium text-slate-700">د.ع</span>
                 </div>
                 <button 
                   type="submit" 
@@ -762,7 +762,7 @@ export default function StudentList({
             
             {/* مربع البحث */}
             <div className="relative flex-grow">
-              <Search className="absolute right-3.5 top-3 w-4 h-4 text-slate-400" />
+              <Search className="absolute right-3.5 top-3 w-4 h-4 text-slate-700" />
               <input 
                 type="text" 
                 placeholder="ابحث بالاسم الرباعي، الرقم الجامعي STU، رقم الهوية أو الهاتف..."
@@ -774,7 +774,7 @@ export default function StudentList({
 
             {/* الفلترة حسب الكلية */}
             <div className="flex items-center gap-1.5 shrink-0 bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
-              <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+              <Filter className="w-4 h-4 text-slate-700 shrink-0" />
               <select 
                 value={filterDepartment}
                 onChange={(e) => setFilterDepartment(e.target.value)}
@@ -789,7 +789,7 @@ export default function StudentList({
 
             {/* الفلترة حسب الدوام */}
             <div className="flex items-center gap-1.5 shrink-0 bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
-              <ArrowLeftRight className="w-4 h-4 text-slate-400 shrink-0" />
+              <ArrowLeftRight className="w-4 h-4 text-slate-700 shrink-0" />
               <select 
                 value={filterShift}
                 onChange={(e) => setFilterShift(e.target.value)}
@@ -827,7 +827,7 @@ export default function StudentList({
                 <FileSpreadsheet className="w-5 h-5 text-indigo-650 shrink-0" />
                 <div className="space-y-0.5">
                   <h4 className="font-extrabold text-xs text-slate-800">تحليل وتبادل بيانات الطلبة الرسمية (Excel ⇄ System)</h4>
-                  <p className="text-[10px] text-slate-500 font-medium">مخصص لمدير التسجيل العام ومدير النظام لتصدير كشوفات التدقيق واستيراد الطلبة القدامى جماعياً</p>
+                  <p className="text-[10px] text-slate-700 font-medium">مخصص لمدير التسجيل العام ومدير النظام لتصدير كشوفات التدقيق واستيراد الطلبة القدامى جماعياً</p>
                 </div>
               </div>
               <div className="text-[10px] bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-md font-bold uppercase shrink-0">
@@ -869,7 +869,7 @@ export default function StudentList({
                 onClick={handleDownloadTemplate}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs p-2.5 rounded-lg transition-all border border-slate-200 flex items-center justify-center gap-2 cursor-pointer"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-slate-500" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-slate-700" />
                 <span>تحميل قالب Excel للطلبة القدماء</span>
               </button>
             </div>
@@ -916,12 +916,12 @@ export default function StudentList({
                 return (
                   <tr key={student.id} className="hover:bg-slate-50/70 transition-colors whitespace-nowrap">
                     {/* 1. ت */}
-                    <td className="p-3 text-center text-slate-400 font-bold border-b border-slate-100">{index + 1}</td>
+                    <td className="p-3 text-center text-slate-700 font-bold border-b border-slate-100">{index + 1}</td>
                     
                     {/* 2. اسم الطالب */}
                     <td className="p-3 border-b border-slate-100">
                       <div className="font-bold text-slate-800">{student.name}</div>
-                      <div className="text-slate-400 text-[10px] md:text-xs mt-0.5 max-w-[200px] overflow-hidden truncate font-sans text-right">
+                      <div className="text-slate-700 text-[10px] md:text-xs mt-0.5 max-w-[200px] overflow-hidden truncate font-sans text-right">
                         {dept?.name || student.departmentId} ({student.phone})
                       </div>
                     </td>
@@ -932,7 +932,7 @@ export default function StudentList({
                     </td>
                     
                     {/* 4. تاريخ الميلاد */}
-                    <td className="p-3 text-center font-mono text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center font-mono text-slate-800 border-b border-slate-100">
                       {student.dob || '2005-06-15'}
                     </td>
                     
@@ -946,7 +946,7 @@ export default function StudentList({
                     </td>
                     
                     {/* 6. سنة التخرج */}
-                    <td className="p-3 text-center font-mono text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center font-mono text-slate-800 border-b border-slate-100">
                       {student.graduationYear || 2025}
                     </td>
                     
@@ -963,7 +963,7 @@ export default function StudentList({
                     </td>
                     
                     {/* 9. محاولات */}
-                    <td className="p-3 text-center font-mono text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center font-mono text-slate-800 border-b border-slate-100">
                       {student.attemptsCount || 1}
                     </td>
                     
@@ -988,7 +988,7 @@ export default function StudentList({
                     </td>
                     
                     {/* 14. الفرع */}
-                    <td className="p-3 text-center text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center text-slate-800 border-b border-slate-100">
                       {student.branch || 'أحيائي'}
                     </td>
                     
@@ -1000,7 +1000,7 @@ export default function StudentList({
                     </td>
                     
                     {/* 16. قانون 15 */}
-                    <td className="p-3 text-center text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center text-slate-800 border-b border-slate-100">
                       {student.law15 || 'غير مشمول'}
                     </td>
                     
@@ -1010,7 +1010,7 @@ export default function StudentList({
                     </td>
                     
                     {/* 18. المعهد */}
-                    <td className="p-3 text-center text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center text-slate-800 border-b border-slate-100">
                       {student.institute || 'لا يوجد'}
                     </td>
                     
@@ -1020,7 +1020,7 @@ export default function StudentList({
                     </td>
                     
                     {/* 20. كود التسجيل */}
-                    <td className="p-3 text-center font-mono text-slate-500 text-[11px] border-b border-slate-100">
+                    <td className="p-3 text-center font-mono text-slate-700 text-[11px] border-b border-slate-100">
                       {student.registrationCode || ('REG-2026-N-' + (4128 + index))}
                     </td>
                     
@@ -1030,12 +1030,12 @@ export default function StudentList({
                     </td>
                     
                     {/* 22. تاريخ الوصل */}
-                    <td className="p-3 text-center font-mono text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center font-mono text-slate-800 border-b border-slate-100">
                       {student.receiptDate || student.registrationDate || '2026-01-20'}
                     </td>
                     
                     {/* 23. تاريخ التسجيل */}
-                    <td className="p-3 text-center font-mono text-slate-600 border-b border-slate-100">
+                    <td className="p-3 text-center font-mono text-slate-800 border-b border-slate-100">
                       {student.registrationDate}
                     </td>
                     
@@ -1125,7 +1125,7 @@ export default function StudentList({
 
               {filteredStudents.length === 0 && (
                 <tr>
-                  <td colSpan={26} className="text-center py-12 text-slate-400 font-medium whitespace-normal">
+                  <td colSpan={26} className="text-center py-12 text-slate-700 font-medium whitespace-normal">
                     <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <span>لا يوجد طلاب مطابقين لمعاير البحث والفلترة المطبقة حالياً.</span>
                   </td>
@@ -1136,7 +1136,7 @@ export default function StudentList({
         </div>
 
         {/* ذيل معلومات إحصائية سريع */}
-        <div className="p-4 bg-slate-50 border-t border-slate-150 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-3">
+        <div className="p-4 bg-slate-50 border-t border-slate-150 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-700 gap-3">
           <span>يظهر الجدول {filteredStudents.length} طلاب مسجلين بالدراسة في هذه الجامعة الأهلية حالياً.</span>
           <span className="font-bold">نظام تدقيق تواريخ الانتهاء للصلاحيات يعمل في وضع التنبيه التلقائي.</span>
         </div>
@@ -1154,7 +1154,7 @@ export default function StudentList({
                 <span className="text-xl">📄</span>
                 <div>
                   <h3 className="font-black text-sm md:text-base text-amber-400">تثبيت وإدخال رقم الوصل المالي للقبول</h3>
-                  <p className="text-slate-400 text-[10px]">قسم شؤون وقيد الطلبة الموحد • الجامعة الأهلية</p>
+                  <p className="text-slate-700 text-[10px]">قسم شؤون وقيد الطلبة الموحد • الجامعة الأهلية</p>
                 </div>
               </div>
               <button 
@@ -1162,7 +1162,7 @@ export default function StudentList({
                   setShowReceiptModal(false);
                   setReceiptModalStudent(null);
                 }}
-                className="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition-all"
+                className="text-slate-700 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1173,11 +1173,11 @@ export default function StudentList({
               {/* معلومات الطالب */}
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-150 space-y-1">
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-400">الطالب المعني بالرسم:</span>
+                  <span className="text-slate-700">الطالب المعني بالرسم:</span>
                   <span className="font-black text-slate-800">{receiptModalStudent.name}</span>
                 </div>
                 <div className="flex justify-between text-[11px] border-t border-slate-200/50 pt-1 mt-1">
-                  <span className="text-slate-400">الكود الجامعي المعتمد:</span>
+                  <span className="text-slate-700">الكود الجامعي المعتمد:</span>
                   <span className="font-mono font-bold text-indigo-900">{receiptModalStudent.id}</span>
                 </div>
               </div>
@@ -1188,7 +1188,7 @@ export default function StudentList({
                 <div className="space-y-1">
                   <label className="font-black text-slate-700 block text-[11px]">رقم الوصل المالي المكتوب:</label>
                   <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:border-indigo-600 focus-within:bg-white p-1.5">
-                    <span className="text-slate-400 font-mono text-[10px] select-none text-left bg-slate-200/50 px-1 py-0.5 rounded-xs">REC-2026-</span>
+                    <span className="text-slate-700 font-mono text-[10px] select-none text-left bg-slate-200/50 px-1 py-0.5 rounded-xs">REC-2026-</span>
                     <input 
                       type="text" 
                       placeholder="9450"
@@ -1248,7 +1248,7 @@ export default function StudentList({
 
               {/* ملاحظات وتأكيد */}
               <div className="space-y-1">
-                <label className="font-bold text-slate-500 block">ملاحظات المسجل عن الوصل المالي الورقي:</label>
+                <label className="font-bold text-slate-700 block">ملاحظات المسجل عن الوصل المالي الورقي:</label>
                 <input 
                   type="text" 
                   placeholder="مثال: تم تدوين رقم الوصل وتدقيقه مع الدائرة القانونية..."
@@ -1271,7 +1271,7 @@ export default function StudentList({
                     setShowReceiptModal(false);
                     setReceiptModalStudent(null);
                   }}
-                  className="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-md font-bold cursor-pointer"
+                  className="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-md font-bold cursor-pointer"
                 >
                   إلغاء الأمر
                 </button>

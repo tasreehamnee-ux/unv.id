@@ -363,7 +363,7 @@ export default function InternalComms({
               </select>
             </div>
           </div>
-          <p className="text-slate-400 text-xs">
+          <p className="text-slate-700 text-xs">
             * تتيح لك ميزة تبديل الجهة مراقبة المراسلات وقراءة التعاميم بصفتك جهة أخرى (صلاحية مدير النظام فقط).
           </p>
         </div>
@@ -377,7 +377,7 @@ export default function InternalComms({
           className={`flex-1 py-3 px-4 font-bold text-xs md:text-sm text-center rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeCommsTab === 'internal'
               ? 'bg-indigo-600 text-white shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              : 'text-slate-700 hover:text-white hover:bg-slate-800'
           }`}
         >
           <Building className="w-4 h-4" />
@@ -389,7 +389,7 @@ export default function InternalComms({
           className={`flex-1 py-3 px-4 font-bold text-xs md:text-sm text-center rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeCommsTab === 'external'
               ? 'bg-amber-600 text-white shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              : 'text-slate-700 hover:text-white hover:bg-slate-800'
           }`}
         >
           <Mail className="w-4 h-4 text-amber-300" />
@@ -409,7 +409,7 @@ export default function InternalComms({
             </div>
             <div>
               <h3 className="font-bold text-slate-850 text-xs md:text-sm">بوابة بروتوكول الـ IP والشبكة الداخلية (Intranet IP Routing)</h3>
-              <p className="text-[11px] text-slate-500">مراقبة سريان الاتصال وعناوين العقد بين الأقسام ورئاسة الجامعة غي شبكة مغلقة</p>
+              <p className="text-[11px] text-slate-700">مراقبة سريان الاتصال وعناوين العقد بين الأقسام ورئاسة الجامعة غي شبكة مغلقة</p>
             </div>
           </div>
           
@@ -431,7 +431,7 @@ export default function InternalComms({
                 <div key={rKey} className="p-3 bg-white rounded-lg border border-slate-200 shadow-3xs space-y-1.5">
                   <span className="font-bold text-slate-700 block text-[11px] truncate">{(roleName as string).split(' - ')[0]}</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-slate-400 font-mono">IP:</span>
+                    <span className="text-[10px] text-slate-700 font-mono">IP:</span>
                     <input
                       type="text"
                       value={ips[rKey]}
@@ -443,7 +443,7 @@ export default function InternalComms({
                 </div>
               );
             })}
-            <div className="md:col-span-2 lg:col-span-4 text-[10px] text-slate-400 leading-normal">
+            <div className="md:col-span-2 lg:col-span-4 text-[10px] text-slate-700 leading-normal">
               💡 *تحديثات الـ IP فورية ومحفوظة بالمتصفح، وتنعكس على ترويسة الرسائل الموجهة لتحديد مسار التوجيه.
             </div>
           </div>
@@ -454,7 +454,7 @@ export default function InternalComms({
           
           <div className="md:col-span-5 space-y-3 flex flex-col justify-between">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 font-mono uppercase">ICMP Echo Request Utility</span>
+              <span className="text-[10px] font-bold text-slate-700 font-mono uppercase">ICMP Echo Request Utility</span>
               <h4 className="font-bold text-slate-800 text-xs">فحص ربط الشبكة (Intranet PING Utility)</h4>
               <p className="text-slate-505 text-[11px] leading-relaxed">
                 اختر أي قسم علمي أو إداري في الجامعة لتشغيل فحص بنج (PING) فوري لغرض التحقق من جاهزية جدار الحماية والاستجابة الفورية للموديم الداخلي.
@@ -483,7 +483,7 @@ export default function InternalComms({
                 disabled={pinging}
                 className={`w-full flex items-center justify-center gap-2 font-bold text-xs p-2 rounded-lg transition-all cursor-pointer ${
                   pinging 
-                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                    ? 'bg-slate-300 text-slate-700 cursor-not-allowed' 
                     : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
                 }`}
               >
@@ -501,7 +501,7 @@ export default function InternalComms({
             
             <div className="flex-grow bg-slate-950 p-4 rounded-b-lg font-mono text-[11px] text-emerald-400 min-h-[140px] max-h-[140px] overflow-y-auto space-y-1 text-left direction-ltr selection:bg-slate-800" style={{ direction: 'ltr' }}>
               {pingLogs.length === 0 ? (
-                <div className="text-slate-500 italic text-center pt-8">
+                <div className="text-slate-700 italic text-center pt-8">
                   -- شاشة سطر الأوامر جاهزة، انقر على فحص البنج بالأعلى لبدء تتبع الطرود --
                 </div>
               ) : (
@@ -570,7 +570,7 @@ export default function InternalComms({
                       {/* مسار الـ IP لتأصيل المراسلة الشبكية */}
                       <div className="flex items-center gap-1.5 text-[9px] text-indigo-800 bg-indigo-50/80 border border-indigo-150/40 px-2 py-0.5 rounded-md w-fit font-mono my-1 select-all" style={{ direction: 'ltr' }}>
                         <span>🌐 {ips[msg.sender] || '192.168.1.10'}</span>
-                        <span className="text-slate-400">➔</span>
+                        <span className="text-slate-700">➔</span>
                         <span>🎯 {
                           msg.recipients.includes('all_departments' as any) 
                             ? '192.168.1.255 (Broadcast)' 
@@ -578,14 +578,14 @@ export default function InternalComms({
                         }</span>
                       </div>
 
-                      <div className="text-[10px] text-slate-400 font-mono">
+                      <div className="text-[10px] text-slate-700 font-mono">
                         {new Date(msg.timestamp).toLocaleString('ar-IQ')}
                       </div>
                     </div>
 
                     <div className="flex gap-2">
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${
-                        msg.priority === 'high' ? 'bg-red-100 text-red-800' : 'bg-slate-150 text-slate-600'
+                        msg.priority === 'high' ? 'bg-red-100 text-red-800' : 'bg-slate-150 text-slate-800'
                       }`}>
                         {msg.priority === 'high' ? 'عالي ذات أولوية' : 'عادي'}
                       </span>
@@ -594,7 +594,7 @@ export default function InternalComms({
 
                   <div className="space-y-1">
                     <h4 className="font-extrabold text-slate-800 text-sm leading-normal">{msg.subject}</h4>
-                    <p className="text-slate-600 text-xs leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-slate-800 text-xs leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   </div>
 
                   {/* ربط ومزامنة بكتاب رسمي ملحق */}
@@ -647,10 +647,10 @@ export default function InternalComms({
             })}
 
             {userInbox.length === 0 && (
-              <div className="text-center py-20 text-slate-400">
+              <div className="text-center py-20 text-slate-700">
                 <Mail className="w-12 h-12 text-slate-200 mx-auto mb-3" />
                 <h3 className="text-sm font-bold text-slate-800">صندوق البريد مغلق وفارغ حالياً</h3>
-                <p className="text-slate-500 text-xs mt-1">لا توجد رسائل موجهة إليك أو صادرة منك في هذا الدور.</p>
+                <p className="text-slate-700 text-xs mt-1">لا توجد رسائل موجهة إليك أو صادرة منك في هذا الدور.</p>
               </div>
             )}
           </div>
@@ -682,7 +682,7 @@ export default function InternalComms({
               </select>
 
               {/* عنوان IP المستلم الفعلي */}
-              <div className="mt-1.5 p-2 bg-slate-50 hover:bg-slate-100/80 border border-slate-150 rounded-lg text-[10px] text-slate-500 font-mono transition-colors" style={{ direction: 'ltr' }}>
+              <div className="mt-1.5 p-2 bg-slate-50 hover:bg-slate-100/80 border border-slate-150 rounded-lg text-[10px] text-slate-700 font-mono transition-colors" style={{ direction: 'ltr' }}>
                 📍 Target IP: <span className="font-bold text-indigo-700">{mailRecipient === 'all_departments' ? '192.168.1.255 (Subnet Broadcast)' : ips[mailRecipient] || '192.168.1.10'}</span>
               </div>
             </div>
@@ -780,9 +780,9 @@ export default function InternalComms({
                   }`}
                   onClick={() => document.getElementById('comms-file-input')?.click()}
                 >
-                  <Paperclip className="w-5 h-5 text-slate-400" />
+                  <Paperclip className="w-5 h-5 text-slate-700" />
                   <span className="font-bold text-slate-700 text-xs">اسحب وأفلت المرفق هنا أو انقر للتصفح</span>
-                  <span className="text-[10px] text-slate-400">PDF، صور، مستندات نصية أو جداول بيانات</span>
+                  <span className="text-[10px] text-slate-700">PDF، صور، مستندات نصية أو جداول بيانات</span>
                   <input
                     id="comms-file-input"
                     type="file"
@@ -971,7 +971,7 @@ export default function InternalComms({
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                   <span className="font-bold text-slate-800 text-xs">سجل المراسلات والبريد الصادر الخارجي الموثق:</span>
                 </div>
-                <span className="text-[10px] text-slate-400">إجمالي الصادرات الخارجية: {externalEmails.length} مخاطبات</span>
+                <span className="text-[10px] text-slate-700">إجمالي الصادرات الخارجية: {externalEmails.length} مخاطبات</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -984,7 +984,7 @@ export default function InternalComms({
 
                     <div className="space-y-1.5">
                       <div className="space-y-0.5" style={{ direction: 'rtl' }}>
-                        <span className="text-[10px] text-slate-400 block text-right">الجهة الخارجية المستلمة:</span>
+                        <span className="text-[10px] text-slate-700 block text-right">الجهة الخارجية المستلمة:</span>
                         <p className="font-extrabold text-slate-800 text-[11px] text-right">{email.recipientName}</p>
                         <p className="font-mono text-[10px] text-indigo-700 font-bold text-right">{email.to}</p>
                       </div>
@@ -1006,15 +1006,15 @@ export default function InternalComms({
                       )}
                     </div>
 
-                    <div className="border-t border-slate-200/60 pt-2 flex justify-between items-center text-[10px] text-slate-400">
+                    <div className="border-t border-slate-200/60 pt-2 flex justify-between items-center text-[10px] text-slate-700">
                       <span>تاريخ الإصدار وبث SMTP:</span>
-                      <span className="font-mono text-slate-500 font-bold">{email.date}</span>
+                      <span className="font-mono text-slate-700 font-bold">{email.date}</span>
                     </div>
                   </div>
                 ))}
 
                 {externalEmails.length === 0 && (
-                  <div className="col-span-2 p-12 text-center text-slate-400 space-y-2 border-2 border-dashed border-slate-200 rounded-2xl bg-white shadow-3xs">
+                  <div className="col-span-2 p-12 text-center text-slate-700 space-y-2 border-2 border-dashed border-slate-200 rounded-2xl bg-white shadow-3xs">
                     <Mail className="w-8 h-8 text-slate-300 mx-auto animate-bounce" />
                     <h3 className="text-xs font-bold text-slate-700">لم يتم رصد صادرات بريد خارجي حتى الآن</h3>
                     <p className="text-[11px] text-slate-405 leading-normal">

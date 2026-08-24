@@ -1218,7 +1218,7 @@ export default function App() {
                   <ShieldAlert className="w-8 h-8 text-amber-600 animate-pulse shrink-0" />
                   <div>
                     <h3 className="font-extrabold text-slate-800 text-lg">بوابة مدير النظام الأول للتحكم الأمني والموظفين والبريد المركزي</h3>
-                    <p className="text-slate-500 text-xs mt-0.5">صلاحيات سيادية كاملة لإضافة وحذف الكوادر، تخصيص رموز المرور، وإدارة إنذارات الطلبة</p>
+                    <p className="text-slate-700 text-xs mt-0.5">صلاحيات سيادية كاملة لإضافة وحذف الكوادر، تخصيص رموز المرور، وإدارة إنذارات الطلبة</p>
                   </div>
                 </div>
               </div>
@@ -1293,7 +1293,7 @@ export default function App() {
                   {/* 1. تبديل وتجربة الأدوار */}
                   <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/65 space-y-3">
                     <h4 className="font-extrabold text-xs text-slate-800">🔄 الإجراء التقني: تبديل الموظف الفعال في الجلسة المباشرة</h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">اختر أي موظف أو عميد كلية لتتقمص هويته وتستعرض فوراً الموقف الجذري وعمادته وصلاحياته المالية والإدارية المحددة:</p>
+                    <p className="text-xs text-slate-700 leading-relaxed">اختر أي موظف أو عميد كلية لتتقمص هويته وتستعرض فوراً الموقف الجذري وعمادته وصلاحياته المالية والإدارية المحددة:</p>
                     
                     <div className="flex flex-wrap gap-2 pt-1">
                       {rolesList.map((cfg) => (
@@ -1317,14 +1317,14 @@ export default function App() {
                   {/* 2. تعديل الرموز السرية */}
                   <div className="space-y-4">
                     <h4 className="font-extrabold text-xs text-slate-800">🔑 تعديل وتخصيص رموز الدخول للموظفين وعمداء الكليات</h4>
-                    <p className="text-xs text-slate-500">قم بتغيير كلمات المرور (الرموز السرية الدخول السداسية/الرباعية) للكوادر الإدارية. التحديث يتم فوراً في المتصفح ويحفظ تلقائياً:</p>
+                    <p className="text-xs text-slate-700">قم بتغيير كلمات المرور (الرموز السرية الدخول السداسية/الرباعية) للكوادر الإدارية. التحديث يتم فوراً في المتصفح ويحفظ تلقائياً:</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {rolesList.map((cfg) => (
                         <div key={cfg.role} className="p-4 bg-white border border-slate-150 rounded-xl space-y-3 shadow-xs">
                           <div className="flex justify-between items-center">
                             <span className="font-bold text-xs text-slate-800">{cfg.title}</span>
-                            <span className="text-[10px] text-slate-400 font-bold bg-slate-105 px-2 py-0.5 rounded-sm">{cfg.categoryName}</span>
+                            <span className="text-[10px] text-slate-700 font-bold bg-slate-105 px-2 py-0.5 rounded-sm">{cfg.categoryName}</span>
                           </div>
                           <div className="flex gap-2">
                             <input
@@ -1367,7 +1367,7 @@ export default function App() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs text-slate-500 font-bold block">الاسم الرباعي والصفة الوظيفية:</label>
+                        <label className="text-xs text-slate-700 font-bold block">الاسم الرباعي والصفة الوظيفية:</label>
                         <input
                           type="text"
                           required
@@ -1378,7 +1378,7 @@ export default function App() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-slate-500 font-bold block">المعرف الوظيفي بالإنجليزية (للربط التقني):</label>
+                        <label className="text-xs text-slate-700 font-bold block">المعرف الوظيفي بالإنجليزية (للربط التقني):</label>
                         <input
                           type="text"
                           required
@@ -1389,7 +1389,7 @@ export default function App() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-slate-500 font-bold block">الفئة وسلطة الصلاحية:</label>
+                        <label className="text-xs text-slate-700 font-bold block">الفئة وسلطة الصلاحية:</label>
                         <select
                           value={newStaffCategory}
                           onChange={(e) => setNewStaffCategory(e.target.value)}
@@ -1402,7 +1402,7 @@ export default function App() {
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-slate-500 font-bold block">الكلية الأكاديمية المرتبطة (محدودية البيانات):</label>
+                        <label className="text-xs text-slate-700 font-bold block">الكلية الأكاديمية المرتبطة (محدودية البيانات):</label>
                         <select
                           value={newStaffDept}
                           onChange={(e) => setNewStaffDept(e.target.value)}
@@ -1415,7 +1415,7 @@ export default function App() {
                         </select>
                       </div>
                       <div className="space-y-1 md:col-span-2">
-                        <label className="text-xs text-slate-500 font-bold block">الرمز السري الخاص بالدخول (رقمي):</label>
+                        <label className="text-xs text-slate-700 font-bold block">الرمز السري الخاص بالدخول (رقمي):</label>
                         <input
                           type="text"
                           maxLength={6}
@@ -1444,7 +1444,7 @@ export default function App() {
                     <div className="overflow-x-auto rounded-xl border border-slate-150 shadow-xs text-right">
                       <table className="w-full text-right text-xs">
                         <thead>
-                          <tr className="bg-slate-50 text-slate-600 border-b border-slate-150 font-bold">
+                          <tr className="bg-slate-50 text-slate-800 border-b border-slate-150 font-bold">
                             <th className="p-3.5">الاسم والصفة الوظيفية للموظف</th>
                             <th className="p-3.5 font-mono">المعرف الوظيفي الدولي (Role)</th>
                             <th className="p-3.5">تصنيف الصلاحيات العامة</th>
@@ -1459,7 +1459,7 @@ export default function App() {
                             return (
                               <tr key={cfg.role} className="hover:bg-slate-50/50 transition-colors">
                                 <td className="p-3.5 font-bold text-slate-800">{cfg.title}</td>
-                                <td className="p-3.5 font-mono text-slate-500">{cfg.role}</td>
+                                <td className="p-3.5 font-mono text-slate-700">{cfg.role}</td>
                                 <td className="p-3.5">
                                   <span className="bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md font-bold text-[10px]">
                                     {cfg.categoryName}
@@ -1475,7 +1475,7 @@ export default function App() {
                                 </td>
                                 <td className="p-3.5 text-center">
                                   {cfg.role === 'admin' ? (
-                                    <span className="text-slate-400 text-[10px] font-bold">حساب نظام أساسي محمي</span>
+                                    <span className="text-slate-700 text-[10px] font-bold">حساب نظام أساسي محمي</span>
                                   ) : (
                                     <button
                                       type="button"
@@ -1501,7 +1501,7 @@ export default function App() {
                       <Building className="w-5 h-5 text-amber-600 animate-pulse animate-bounce" />
                       <div>
                         <h4 className="font-extrabold text-sm text-slate-800">🏢 إدارة الأقسام الأكاديمية وكليات الجامعة (إضافة وحذف فوري)</h4>
-                        <p className="text-slate-500 text-[10px]">بصفتك مدير النظام، يمكنك إضافة كليات/أقسام جديدة بخصائص متفردة، أو تصفية وحذف الأقسام والمحطات نهائياً</p>
+                        <p className="text-slate-700 text-[10px]">بصفتك مدير النظام، يمكنك إضافة كليات/أقسام جديدة بخصائص متفردة، أو تصفية وحذف الأقسام والمحطات نهائياً</p>
                       </div>
                     </div>
 
@@ -1513,7 +1513,7 @@ export default function App() {
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                           <div className="space-y-1">
-                            <label className="font-bold text-slate-500 block">اسم الكلية / القسم الجديد:</label>
+                            <label className="font-bold text-slate-700 block">اسم الكلية / القسم الجديد:</label>
                             <input
                               type="text"
                               required
@@ -1525,7 +1525,7 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="font-bold text-slate-500 block">عنوان حاسبوها IP VLAN الرقمي:</label>
+                            <label className="font-bold text-slate-700 block">عنوان حاسبوها IP VLAN الرقمي:</label>
                             <input
                               type="text"
                               required
@@ -1537,7 +1537,7 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="font-bold text-slate-500 block">القسط السنوي للدراسة الصباحية (د.ع):</label>
+                            <label className="font-bold text-slate-700 block">القسط السنوي للدراسة الصباحية (د.ع):</label>
                             <input
                               type="number"
                               required
@@ -1548,7 +1548,7 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="font-bold text-slate-500 block">القسط السنوي للدراسة المسائية (د.ع):</label>
+                            <label className="font-bold text-slate-700 block">القسط السنوي للدراسة المسائية (د.ع):</label>
                             <input
                               type="number"
                               required
@@ -1559,7 +1559,7 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="font-bold text-slate-500 block">عدد سنوات الدراسة بالقسم:</label>
+                            <label className="font-bold text-slate-700 block">عدد سنوات الدراسة بالقسم:</label>
                             <input
                               type="number"
                               required
@@ -1572,7 +1572,7 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="font-bold text-slate-500 block">المقاعد الدراسية المتاحة كحد أقصى:</label>
+                            <label className="font-bold text-slate-700 block">المقاعد الدراسية المتاحة كحد أقصى:</label>
                             <input
                               type="number"
                               required
@@ -1600,7 +1600,7 @@ export default function App() {
                         <div className="overflow-x-auto max-h-[300px] overflow-y-auto rounded-lg border border-slate-150 text-right">
                           <table className="w-full text-right text-xs">
                             <thead>
-                              <tr className="bg-slate-50 text-slate-600 border-b border-slate-150 font-bold sticky top-0">
+                              <tr className="bg-slate-50 text-slate-800 border-b border-slate-150 font-bold sticky top-0">
                                 <th className="p-2.5 text-right">اسم الكلية / القسم</th>
                                 <th className="p-2.5 text-right font-mono">محطة الـ IP VLAN</th>
                                 <th className="p-2.5 text-right font-mono">سنوات التخرج</th>
@@ -1615,7 +1615,7 @@ export default function App() {
                                   <tr key={dept.id} className="hover:bg-slate-50/50">
                                     <td className="p-2.5 text-right font-bold text-slate-800">{dept.name}</td>
                                     <td className="p-2.5 text-right font-mono font-bold text-indigo-700">{collegeIp}</td>
-                                    <td className="p-2.5 text-right font-mono text-slate-500">{dept.durationYears} سنوات</td>
+                                    <td className="p-2.5 text-right font-mono text-slate-700">{dept.durationYears} سنوات</td>
                                     <td className="p-2.5 text-right font-mono text-emerald-650 font-bold">{(dept.annualFeeMorning || 0).toLocaleString()} د.ع</td>
                                     <td className="p-2.5 text-center">
                                       <button
@@ -1665,7 +1665,7 @@ export default function App() {
 
                       <div className="space-y-3">
                         <div className="space-y-1">
-                          <label className="text-[10px] text-slate-400 font-bold block">الكلية الأكاديمية المستهدفة:</label>
+                          <label className="text-[10px] text-slate-700 font-bold block">الكلية الأكاديمية المستهدفة:</label>
                           <select
                             required
                             value={formDeanDept}
@@ -1680,7 +1680,7 @@ export default function App() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] text-slate-400 font-bold block">اسم عميد الكلية الرباعي واللقب:</label>
+                          <label className="text-[10px] text-slate-700 font-bold block">اسم عميد الكلية الرباعي واللقب:</label>
                           <input
                             type="text"
                             required
@@ -1692,7 +1692,7 @@ export default function App() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] text-slate-400 font-bold block">رمز دخول الكلية السري (قفل أمني رقمي):</label>
+                          <label className="text-[10px] text-slate-700 font-bold block">رمز دخول الكلية السري (قفل أمني رقمي):</label>
                           <input
                             type="text"
                             required
@@ -1740,7 +1740,7 @@ export default function App() {
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[10px] text-slate-400 font-bold block">اسم الكلية الأكاديمية:</label>
+                            <label className="text-[10px] text-slate-700 font-bold block">اسم الكلية الأكاديمية:</label>
                             <input
                               type="text"
                               required
@@ -1752,7 +1752,7 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] text-slate-400 font-bold block">عنوان حاسبوها IP VLAN:</label>
+                            <label className="text-[10px] text-slate-700 font-bold block">عنوان حاسبوها IP VLAN:</label>
                             <input
                               type="text"
                               required
@@ -1766,7 +1766,7 @@ export default function App() {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[10px] text-slate-400 font-bold block">قسط الدراسة الصباحية (د.ع):</label>
+                            <label className="text-[10px] text-slate-700 font-bold block">قسط الدراسة الصباحية (د.ع):</label>
                             <input
                               type="number"
                               required
@@ -1777,7 +1777,7 @@ export default function App() {
                           </div>
                           
                           <div className="space-y-1">
-                            <label className="text-[10px] text-slate-400 font-bold block">قسط الدراسة المسائية (د.ع):</label>
+                            <label className="text-[10px] text-slate-700 font-bold block">قسط الدراسة المسائية (د.ع):</label>
                             <input
                               type="number"
                               required
@@ -1790,7 +1790,7 @@ export default function App() {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[10px] text-slate-400 font-bold block">عدد سنوات الدراسة في الكلية:</label>
+                            <label className="text-[10px] text-slate-700 font-bold block">عدد سنوات الدراسة في الكلية:</label>
                             <input
                               type="number"
                               required
@@ -1803,7 +1803,7 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] text-slate-400 font-bold block">الحد الأقصى للمقاعد:</label>
+                            <label className="text-[10px] text-slate-700 font-bold block">الحد الأقصى للمقاعد:</label>
                             <input
                               type="number"
                               required
@@ -1853,7 +1853,7 @@ export default function App() {
                         <span>🖥️ السيرفر والشبكة التفاعلية لحسابات الكليات ومحطاتها الرقمية الفعالة (IPs & Passcodes)</span>
                         <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-black animate-pulse">غرفة المراقبة والتحكم المباشر للتسجيل</span>
                       </h4>
-                      <span className="text-xs text-slate-400 font-bold font-mono">الشبكة: SECURE VLAN-COLLEGE_CENTRAL_GATEWAY</span>
+                      <span className="text-xs text-slate-700 font-bold font-mono">الشبكة: SECURE VLAN-COLLEGE_CENTRAL_GATEWAY</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -1885,7 +1885,7 @@ export default function App() {
                                   </div>
                                   <div>
                                     <h5 className="font-extrabold text-xs text-slate-800">{dept.name}</h5>
-                                    <span className="text-[9px] text-slate-400 font-bold block mt-0.5">VLAN Station IP</span>
+                                    <span className="text-[9px] text-slate-700 font-bold block mt-0.5">VLAN Station IP</span>
                                   </div>
                                 </div>
                                 <span className="font-mono text-[9px] bg-slate-900 text-emerald-400 border border-slate-850 px-2 py-0.5 rounded-lg font-black tracking-wider">
@@ -1919,7 +1919,7 @@ export default function App() {
 
                               {/* قائمة أسماء المقبولين في هذه الكلية تحديداً */}
                               <div className="space-y-1.5 font-sans">
-                                <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold">
+                                <div className="flex justify-between items-center text-[10px] text-slate-700 font-bold">
                                   <span>📥 قيد الأسماء المقبولة محلياً:</span>
                                   <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-black">
                                     {deptStudents.length} طالب
@@ -1927,7 +1927,7 @@ export default function App() {
                                 </div>
 
                                 {deptStudents.length === 0 ? (
-                                  <div className="p-2 border border-dashed border-slate-200 bg-white text-center text-[9px] text-slate-400 rounded-lg">
+                                  <div className="p-2 border border-dashed border-slate-200 bg-white text-center text-[9px] text-slate-700 rounded-lg">
                                     لا يوجد طلاب مقبولين في هذه الكلية حالياً
                                   </div>
                                 ) : (
@@ -1935,7 +1935,7 @@ export default function App() {
                                     {deptStudents.map(student => (
                                       <div key={student.id} className="p-1 px-2 flex justify-between items-center hover:bg-slate-50">
                                         <span className="text-slate-800 font-bold truncate max-w-[120px]">{student.name}</span>
-                                        <span className="font-mono text-[9px] text-slate-400">{student.id}</span>
+                                        <span className="font-mono text-[9px] text-slate-700">{student.id}</span>
                                       </div>
                                     ))}
                                   </div>
@@ -2023,14 +2023,14 @@ export default function App() {
 
                       <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 font-sans">
                         <div className="flex justify-between items-center text-[10px]">
-                          <span className="text-slate-400">حالة الخدمة بالسيرفر:</span>
+                          <span className="text-slate-700">حالة الخدمة بالسيرفر:</span>
                           <span className="text-emerald-400 font-bold flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                             <span>متصل وآمن 🟢</span>
                           </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px] border-t border-slate-900 pt-2">
-                          <span className="text-slate-400">تاريخ الفحص الأمني التلقائي الفعال:</span>
+                          <span className="text-slate-700">تاريخ الفحص الأمني التلقائي الفعال:</span>
                           <span className="font-mono font-bold text-amber-400">{SYSTEM_CURRENT_DATE}</span>
                         </div>
                       </div>
@@ -2059,7 +2059,7 @@ export default function App() {
 
                       <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2 font-sans">
                         <div className="flex justify-between items-center text-[10px]">
-                          <span className="text-slate-400">تفويض إشعار المتصفح المحقق:</span>
+                          <span className="text-slate-700">تفويض إشعار المتصفح المحقق:</span>
                           <span className={`font-bold font-mono px-2 py-0.5 rounded ${
                             notificationPermission === 'granted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-500'
                           }`}>
@@ -2104,10 +2104,10 @@ export default function App() {
                     </h4>
 
                     {emailLogs.length === 0 ? (
-                      <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-center text-slate-400 rounded-3xl text-xs space-y-2 font-sans">
+                      <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-center text-slate-700 rounded-3xl text-xs space-y-2 font-sans">
                         <Mail className="w-8 h-8 text-slate-300 mx-auto animate-pulse" />
                         <p className="font-bold">لم يتم تسجيل أي إرسال أو بث بريدي تلقائي في هذه الجلسة</p>
-                        <p className="text-[10px] text-slate-400">انقر فوق زر "إرسال وتحديث تنبيهات البريد" لبدء الحوسبة التلقائية</p>
+                        <p className="text-[10px] text-slate-700">انقر فوق زر "إرسال وتحديث تنبيهات البريد" لبدء الحوسبة التلقائية</p>
                       </div>
                     ) : (
                       <div className="bg-white border border-slate-150 rounded-2xl overflow-hidden shadow-xs divide-y divide-slate-100 max-h-[400px] overflow-y-auto font-sans">
@@ -2123,9 +2123,9 @@ export default function App() {
                                   {log.docName}
                                 </span>
                               </div>
-                              <span className="font-mono text-[10px] text-slate-400 font-bold">{log.timestamp}</span>
+                              <span className="font-mono text-[10px] text-slate-700 font-bold">{log.timestamp}</span>
                             </div>
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 text-xs font-mono font-medium leading-relaxed">
+                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-800 text-xs font-mono font-medium leading-relaxed">
                               {log.content}
                             </div>
                           </div>
@@ -2145,7 +2145,7 @@ export default function App() {
                           <CreditCard className="w-5 h-5 text-amber-600" />
                           <span>تخريج وتخصيص البيانات المطبوعة واسم الجامعة على الوصل المالي للطلاب ⚙️</span>
                         </h4>
-                        <p className="text-slate-500 text-xs mt-0.5">
+                        <p className="text-slate-700 text-xs mt-0.5">
                           تغيير إعدادات ترويسة وملاحظات الوصولات والمدفوعات لتنعكس فوراً عند طباعة السند المالي.
                         </p>
                       </div>
@@ -2211,9 +2211,9 @@ export default function App() {
                             <Building className="w-4 h-4 text-amber-600" />
                             <span>{receiptUniversityName} - {receiptSubText}</span>
                           </div>
-                          <span className="text-[10px] text-slate-400 block mt-0.5">وصل قبض وقبض أجور دراسية رسمي رقم: #105934</span>
+                          <span className="text-[10px] text-slate-700 block mt-0.5">وصل قبض وقبض أجور دراسية رسمي رقم: #105934</span>
                         </div>
-                        <p className="text-[10px] text-slate-400 leading-normal bg-slate-50/50 p-2 rounded-lg border border-slate-100">{receiptNoteText}</p>
+                        <p className="text-[10px] text-slate-700 leading-normal bg-slate-50/50 p-2 rounded-lg border border-slate-100">{receiptNoteText}</p>
                       </div>
                     </div>
 
@@ -2238,7 +2238,7 @@ export default function App() {
                   <div className="bg-white p-6 rounded-2xl border border-slate-150 shadow-xs space-y-5">
                     <div className="border-b border-slate-100 pb-3">
                       <h4 className="font-extrabold text-sm md:text-base text-slate-800">🌐 تخصيص حالة الربط والشبكة</h4>
-                      <p className="text-slate-500 text-xs mt-1">اختر طريقة تواصل التطبيق لنقل البيانات بين الأجهزة</p>
+                      <p className="text-slate-700 text-xs mt-1">اختر طريقة تواصل التطبيق لنقل البيانات بين الأجهزة</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -2248,10 +2248,10 @@ export default function App() {
                         className={`p-4 rounded-xl border text-center transition-all cursor-pointer ${
                           communicationMode === 'cloud' 
                             ? 'bg-indigo-50 border-indigo-500 text-indigo-800 shadow-sm' 
-                            : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'
                         }`}
                       >
-                        <Globe className={`w-6 h-6 mx-auto mb-2 ${communicationMode === 'cloud' ? 'text-indigo-600 animate-pulse' : 'text-slate-400'}`} />
+                        <Globe className={`w-6 h-6 mx-auto mb-2 ${communicationMode === 'cloud' ? 'text-indigo-600 animate-pulse' : 'text-slate-700'}`} />
                         <h5 className="font-bold text-sm">التخزين السحابي (Cloud)</h5>
                         <p className="text-[10px] mt-1 opacity-80">يضمن وصول الرسائل للجميع (الوضع الموصى به)</p>
                       </button>
@@ -2262,10 +2262,10 @@ export default function App() {
                         className={`p-4 rounded-xl border text-center transition-all cursor-pointer ${
                           communicationMode === 'network' 
                             ? 'bg-amber-50 border-amber-500 text-amber-800 shadow-sm' 
-                            : 'bg-white border-slate-200 text-slate-500 hover:border-amber-300'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-amber-300'
                         }`}
                       >
-                        <Building className={`w-6 h-6 mx-auto mb-2 ${communicationMode === 'network' ? 'text-amber-600' : 'text-slate-400'}`} />
+                        <Building className={`w-6 h-6 mx-auto mb-2 ${communicationMode === 'network' ? 'text-amber-600' : 'text-slate-700'}`} />
                         <h5 className="font-bold text-sm">شبكة داخلية (Local Network)</h5>
                         <p className="text-[10px] mt-1 opacity-80">العمل ضمن شبكة الكلية بدون مزامنة خارجية</p>
                       </button>
@@ -2276,10 +2276,10 @@ export default function App() {
                         className={`p-4 rounded-xl border text-center transition-all cursor-pointer ${
                           communicationMode === 'ip' 
                             ? 'bg-emerald-50 border-emerald-500 text-emerald-800 shadow-sm' 
-                            : 'bg-white border-slate-200 text-slate-500 hover:border-emerald-300'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-300'
                         }`}
                       >
-                        <Activity className={`w-6 h-6 mx-auto mb-2 ${communicationMode === 'ip' ? 'text-emerald-600' : 'text-slate-400'}`} />
+                        <Activity className={`w-6 h-6 mx-auto mb-2 ${communicationMode === 'ip' ? 'text-emerald-600' : 'text-slate-700'}`} />
                         <h5 className="font-bold text-sm">الربط المباشر (Direct IP)</h5>
                         <p className="text-[10px] mt-1 opacity-80">تخصيص العقد يدوياً بين الأجهزة المعينة</p>
                       </button>
@@ -2321,7 +2321,7 @@ export default function App() {
               ⚠️ تنبيه ترخيص البرمجيات | SOFTWARE LICENSE EXPIRED
             </span>
             <h2 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">نظام الجامعة الأهلية العراقية</h2>
-            <p className="text-xs text-slate-400">نظام الإدارة وقيد التسجيل المركزي المتكامل - النسخة المستقلة</p>
+            <p className="text-xs text-slate-700">نظام الإدارة وقيد التسجيل المركزي المتكامل - النسخة المستقلة</p>
           </div>
 
           {/* التفسير التقني للانتهاء الفعلي */}
@@ -2332,7 +2332,7 @@ export default function App() {
             <div className="text-lg font-mono font-black text-red-400 select-all tracking-wide bg-red-500/5 p-2 rounded-lg border border-red-500/20 w-fit mx-auto">
               1 / 7 / 2027 م.
             </div>
-            <p className="text-[11px] text-slate-500 leading-normal">
+            <p className="text-[11px] text-slate-700 leading-normal">
               يتطلب النظام تفعيل مفتاح الربط وتمديد خط الأمان المركزي لضمان استمرارية مزامنة الطلاب المسجلين والوصولات الصادرة وقرارات الأرشيف.
             </p>
           </div>
@@ -2346,11 +2346,11 @@ export default function App() {
                 07832343995
               </a>
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">المطوّر كرم السهلاني - شعبة البرمجيات التقنية المباشرة</p>
+            <p className="text-[10px] text-slate-700 mt-1">المطوّر كرم السهلاني - شعبة البرمجيات التقنية المباشرة</p>
           </div>
 
           {/* قائمة الميزات المغلقة للتأكيد في النظام */}
-          <div className="space-y-1.5 text-right text-[11px] text-slate-400 border-t border-slate-800 pt-4">
+          <div className="space-y-1.5 text-right text-[11px] text-slate-700 border-t border-slate-800 pt-4">
             <span className="font-bold text-slate-300 block mb-1">الأنظمة والأقسام المعلقة حالياً:</span>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-1.5 p-1 rounded hover:bg-slate-800/30">
@@ -2414,7 +2414,7 @@ export default function App() {
 
           <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-850/80 text-xs text-slate-300 leading-relaxed text-center space-y-1">
             <p className="font-bold text-slate-100 mb-1">التحقق الأمني من الرمز السري 🔒</p>
-            <p className="text-[11px] text-slate-400">يرجى كتابة رمز الدخول الفردي للمدير أو الكادر المعتمد للولوج المباشر إلى المنصة.</p>
+            <p className="text-[11px] text-slate-700">يرجى كتابة رمز الدخول الفردي للمدير أو الكادر المعتمد للولوج المباشر إلى المنصة.</p>
             <p className="text-[10px] text-emerald-400 font-mono">يدعم الكتابة بلوحة مفاتيح الحاسوب مباشرة ثم الضغط على Enter ✔</p>
           </div>
 
@@ -2515,11 +2515,11 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex justify-between items-center text-[10px] px-2 text-slate-500 pt-1">
+          <div className="flex justify-between items-center text-[10px] px-2 text-slate-700 pt-1">
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="hover:text-slate-400 font-medium underline"
+              className="hover:text-slate-700 font-medium underline"
             >
               {showPassword ? 'إخفاء الرمز أثناء الكتابة' : 'إظهار الرمز عند الطباعة'}
             </button>
@@ -2595,7 +2595,7 @@ export default function App() {
                   <span>التنبيهات التلقائية:</span>
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[9px] font-bold ${alertsEnabled ? 'text-amber-500' : 'text-slate-500'}`}>
+                  <span className={`text-[9px] font-bold ${alertsEnabled ? 'text-amber-500' : 'text-slate-700'}`}>
                     {alertsEnabled ? 'مفعلة' : 'ملغاة'}
                   </span>
                   <button
@@ -2631,12 +2631,12 @@ export default function App() {
                   className={`w-full flex items-center justify-between p-3 rounded-xl text-right text-xs xl:text-sm font-semibold transition-all group cursor-pointer ${
                     isActive 
                       ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10 scale-[1.02]' 
-                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                      : 'text-slate-700 hover:bg-slate-800/50 hover:text-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className={`w-4 h-4 xl:w-4.5 h-4.5 shrink-0 transition-transform ${
-                      isActive ? 'text-white' : 'text-slate-400 group-hover:scale-110'
+                      isActive ? 'text-white' : 'text-slate-700 group-hover:scale-110'
                     }`} />
                     <span>{item.label}</span>
                   </div>
@@ -2661,12 +2661,12 @@ export default function App() {
           
           <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-750/50 space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">حالة ترخيص النظام:</span>
+              <span className="text-slate-700">حالة ترخيص النظام:</span>
               <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded-sm">
                 نشط وآمن
               </span>
             </div>
-            <div className="text-[10px] text-slate-400 leading-normal text-right">
+            <div className="text-[10px] text-slate-700 leading-normal text-right">
               صلاحية البرنامج مستمرة لغاية <span className="text-amber-400 font-mono font-bold">1 / 7 / 2027</span>.
             </div>
             <button
@@ -2677,8 +2677,8 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-800/40 p-2.5 rounded-lg border border-slate-800/35 text-[11px] text-slate-400 leading-snug">
-            <Clock className="w-4 h-4 text-slate-500 shrink-0" />
+          <div className="flex items-center gap-2 bg-slate-800/40 p-2.5 rounded-lg border border-slate-800/35 text-[11px] text-slate-700 leading-snug">
+            <Clock className="w-4 h-4 text-slate-700 shrink-0" />
             <div>
               <span>معدل الدورة الفعالة:</span>
               <span className="font-mono block text-slate-350">v1.2.6 (May 2026)</span>
@@ -2715,7 +2715,7 @@ export default function App() {
           <Building className="w-6 h-6 text-amber-500" />
           <div>
             <h1 className="font-bold text-xs">بوابة جامعة الكوت</h1>
-            <span className="text-[9px] text-slate-400 block font-sans">نظام أتمتة المعلومات والبيانات</span>
+            <span className="text-[9px] text-slate-700 block font-sans">نظام أتمتة المعلومات والبيانات</span>
           </div>
         </div>
 
@@ -2739,7 +2739,7 @@ export default function App() {
               {currentRoleConfig && (
                 <div className="p-3 bg-slate-950 rounded-lg text-xs space-y-2 mb-2">
                   <span className="text-amber-400 font-bold block">{currentRoleConfig.title}</span>
-                  <span className="text-slate-400 text-[10px] block">{currentRoleConfig.categoryName}</span>
+                  <span className="text-slate-700 text-[10px] block">{currentRoleConfig.categoryName}</span>
                 </div>
               )}
 
@@ -2754,7 +2754,7 @@ export default function App() {
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center justify-between p-3 rounded-lg text-right text-xs font-bold transition-all ${
-                      isActive ? 'bg-amber-600 text-white' : 'text-slate-400 hover:bg-slate-800'
+                      isActive ? 'bg-amber-600 text-white' : 'text-slate-700 hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -2778,7 +2778,7 @@ export default function App() {
                   <span>التنبيهات التلقائية:</span>
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[10px] font-bold ${alertsEnabled ? 'text-amber-500' : 'text-slate-500'}`}>
+                  <span className={`text-[10px] font-bold ${alertsEnabled ? 'text-amber-500' : 'text-slate-700'}`}>
                     {alertsEnabled ? 'مفعلة' : 'ملغاة'}
                   </span>
                   <button
@@ -2848,7 +2848,7 @@ export default function App() {
                   className={`font-bold text-[10px] px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
                     currentRole === r.role
                       ? 'bg-amber-600 text-white border-amber-600'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
+                      : 'bg-slate-950 text-slate-700 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
                   }`}
                   title="تبديل الهوية الفعالة فوراً"
                 >
@@ -2889,7 +2889,7 @@ export default function App() {
               <div className="flex-1 space-y-1 text-right">
                 <div className="flex justify-between items-center gap-2">
                   <span className="font-extrabold text-[11px] text-slate-200">{toast.title}</span>
-                  <span className="font-mono text-[9px] text-slate-400 shrink-0">{toast.timestamp}</span>
+                  <span className="font-mono text-[9px] text-slate-700 shrink-0">{toast.timestamp}</span>
                 </div>
                 <p className="text-[10px] text-slate-300 leading-relaxed font-semibold font-sans">{toast.message}</p>
               </div>
@@ -2898,7 +2898,7 @@ export default function App() {
                 onClick={() => {
                   setInAppToasts(prev => prev.filter(t => t.id !== toast.id));
                 }}
-                className="text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0 text-xs font-bold bg-slate-800/50 hover:bg-slate-800 p-1 rounded-full flex items-center justify-center h-5 w-5"
+                className="text-slate-700 hover:text-white transition-colors cursor-pointer shrink-0 text-xs font-bold bg-slate-800/50 hover:bg-slate-800 p-1 rounded-full flex items-center justify-center h-5 w-5"
               >
                 <X className="w-3.5 h-3.5" />
               </button>

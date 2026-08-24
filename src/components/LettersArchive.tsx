@@ -46,7 +46,7 @@ const BarcodePattern = ({ code }: { code: string }) => {
           />
         ))}
       </div>
-      <span className="text-[9px] font-mono tracking-[4px] mt-1 text-slate-500 font-extrabold uppercase">{code}</span>
+      <span className="text-[9px] font-mono tracking-[4px] mt-1 text-slate-700 font-extrabold uppercase">{code}</span>
     </div>
   );
 };
@@ -239,7 +239,7 @@ export default function LettersArchive({
           className={`flex-1 py-3 px-4 font-bold text-xs md:text-sm text-center rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeSubTab === 'archive'
               ? 'bg-[#1e293b] border border-slate-700 text-white shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-slate-850'
+              : 'text-slate-700 hover:text-white hover:bg-slate-850'
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -251,7 +251,7 @@ export default function LettersArchive({
           className={`flex-1 py-3 px-4 font-bold text-xs md:text-sm text-center rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeSubTab === 'authenticity'
               ? 'bg-emerald-650 text-white shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-slate-850'
+              : 'text-slate-700 hover:text-white hover:bg-slate-850'
           }`}
         >
           <CheckCircle className="w-4 h-4 text-emerald-400" />
@@ -265,7 +265,7 @@ export default function LettersArchive({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-xs">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-slate-800">الأرشيف المركزي والكتب والتعميمات الرسمية</h2>
-          <p className="text-slate-500 text-xs md:text-sm mt-1">تداول وأرشفة الأوامر الإدارية والوزارية وتثبيت فترات نفاذ القوانين</p>
+          <p className="text-slate-700 text-xs md:text-sm mt-1">تداول وأرشفة الأوامر الإدارية والوزارية وتثبيت فترات نفاذ القوانين</p>
         </div>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
@@ -436,7 +436,7 @@ export default function LettersArchive({
         
         {/* شريط البحث الموجه */}
         <div className="relative flex-grow">
-          <Search className="absolute right-3 top-3 w-4 h-4 text-slate-400" />
+          <Search className="absolute right-3 top-3 w-4 h-4 text-slate-700" />
           <input 
             type="text" 
             placeholder="ابحث برقم المعاملة، عنوان القرار، المضمون، أو دائرة الصادر..."
@@ -517,7 +517,7 @@ export default function LettersArchive({
                 </div>
 
                 <div className="space-y-1.5 mt-3 text-right">
-                  <div className="font-mono text-slate-400 text-[10px] md:text-xs">
+                  <div className="font-mono text-slate-700 text-[10px] md:text-xs">
                     كود الحفظ: {letItem.id} • إداري: <span className="font-bold text-slate-750">{letItem.letterNumber}</span>
                   </div>
                   <h4 className="font-extrabold text-slate-800 text-sm leading-snug line-clamp-1 hover:text-univ-blue transition-colors cursor-pointer" title={letItem.title}>
@@ -526,7 +526,7 @@ export default function LettersArchive({
                 </div>
 
                 {/* نص الخلاصة المودع */}
-                <p className="text-slate-500 text-xs mt-2.5 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100 line-clamp-3">
+                <p className="text-slate-700 text-xs mt-2.5 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100 line-clamp-3">
                   {letItem.summary}
                 </p>
 
@@ -535,13 +535,13 @@ export default function LettersArchive({
               {/* الفوتر وتوضيح الصادر والوارد مع تدوين تاريخ الانتهاء */}
               <div className="border-t border-slate-100 pt-3 flex flex-col gap-2 Text-xs">
                 
-                <div className="flex justify-between items-center text-[11px] text-slate-500">
+                <div className="flex justify-between items-center text-[11px] text-slate-700">
                   <span>صادر عن: <span className="font-bold text-slate-700">{letItem.source}</span></span>
                   <span>موجه إلى: <span className="font-bold text-slate-705 truncate max-w-[150px] inline-block align-bottom">{letItem.destination}</span></span>
                 </div>
 
                 {/* تاريخ انتهاء الصلاحية والملف المرفق */}
-                <div className="flex justify-between items-center bg-slate-50/50 p-1.5 rounded-lg text-[10px] font-mono text-slate-500">
+                <div className="flex justify-between items-center bg-slate-50/50 p-1.5 rounded-lg text-[10px] font-mono text-slate-700">
                   <div className="flex items-center gap-1 font-bold text-red-800">
                     <Calendar className="w-3.5 h-3.5 text-red-650" />
                     <span>تاريخ انتهاء الصلاحية: {letItem.expiryDate || 'مفتوح للعمل'}</span>
@@ -568,7 +568,7 @@ export default function LettersArchive({
           <div className="md:col-span-2 text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-xs">
             <AlertTriangle className="w-14 h-14 text-slate-300 mx-auto mb-3" />
             <h3 className="text-sm font-bold text-slate-800">لا يوجد كتب موافقة لشريط الفلترة الحالي</h3>
-            <p className="text-slate-500 text-xs mt-1">يرجى تسجيل كتب رسمية جديدة أو تغيير معيار تصفية الصلاحيات.</p>
+            <p className="text-slate-700 text-xs mt-1">يرجى تسجيل كتب رسمية جديدة أو تغيير معيار تصفية الصلاحيات.</p>
           </div>
         )}
       </div>
@@ -582,7 +582,7 @@ export default function LettersArchive({
               <CheckCircle className="w-5 h-5 text-emerald-600 animate-pulse" />
               <span>منظومة صيانة ومصادقة صحة صدور الوثائق الإلكترونية المشتركة</span>
             </h3>
-            <p className="text-[11px] md:text-xs text-slate-500 leading-relaxed">
+            <p className="text-[11px] md:text-xs text-slate-700 leading-relaxed">
               تتيح هذه المنظومة للأقسام العلمية والكليات والعمادات توليد أكواد تحقق فريدة (Certification Verification Keys) لوثائق الطلبة والخريجين، بالإضافة لخاصية الاستعلام اللحظي والرقابة من الكليات الأخرى لمنع التزوير وضمان حوكمة البيانات.
             </p>
           </div>
@@ -639,26 +639,26 @@ export default function LettersArchive({
                             </span>
                             <span className="font-mono text-xs text-emerald-700 bg-white border border-emerald-150 px-2 py-0.5 rounded-md font-bold">المعرف الموحد: {scannedCert.certCode}</span>
                           </div>
-                          <span className="text-[10px] text-slate-500 font-bold">{universityName}</span>
+                          <span className="text-[10px] text-slate-700 font-bold">{universityName}</span>
                         </div>
 
                         {/* المحتوى الرئيسي مجزأ بجانب الباركود و الـ QR Code */}
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                           <div className="md:col-span-8 grid grid-cols-2 gap-3 text-xs text-slate-700">
                             <div>
-                              <span className="text-slate-400 block text-right">اسم الطالب الثلاثي واللقب:</span> 
+                              <span className="text-slate-700 block text-right">اسم الطالب الثلاثي واللقب:</span> 
                               <strong className="text-slate-900 font-extrabold block text-right mt-0.5 text-sm">{scannedCert.studentName}</strong>
                             </div>
                             <div>
-                              <span className="text-slate-400 block text-right">الكلية أو القسم المانح:</span> 
+                              <span className="text-slate-700 block text-right">الكلية أو القسم المانح:</span> 
                               <strong className="text-slate-900 block text-right mt-0.5">{scannedCert.college}</strong>
                             </div>
                             <div className="mt-1">
-                              <span className="text-slate-400 block text-right">رقم وتاريخ وثيقة الصدور العلمية:</span> 
+                              <span className="text-slate-700 block text-right">رقم وتاريخ وثيقة الصدور العلمية:</span> 
                               <strong className="text-slate-900 font-mono block text-right mt-0.5">{scannedCert.docNumber}</strong>
                             </div>
                             <div className="mt-1">
-                              <span className="text-slate-400 block text-right">العام الدراسي وحالة التخرج:</span> 
+                              <span className="text-slate-700 block text-right">العام الدراسي وحالة التخرج:</span> 
                               <strong className="text-slate-900 font-mono block text-right mt-0.5">{scannedCert.gradYear}</strong>
                             </div>
                           </div>
@@ -675,11 +675,11 @@ export default function LettersArchive({
 
                         <div className="border-t border-emerald-200/80 pt-3 text-[10.5px] text-slate-555 font-sans flex flex-col sm:flex-row justify-between items-center text-right gap-2">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-slate-400">جهة البث والاعتماد:</span>
+                            <span className="text-slate-700">جهة البث والاعتماد:</span>
                             <span className="text-slate-800 font-bold">{universityName} ({universityEmail})</span>
                           </div>
                           <div>
-                            <span className="text-slate-400 ml-1">تاريخ المصادقة الفعلي بالمنظومة:</span> 
+                            <span className="text-slate-700 ml-1">تاريخ المصادقة الفعلي بالمنظومة:</span> 
                             <strong className="text-emerald-800 font-bold bg-emerald-100/50 px-1.5 py-0.5 rounded">{scannedCert.dateIssued}</strong>
                           </div>
                         </div>
@@ -711,11 +711,11 @@ export default function LettersArchive({
                                         <div className="text-right space-y-1">
                                           <h1 className="text-2xl font-black text-emerald-850">${universityName}</h1>
                                           <p className="text-xs text-slate-505 font-bold">بوابة التحقق وصحة الصدور الإلكترونية</p>
-                                          <p className="text-[10px] text-slate-400">البريد الرسمي: ${universityEmail}</p>
+                                          <p className="text-[10px] text-slate-700">البريد الرسمي: ${universityEmail}</p>
                                         </div>
                                         <div className="text-left space-y-1">
                                           <div className="text-xs bg-emerald-105 text-emerald-800 font-extrabold px-3 py-1 rounded-full uppercase inline-block">وثيقة معتمدة ومصادق عليها</div>
-                                          <p className="text-[11px] text-slate-500 font-mono mt-1 block">رقم الكود: <span className="font-bold">${scannedCert.certCode}</span></p>
+                                          <p className="text-[11px] text-slate-700 font-mono mt-1 block">رقم الكود: <span className="font-bold">${scannedCert.certCode}</span></p>
                                         </div>
                                       </div>
 
@@ -726,22 +726,22 @@ export default function LettersArchive({
                                         </p>
 
                                         <div className="grid grid-cols-2 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-150 text-sm mt-3">
-                                          <div><span className="text-slate-400 block mb-1">اسم الطالب المعتمد:</span> <strong className="text-slate-900 text-base">${scannedCert.studentName}</strong></div>
-                                          <div><span className="text-slate-400 block mb-1">الكلية / القسم الأكاديمي:</span> <strong className="text-slate-900">${scannedCert.college}</strong></div>
-                                          <div className="mt-2"><span className="text-slate-400 block mb-1">رقم وتاريخ وثيقة التخرج:</span> <strong className="text-slate-900 font-mono">${scannedCert.docNumber}</strong></div>
-                                          <div className="mt-2"><span className="text-slate-400 block mb-1">العام الدراسي للمعدل والتقدير:</span> <strong className="text-slate-900 font-mono">${scannedCert.gradYear}</strong></div>
+                                          <div><span className="text-slate-700 block mb-1">اسم الطالب المعتمد:</span> <strong className="text-slate-900 text-base">${scannedCert.studentName}</strong></div>
+                                          <div><span className="text-slate-700 block mb-1">الكلية / القسم الأكاديمي:</span> <strong className="text-slate-900">${scannedCert.college}</strong></div>
+                                          <div className="mt-2"><span className="text-slate-700 block mb-1">رقم وتاريخ وثيقة التخرج:</span> <strong className="text-slate-900 font-mono">${scannedCert.docNumber}</strong></div>
+                                          <div className="mt-2"><span className="text-slate-700 block mb-1">العام الدراسي للمعدل والتقدير:</span> <strong className="text-slate-900 font-mono">${scannedCert.gradYear}</strong></div>
                                         </div>
                                       </div>
 
                                       <div className="grid grid-cols-2 gap-6 items-center border-t border-slate-200 pt-6">
                                         <div className="space-y-2 text-center border-l border-slate-150 pl-4 py-2">
-                                          <p className="text-xs text-slate-500 font-bold block mb-1">الترميز والشريط التعريفي للوثيقة (Barcode)</p>
+                                          <p className="text-xs text-slate-700 font-bold block mb-1">الترميز والشريط التعريفي للوثيقة (Barcode)</p>
                                           <div className="flex justify-center flex-col items-center">
                                             <div className="flex items-center justify-center gap-[1.5px] bg-white p-2 rounded-lg border border-slate-200 select-none overflow-hidden h-12 w-48">
                                               ${[2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 4, 1, 3].map((w, idx) => `<span style="width: ${w}px;" class="h-8 bg-slate-900 shrink-0"></span>`).join('')}
                                               ${[2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 4, 1, 3].reverse().map((w, idx) => `<span style="width: ${w}px;" class="h-8 bg-slate-900 shrink-0"></span>`).join('')}
                                             </div>
-                                            <span class="text-[9px] font-mono tracking-[4px] mt-1 text-slate-500 font-extrabold uppercase">${scannedCert.certCode}</span>
+                                            <span class="text-[9px] font-mono tracking-[4px] mt-1 text-slate-700 font-extrabold uppercase">${scannedCert.certCode}</span>
                                           </div>
                                         </div>
 
@@ -762,7 +762,7 @@ export default function LettersArchive({
                                         </div>
                                       </div>
 
-                                      <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-xs text-slate-500 text-right">
+                                      <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-xs text-slate-700 text-right">
                                         <span>تاريخ الطباعة الفنية والمطابقة: ${new Date().toLocaleDateString('ar-IQ')}</span>
                                         <span className="font-bold">عمادة القبول والتسجيل الإلكتروني</span>
                                       </div>
@@ -925,12 +925,12 @@ export default function LettersArchive({
                   </div>
 
                   <div className="space-y-1 text-right mt-2">
-                    <p className="text-[10px] text-slate-400">الطالب وصاحب الوثيقة:</p>
+                    <p className="text-[10px] text-slate-700">الطالب وصاحب الوثيقة:</p>
                     <p className="font-black text-slate-900 text-[11.5px]">{cert.studentName}</p>
-                    <p className="text-slate-600 font-medium">{cert.college}</p>
+                    <p className="text-slate-800 font-medium">{cert.college}</p>
                   </div>
 
-                  <div className="border-t border-slate-200/60 pt-2 space-y-1 text-[11px] text-slate-500">
+                  <div className="border-t border-slate-200/60 pt-2 space-y-1 text-[11px] text-slate-700">
                     <div className="flex justify-between">
                       <span>رقم الوثيقة:</span>
                       <span className="font-mono text-slate-800 font-bold">{cert.docNumber}</span>
@@ -949,7 +949,7 @@ export default function LettersArchive({
                   {/* الرموز المضافة: الباركود ومربع التحقق */}
                   <div className="bg-white p-2 rounded-xl border border-slate-150 flex items-center justify-between gap-2 mt-1">
                     <div className="flex flex-col gap-0.5 text-right w-full">
-                      <span className="text-[8px] text-slate-400 block font-sans">الترميز التوليدي:</span>
+                      <span className="text-[8px] text-slate-700 block font-sans">الترميز التوليدي:</span>
                       <span className="font-mono text-[9px] font-bold text-slate-700">{cert.certCode}</span>
                     </div>
                     <div className="shrink-0 flex items-center justify-center p-1 bg-slate-50 border border-slate-200 rounded-md">
@@ -957,7 +957,7 @@ export default function LettersArchive({
                     </div>
                   </div>
 
-                  <div className="text-[9px] text-slate-400 text-right border-t border-slate-100 pt-1.5 flex justify-between items-center font-mono">
+                  <div className="text-[9px] text-slate-700 text-right border-t border-slate-100 pt-1.5 flex justify-between items-center font-mono">
                     <span>بث المصادقة: {cert.dateIssued}</span>
                     <button
                       onClick={() => {

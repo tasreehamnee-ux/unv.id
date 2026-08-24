@@ -48,7 +48,7 @@ const BarcodePattern = ({ code }: { code: string }) => {
           />
         ))}
       </div>
-      <span className="text-[8px] font-mono tracking-[1.5px] mt-0.5 text-slate-500 font-bold uppercase">{code}</span>
+      <span className="text-[8px] font-mono tracking-[1.5px] mt-0.5 text-slate-700 font-bold uppercase">{code}</span>
     </div>
   );
 };
@@ -117,7 +117,7 @@ export default function StudentPortal({
       <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-xs">
         <User className="w-16 h-16 text-slate-300 mx-auto mb-3" />
         <h3 className="text-lg font-bold text-slate-800">لا يوجد بيانات طلاب</h3>
-        <p className="text-slate-500 text-xs mt-1">يرجى إضافة أو تسجيل طلاب في قسم التسجيل أولاً.</p>
+        <p className="text-slate-700 text-xs mt-1">يرجى إضافة أو تسجيل طلاب في قسم التسجيل أولاً.</p>
       </div>
     );
   }
@@ -133,7 +133,7 @@ export default function StudentPortal({
 
   // دالة لحساب وتصنيف صلاحية مستمسكات الطالب
   const getDocExpiryStats = (doc: RequiredDocument) => {
-    if (!doc.provided || !doc.expiryDate) return { label: 'صالحة ودائمة', status: 'valid', color: 'text-slate-400 bg-slate-50' };
+    if (!doc.provided || !doc.expiryDate) return { label: 'صالحة ودائمة', status: 'valid', color: 'text-slate-700 bg-slate-50' };
     
     const curr = new Date(SYSTEM_CURRENT_DATE);
     const exp = new Date(doc.expiryDate);
@@ -203,50 +203,50 @@ export default function StudentPortal({
 
             <div className="space-y-1">
               <h3 className="font-extrabold text-slate-800 text-lg leading-snug">{currentStudent.name}</h3>
-              <span className="font-mono font-bold text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full inline-block">
+              <span className="font-mono font-bold text-xs bg-slate-100 text-slate-800 px-3 py-1 rounded-full inline-block">
                 ID: {currentStudent.id}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2 text-xs text-right">
               <div className="p-2.5 bg-slate-50 rounded-lg">
-                <span className="text-slate-400 block text-[10px] mb-0.5">الكلية الأكاديمية:</span>
+                <span className="text-slate-700 block text-[10px] mb-0.5">الكلية الأكاديمية:</span>
                 <span className="font-bold text-slate-800 block truncate">{studentDept?.name}</span>
-                <span className="text-slate-400 text-[9px] block truncate">{studentDept?.college}</span>
+                <span className="text-slate-700 text-[9px] block truncate">{studentDept?.college}</span>
               </div>
               <div className="p-2.5 bg-slate-50 rounded-lg">
-                <span className="text-slate-400 block text-[10px] mb-0.5">نوع وجبة الدراسة:</span>
+                <span className="text-slate-700 block text-[10px] mb-0.5">نوع وجبة الدراسة:</span>
                 <span className="font-bold text-amber-800 block text-center">
                   {currentStudent.shift === 'morning' ? 'صباحي' : 'مسائي'}
                 </span>
-                <span className="text-slate-400 text-[9px] block text-center">المرحلة {currentStudent.stage}</span>
+                <span className="text-slate-700 text-[9px] block text-center">المرحلة {currentStudent.stage}</span>
               </div>
             </div>
 
             <div className="border-t border-slate-100 pt-4 space-y-3.5 text-xs text-right">
               <div className="flex justify-between items-center">
-                <span className="text-slate-400 flex items-center gap-1">
+                <span className="text-slate-700 flex items-center gap-1">
                   <UserCheck className="w-3.5 h-3.5 text-slate-405" />
                   <span>المشرف الأكاديمي:</span>
                 </span>
                 <span className="font-bold text-slate-800">{currentStudent.academicAdvisor || 'لم يحدد بعد'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400 flex items-center gap-1">
+                <span className="text-slate-700 flex items-center gap-1">
                   <Smartphone className="w-3.5 h-3.5 text-slate-405" />
                   <span>رقم الهاتف الخلوي:</span>
                 </span>
                 <span className="font-bold text-slate-800 font-mono text-left">{currentStudent.phone}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400 flex items-center gap-1">
+                <span className="text-slate-700 flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-slate-405" />
                   <span>تاريخ القبول الأولي:</span>
                 </span>
                 <span className="font-bold text-slate-800 font-mono">{currentStudent.registrationDate}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400 flex items-center gap-1">
+                <span className="text-slate-700 flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-slate-405" />
                   <span>الرقم الموحد المعتمد:</span>
                 </span>
@@ -274,7 +274,7 @@ export default function StudentPortal({
 
               <div className="bg-slate-50 border border-slate-150 p-3 rounded-2xl flex items-center justify-between gap-3 shadow-3xs">
                 <div className="space-y-1 block w-2/3">
-                  <span className="text-[9px] text-slate-400 block font-sans">الترميز التعريفي الفريد (Verification QR):</span>
+                  <span className="text-[9px] text-slate-700 block font-sans">الترميز التعريفي الفريد (Verification QR):</span>
                   <span className="font-mono text-[9px] font-bold text-slate-800 break-all select-all block bg-white border border-slate-200 p-1 rounded-md text-center">
                     {getStudentVerificationCode(currentStudent.id, currentStudent.registrationDate)}
                   </span>
@@ -309,11 +309,11 @@ export default function StudentPortal({
                           <div class="flex justify-between items-center pb-4 border-b-2 border-slate-200">
                             <div class="text-right space-y-1">
                               <h1 class="text-xl font-black text-slate-800">${universityName}</h1>
-                              <p class="text-xs text-slate-500">${subText}</p>
+                              <p class="text-xs text-slate-700">${subText}</p>
                             </div>
                             <div class="text-left space-y-1">
                               <div class="text-xs bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full">صحة صدور معتمدة وإلكترونية</div>
-                              <p class="text-[10px] text-slate-400 font-mono mt-0.5">رمز الصدور: ${valCode}</p>
+                              <p class="text-[10px] text-slate-700 font-mono mt-0.5">رمز الصدور: ${valCode}</p>
                             </div>
                           </div>
 
@@ -324,29 +324,29 @@ export default function StudentPortal({
                             </p>
 
                             <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-150">
-                              <div><span class="text-slate-400 block text-xs">إسم الطالب الثلاثي:</span> <strong class="text-slate-900">${currentStudent.name}</strong></div>
-                              <div><span class="text-slate-400 block text-xs">الكلية والفرع الدراسي:</span> <strong class="text-slate-900">${studentDept?.name || 'غير محدد'}</strong></div>
-                              <div class="mt-2"><span class="text-slate-400 block text-xs">الرقم الموحد المعتمد:</span> <strong class="text-slate-900 font-mono">${currentStudent.nationalId || 'بدون'}</strong></div>
-                              <div class="mt-2"><span class="text-slate-400 block text-xs">تاريخ المباشرة المعتمد:</span> <strong class="text-slate-900 font-mono">${currentStudent.registrationDate}</strong></div>
-                              <div class="mt-2"><span class="text-slate-400 block text-xs">المرحلة الدراسية والوجبة:</span> <strong class="text-slate-900">المرحلة ${currentStudent.stage} - ${currentStudent.shift === 'morning' ? 'صباحي' : 'مسائي'}</strong></div>
-                              <div class="mt-2"><span class="text-slate-400 block text-xs">رقم الموبايل:</span> <strong class="text-slate-900 font-mono">${currentStudent.phone}</strong></div>
+                              <div><span class="text-slate-700 block text-xs">إسم الطالب الثلاثي:</span> <strong class="text-slate-900">${currentStudent.name}</strong></div>
+                              <div><span class="text-slate-700 block text-xs">الكلية والفرع الدراسي:</span> <strong class="text-slate-900">${studentDept?.name || 'غير محدد'}</strong></div>
+                              <div class="mt-2"><span class="text-slate-700 block text-xs">الرقم الموحد المعتمد:</span> <strong class="text-slate-900 font-mono">${currentStudent.nationalId || 'بدون'}</strong></div>
+                              <div class="mt-2"><span class="text-slate-700 block text-xs">تاريخ المباشرة المعتمد:</span> <strong class="text-slate-900 font-mono">${currentStudent.registrationDate}</strong></div>
+                              <div class="mt-2"><span class="text-slate-700 block text-xs">المرحلة الدراسية والوجبة:</span> <strong class="text-slate-900">المرحلة ${currentStudent.stage} - ${currentStudent.shift === 'morning' ? 'صباحي' : 'مسائي'}</strong></div>
+                              <div class="mt-2"><span class="text-slate-700 block text-xs">رقم الموبايل:</span> <strong class="text-slate-900 font-mono">${currentStudent.phone}</strong></div>
                             </div>
                           </div>
 
                           <div class="grid grid-cols-2 gap-4 items-center border-t border-slate-150 pt-3">
                             <div class="text-center py-2">
-                              <p class="text-xs text-slate-500 font-bold block mb-1">الترميز التوليدي وصحة الصدور</p>
+                              <p class="text-xs text-slate-700 font-bold block mb-1">الترميز التوليدي وصحة الصدور</p>
                               <div class="inline-block">
                                 <div class="flex items-center justify-center gap-[1.5px] bg-white p-2 rounded-lg border border-slate-200 select-none overflow-hidden h-10 w-44">
                                   ${[2, 3, 1, 4, 2, 1, 3, 2, 1, 4, 2, 3, 1, 2, 1].map((w) => `<span style="width: ${w}px;" class="h-6 bg-slate-900 shrink-0"></span>`).join('')}
                                 </div>
-                                <span class="text-[9px] font-mono tracking-[2px] mt-1 text-slate-500 font-extrabold uppercase">${valCode}</span>
+                                <span class="text-[9px] font-mono tracking-[2px] mt-1 text-slate-700 font-extrabold uppercase">${valCode}</span>
                               </div>
                             </div>
 
                             <div class="flex justify-center items-center">
                               <div class="text-center">
-                                <p class="text-[11px] text-slate-500 font-bold block mb-1">رمز التحقق السريع (QR Code)</p>
+                                <p class="text-[11px] text-slate-700 font-bold block mb-1">رمز التحقق السريع (QR Code)</p>
                                 <div class="w-16 h-16 border-2 border-slate-900 p-1 bg-white relative flex flex-wrap items-center justify-center shrink-0 rounded-xl shadow-xs mx-auto">
                                   <span class="absolute top-0.5 left-0.5 w-4 h-4 border border-slate-900 bg-white"><span class="w-1.5 h-1.5 bg-slate-950 block m-auto mt-0.5 animate-pulse"></span></span>
                                   <span class="absolute top-0.5 right-0.5 w-4 h-4 border border-slate-900 bg-white"><span class="w-1.5 h-1.5 bg-slate-950 block m-auto mt-0.5 animate-pulse"></span></span>
@@ -360,7 +360,7 @@ export default function StudentPortal({
                             </div>
                           </div>
 
-                          <div class="border-t border-slate-250 pt-4 flex justify-between items-center text-xs text-slate-500">
+                          <div class="border-t border-slate-250 pt-4 flex justify-between items-center text-xs text-slate-700">
                             <span>تاريخ طباعة هذه البطاقة التلقائية: ${new Date().toLocaleDateString('ar-IQ')}</span>
                             <span class="font-bold">عمادة القبول والتسجيل الإلكترونية</span>
                           </div>
@@ -395,7 +395,7 @@ export default function StudentPortal({
                 <CreditCard className="w-5 h-5 text-amber-700" />
                 <span>الميزان والموقف المالي للطلب</span>
               </h4>
-              <p className="text-slate-400 text-[11px] mt-0.5">القسط السنوي وتفاصيل الدفع والتحصيل للعام الدراسي الحالي</p>
+              <p className="text-slate-700 text-[11px] mt-0.5">القسط السنوي وتفاصيل الدفع والتحصيل للعام الدراسي الحالي</p>
             </div>
 
             <div className="flex items-center gap-4 py-2 border-b border-slate-50">
@@ -411,7 +411,7 @@ export default function StudentPortal({
                 <span className="font-mono font-extrabold text-sm text-amber-800">{paidPercentage}%</span>
               </div>
               <div className="space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase font-bold">نسبة تسديد الأجور</span>
+                <span className="text-[10px] text-slate-700 uppercase font-bold">نسبة تسديد الأجور</span>
                 <h5 className="text-xs text-slate-550 leading-relaxed font-bold">
                   تم سداد {financialSummary.paid.toLocaleString()} د.ع من إجمالي القسط المالي السنوي.
                 </h5>
@@ -419,7 +419,7 @@ export default function StudentPortal({
             </div>
 
             <div className="space-y-3.5 text-xs">
-              <div className="flex justify-between items-center text-slate-600">
+              <div className="flex justify-between items-center text-slate-800">
                 <span>القسط الدراسي الواجب السنوي:</span>
                 <span className="font-bold text-slate-900 font-mono text-base">{financialSummary.total.toLocaleString()} د.ع</span>
               </div>
@@ -455,7 +455,7 @@ export default function StudentPortal({
                 <BookmarkCheck className="w-5 h-5 text-univ-emerald" />
                 <span>أرشيف أوراق الطلب ومطابقة الصلاحيات الطبية والهوية الوطنية</span>
               </h4>
-              <p className="text-slate-400 text-xs mt-1">تحديد المستندات الأصلية المودعة ومعاينة التنبيهات الخاصة بانتهاء فاعليتها</p>
+              <p className="text-slate-700 text-xs mt-1">تحديد المستندات الأصلية المودعة ومعاينة التنبيهات الخاصة بانتهاء فاعليتها</p>
             </div>
 
             {/* قائمة مستندات الطالب */}
@@ -492,7 +492,7 @@ export default function StudentPortal({
                       </div>
                     )}
                     {doc.provided && !doc.expiryDate && (
-                      <div className="text-[10px] text-slate-400 italic block mt-1">
+                      <div className="text-[10px] text-slate-700 italic block mt-1">
                         * مستند مستدام لا تنتهي فاعليته إدارياً.
                       </div>
                     )}
@@ -515,7 +515,7 @@ export default function StudentPortal({
                   <CreditCard className="w-5 h-5 text-indigo-500" />
                   <span>أرشيف الإيصالات المالية والتحصيل المعتمد</span>
                 </h4>
-                <p className="text-slate-400 text-xs mt-1">قائمة الإيصالات الصادرة والمنقولة إلكترونياً باسم الطالب</p>
+                <p className="text-slate-700 text-xs mt-1">قائمة الإيصالات الصادرة والمنقولة إلكترونياً باسم الطالب</p>
               </div>
               <span className="text-xs bg-indigo-50 text-indigo-800 px-2.5 py-1 rounded-lg font-bold">
                 لديه {studentPayments.length} أوصال
@@ -537,19 +537,19 @@ export default function StudentPortal({
                       </span>
                       <span className="font-mono text-xs font-extrabold text-slate-800">{pay.receiptNumber}</span>
                     </div>
-                    <div className="text-[11px] text-slate-500">
+                    <div className="text-[11px] text-slate-700">
                       بواسطة الموظف: {pay.loggedBy} • طريقة الدفع: {pay.method}
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-left shrink-0 self-end sm:self-center">
                     <div className="space-y-0.5 text-right">
-                      <span className="text-[10px] text-slate-400 block font-bold">المبلغ المقبوض:</span>
+                      <span className="text-[10px] text-slate-700 block font-bold">المبلغ المقبوض:</span>
                       <span className="text-emerald-700 font-extrabold text-sm md:text-md font-mono">
                         {pay.amount.toLocaleString()} د.ع
                       </span>
                     </div>
                     <button 
-                      className="p-2 bg-white text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 shadow-xs cursor-pointer"
+                      className="p-2 bg-white text-slate-800 hover:text-slate-800 rounded-lg border border-slate-200 shadow-xs cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveReceipt(pay);
@@ -562,7 +562,7 @@ export default function StudentPortal({
               ))}
 
               {studentPayments.length === 0 && (
-                <div className="text-center py-10 text-slate-400 text-xs">
+                <div className="text-center py-10 text-slate-700 text-xs">
                   <AlertTriangle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
                   <span>لا يوجد أي دفعات أو إيصالات مالية مسجلة بعد لهذا الطالب.</span>
                 </div>
@@ -585,30 +585,30 @@ export default function StudentPortal({
                 <Building className="w-5 h-5 text-amber-700" />
                 <span>{universityName} - {subText}</span>
               </div>
-              <p className="text-slate-400 text-xs">وصل قبض وقبض أجور دراسية رسمي رقم: <span className="font-mono font-bold text-slate-800">{activeReceipt.receiptNumber}</span></p>
-              <div className="text-[11px] text-slate-500 font-mono mt-1">تاريخ المعاملة: {activeReceipt.date}</div>
+              <p className="text-slate-700 text-xs">وصل قبض وقبض أجور دراسية رسمي رقم: <span className="font-mono font-bold text-slate-800">{activeReceipt.receiptNumber}</span></p>
+              <div className="text-[11px] text-slate-700 font-mono mt-1">تاريخ المعاملة: {activeReceipt.date}</div>
             </div>
 
             {/* تفاصيل السند المالي المطبوع */}
             <div className="space-y-3 text-xs leading-relaxed text-slate-700">
               <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-50">
                 <div>
-                  <span className="text-slate-400 font-bold block">إسم الطالب الثلاثي:</span>
+                  <span className="text-slate-700 font-bold block">إسم الطالب الثلاثي:</span>
                   <span className="font-bold text-slate-800 text-sm">{activeReceipt.studentName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-bold block">الرقم الجامعي للطلبة:</span>
+                  <span className="text-slate-700 font-bold block">الرقم الجامعي للطلبة:</span>
                   <span className="font-mono font-bold text-slate-800 text-sm">{activeReceipt.studentId}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-50">
                 <div>
-                  <span className="text-slate-400 font-bold block">الكلية الأكاديمية:</span>
+                  <span className="text-slate-700 font-bold block">الكلية الأكاديمية:</span>
                   <span className="font-bold text-slate-800">{activeReceipt.departmentName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-bold block">فئة ووجه المقبوض الزمني:</span>
+                  <span className="text-slate-700 font-bold block">فئة ووجه المقبوض الزمني:</span>
                   <span className="font-bold text-slate-800">
                     {activeReceipt.category === 'tuition' ? 'قسط دراسي معتمد' :
                      activeReceipt.category === 'registration_fee' ? 'رسوم وخدمات التسجيل' : 'أخرى'}
@@ -621,10 +621,10 @@ export default function StudentPortal({
                 <span className="text-slate-900 font-black font-mono text-xl md:text-2xl">
                   {activeReceipt.amount.toLocaleString()} دينار عراقي
                 </span>
-                <p className="text-[10px] text-slate-400">فقط مليون وخمسمائة ألف دينار عراقي لا غير.</p>
+                <p className="text-[10px] text-slate-700">فقط مليون وخمسمائة ألف دينار عراقي لا غير.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-3 text-[11px] text-slate-500">
+              <div className="grid grid-cols-2 gap-4 pt-3 text-[11px] text-slate-700">
                 <div>
                   <span className="block">طريقة السداد: <span className="font-bold text-slate-700">{activeReceipt.method}</span></span>
                   <span className="block mt-0.5">مسؤول نظام التدقيق: <span className="font-bold text-slate-700">{activeReceipt.loggedBy}</span></span>
@@ -640,7 +640,7 @@ export default function StudentPortal({
               {/* 🔒 الترميز التوليدي وصحة صدور الوصل المالي */}
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150 flex items-center justify-between gap-3 mt-2">
                 <div className="flex flex-col gap-0.5 text-right w-1/2">
-                  <span className="text-[9px] text-slate-400 block font-sans">معرف صحة الصدور الإلكتروني:</span>
+                  <span className="text-[9px] text-slate-700 block font-sans">معرف صحة الصدور الإلكتروني:</span>
                   <span className="font-mono text-[9px] font-bold text-emerald-800 break-all select-all block bg-white px-1.5 py-0.5 rounded border border-slate-200">
                     {getStudentVerificationCode(activeReceipt.studentId, activeReceipt.date)}
                   </span>
@@ -652,7 +652,7 @@ export default function StudentPortal({
               </div>
 
               {noteText && (
-                <div className="border-t border-slate-100 pt-3 text-[10px] text-slate-500 leading-relaxed text-right font-sans">
+                <div className="border-t border-slate-100 pt-3 text-[10px] text-slate-700 leading-relaxed text-right font-sans">
                   {noteText}
                 </div>
               )}

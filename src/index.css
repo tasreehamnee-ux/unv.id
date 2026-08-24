@@ -11,6 +11,7 @@
 }
 
 body {
+  font-weight: 600;
   font-family: "Arial", "Cairo", system-ui, -apple-system, sans-serif;
   font-weight: 700; /* تجعل الخط عريض بشكل افتراضي بناءً على طلب المستخدم */
   font-size: 15px;  /* خط أكبر وأكثر وضوحاً */
@@ -56,6 +57,7 @@ h1, h2, h3, h4, h5, h6 {
 @media print {
   /* Hide every element on the page */
   body {
+  font-weight: 600;
     background-color: white !important;
     color: black !important;
   }

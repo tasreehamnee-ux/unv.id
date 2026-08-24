@@ -156,7 +156,7 @@ export default function Dashboard({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-xs">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-slate-800">أهلاً بك في نظام الإدارة والتسجيل المتكامل</h2>
-          <p className="text-slate-500 text-xs md:text-sm mt-1">جامعة الكوت • إدارة وأتمتة المعلومات والبيانات للجامعة وكلياتها وأقسامها</p>
+          <p className="text-slate-700 text-xs md:text-sm mt-1">جامعة الكوت • إدارة وأتمتة المعلومات والبيانات للجامعة وكلياتها وأقسامها</p>
         </div>
         <div className="flex items-center gap-3 bg-amber-50 text-amber-800 px-4 py-2.5 rounded-xl border border-amber-100/60 text-xs font-medium shrink-0 animate-pulse">
           <Clock className="w-4 h-4 text-amber-600 animate-bounce" />
@@ -180,13 +180,13 @@ export default function Dashboard({
               <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
               <div>
                 <h3 className="text-base font-black text-white">🖥️ حاسبة محطة العمل المشفرة: عمادة {activeDept.name}</h3>
-                <span className="text-[10px] text-slate-400 block mt-0.5">الحاسبة معتمدة لدى مركز السيرفرات ولها IP مخصص مستقل</span>
+                <span className="text-[10px] text-slate-700 block mt-0.5">الحاسبة معتمدة لدى مركز السيرفرات ولها IP مخصص مستقل</span>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
               <div className="bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs px-3 py-1.5 rounded-lg flex items-center gap-2">
-                <span className="text-[10px] text-slate-500">STATION IP:</span>
+                <span className="text-[10px] text-slate-700">STATION IP:</span>
                 <span className="font-extrabold text-emerald-400 tracking-wide">{activeDeptIP}</span>
               </div>
               <div className="bg-emerald-950/40 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-black border border-emerald-950/40">
@@ -199,37 +199,37 @@ export default function Dashboard({
             
             <div className="lg:col-span-4 space-y-4">
               <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-                <h4 className="text-[11px] font-black tracking-wider text-slate-400 border-b border-slate-800 pb-1.5">
+                <h4 className="text-[11px] font-black tracking-wider text-slate-700 border-b border-slate-800 pb-1.5">
                   🛡️ وثيقة الاعتماد الأمني وبوابة التعاليق المباشرة
                 </h4>
                 <div className="space-y-2 text-[11px]">
                   <div className="flex justify-between">
-                    <span className="text-slate-500 font-bold">اسم العميد المسؤول:</span>
+                    <span className="text-slate-700 font-bold">اسم العميد المسؤول:</span>
                     <span className="text-slate-200 font-black">{activeDept.headOfDepartment}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500 font-bold">المرور السحابي لعميد:</span>
+                    <span className="text-slate-700 font-bold">المرور السحابي لعميد:</span>
                     <span className="font-mono text-amber-400 font-extrabold font-black bg-slate-950 px-1.5 py-0.5 rounded">
                       AUTHORIZED
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500 font-bold">عدد المقاعد الكلي:</span>
+                    <span className="text-slate-700 font-bold">عدد المقاعد الكلي:</span>
                     <span className="text-emerald-400 font-extrabold font-black">{activeDept.availableSeats} مقعد</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500 font-bold">سنوات الدراسة:</span>
+                    <span className="text-slate-700 font-bold">سنوات الدراسة:</span>
                     <span className="text-slate-200 font-black">{activeDept.durationYears} سنوات أكاديمية</span>
                   </div>
                 </div>
               </div>
 
               <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 space-y-2 text-center">
-                <span className="text-[10px] text-slate-500 font-bold block">إجمالي المقبولين في {activeDept.name} حالياً</span>
+                <span className="text-[10px] text-slate-700 font-bold block">إجمالي المقبولين في {activeDept.name} حالياً</span>
                 <span className="text-4xl font-extrabold font-mono text-slate-105 block">
-                  {collegeStudents.length} <span className="text-xs text-slate-500 font-sans font-medium">طالب</span>
+                  {collegeStudents.length} <span className="text-xs text-slate-700 font-sans font-medium">طالب</span>
                 </span>
-                <span className="text-[9px] text-slate-400 bg-slate-900 px-2 py-1 rounded block">
+                <span className="text-[9px] text-slate-700 bg-slate-900 px-2 py-1 rounded block">
                   اكتمال المقاعد: {Math.round((collegeStudents.length / activeDept.availableSeats) * 105 || 0)}%
                 </span>
               </div>
@@ -240,16 +240,16 @@ export default function Dashboard({
                 <h4 className="text-[12px] font-black text-white flex items-center gap-1.5">
                   <span>📥 سجل كشف قيد الطلبة المقبولين بالكلية (يحدث تلقائياً)</span>
                 </h4>
-                <span className="text-[9px] bg-slate-950 text-slate-400 px-2 py-1 rounded">
+                <span className="text-[9px] bg-slate-950 text-slate-700 px-2 py-1 rounded">
                   قائمة الأسماء التلقائية للمقبولين
                 </span>
               </div>
 
               {collegeStudents.length === 0 ? (
-                <div className="p-12 text-center text-slate-500 space-y-2">
+                <div className="p-12 text-center text-slate-700 space-y-2">
                   <div className="text-3xl">📭</div>
                   <p className="font-extrabold text-xs">لا يوجد أي طالب مقبول في كلية {activeDept.name} حالياً.</p>
-                  <p className="text-[10px] text-slate-600">عند قبول وتسجيل طالب جديد بالكلية، يظهر اسمه هنا فورياً وتلقائياً.</p>
+                  <p className="text-[10px] text-slate-800">عند قبول وتسجيل طالب جديد بالكلية، يظهر اسمه هنا فورياً وتلقائياً.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto max-h-[220px] overflow-y-auto">
@@ -269,9 +269,9 @@ export default function Dashboard({
                           <tr key={student.id} className="hover:bg-slate-950/50 transition-colors">
                             <td className="py-2.5">
                               <span className="font-black text-white block">{student.name}</span>
-                              <span className="text-[9px] text-slate-500 block mt-0.5">دراسة: {student.shift === 'morning' ? 'صباحي ☀️' : 'مسائي 🌙'} • مرحلة {student.stage}</span>
+                              <span className="text-[9px] text-slate-700 block mt-0.5">دراسة: {student.shift === 'morning' ? 'صباحي ☀️' : 'مسائي 🌙'} • مرحلة {student.stage}</span>
                             </td>
-                            <td className="py-2.5 text-center font-mono font-bold text-slate-400">{student.id}</td>
+                            <td className="py-2.5 text-center font-mono font-bold text-slate-700">{student.id}</td>
                             <td className="py-2.5 text-center">
                               <span className="block text-slate-100 font-bold">{(student.totalTuitionFee).toLocaleString('ar-IQ')} د.ع</span>
                               <span className="text-[9px] text-emerald-400 mt-0.5 block font-bold font-mono">المسدد: {(studentFeeInfo.paid).toLocaleString('ar-IQ')} د.ع</span>
@@ -308,7 +308,7 @@ export default function Dashboard({
           className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
         >
           <div className="flex justify-between items-start">
-            <span className="text-slate-500 text-sm font-medium">الطلاب المسجلين</span>
+            <span className="text-slate-700 text-sm font-medium">الطلاب المسجلين</span>
             <div className="p-3 bg-sky-50 text-sky-700 rounded-xl group-hover:scale-110 transition-transform">
               <Users className="w-5 h-5" />
             </div>
@@ -329,16 +329,16 @@ export default function Dashboard({
           className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
         >
           <div className="flex justify-between items-start">
-            <span className="text-slate-500 text-sm font-medium">المدفوعات والمستحصل من الرسوم</span>
+            <span className="text-slate-700 text-sm font-medium">المدفوعات والمستحصل من الرسوم</span>
             <div className="p-3 bg-emerald-50 text-emerald-700 rounded-xl group-hover:scale-110 transition-transform">
               <CreditCard className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
             <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono">
-              {totalCollected.toLocaleString()} <span className="text-xs font-sans font-medium text-slate-500">د.ع</span>
+              {totalCollected.toLocaleString()} <span className="text-xs font-sans font-medium text-slate-700">د.ع</span>
             </h3>
-            <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
+            <div className="flex items-center justify-between mt-2 text-xs text-slate-700">
               <div className="flex items-center font-medium gap-1 text-emerald-600">
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>تحصيل {collectionRate}%</span>
@@ -355,7 +355,7 @@ export default function Dashboard({
           className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
         >
           <div className="flex justify-between items-start">
-            <span className="text-slate-500 text-sm font-medium">الأرشيف المركزي والكتب</span>
+            <span className="text-slate-700 text-sm font-medium">الأرشيف المركزي والكتب</span>
             <div className="p-3 bg-indigo-50 text-indigo-700 rounded-xl group-hover:scale-110 transition-transform">
               <FileText className="w-5 h-5" />
             </div>
@@ -381,7 +381,7 @@ export default function Dashboard({
           className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
         >
           <div className="flex justify-between items-start">
-            <span className="text-slate-500 text-sm font-medium">التواصل والخطوط الداخلية</span>
+            <span className="text-slate-700 text-sm font-medium">التواصل والخطوط الداخلية</span>
             <div className="p-3 bg-pink-50 text-pink-700 rounded-xl group-hover:scale-110 transition-transform">
               <MessageSquare className="w-5 h-5" />
             </div>
@@ -409,7 +409,7 @@ export default function Dashboard({
             </div>
             <div className="text-right">
               <h3 className="font-extrabold text-slate-800 text-sm md:text-base">توزيع الطلاب المقبولين في الكليات والأقسام العلمية</h3>
-              <p className="text-slate-400 text-[11px] mt-0.5">توزيع الطلاب وتعداد المقاعد ومؤشرات النسب المئوية التفصيلية في كل قسم علمي</p>
+              <p className="text-slate-700 text-[11px] mt-0.5">توزيع الطلاب وتعداد المقاعد ومؤشرات النسب المئوية التفصيلية في كل قسم علمي</p>
             </div>
           </div>
           <div className="bg-slate-55 text-slate-700 text-[11px] font-black px-3 py-1.5 rounded-lg border border-slate-200">
@@ -449,7 +449,7 @@ export default function Dashboard({
                       }} 
                     />
                   </div>
-                  <div className="flex justify-between text-[11px] font-bold text-slate-500 font-mono">
+                  <div className="flex justify-between text-[11px] font-bold text-slate-700 font-mono">
                     <span>الاستيعاب الجاري</span>
                     <span>{count} طالب مقبول</span>
                   </div>
@@ -471,7 +471,7 @@ export default function Dashboard({
                 <AlertTriangle className="w-5 h-5 text-red-500 animate-bounce" />
                 <span>مركز المراقبة والتحقق من تواريخ انتهاء الصلاحية</span>
               </h3>
-              <p className="text-slate-400 text-xs mt-1">تتبع مستندات الطلبة والكتب الرسمية ذات الصلاحية المحدودة</p>
+              <p className="text-slate-700 text-xs mt-1">تتبع مستندات الطلبة والكتب الرسمية ذات الصلاحية المحدودة</p>
             </div>
             <div className="flex gap-2">
               <span className="text-[11px] font-bold bg-red-100 text-red-800 px-2 py-1 rounded-lg">
@@ -487,9 +487,9 @@ export default function Dashboard({
             
             {/* الجزء الأول: الكتب الرسمية المنتهية */}
             <div className="space-y-3 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
-              <h4 className="text-xs font-bold text-slate-600 flex items-center justify-between">
+              <h4 className="text-xs font-bold text-slate-800 flex items-center justify-between">
                 <span>📚 صلاحية الكتب والقرارات الرسمية:</span>
-                <span className="text-[10px] text-slate-400">تحديث فوري</span>
+                <span className="text-[10px] text-slate-700">تحديث فوري</span>
               </h4>
               
               <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
@@ -511,7 +511,7 @@ export default function Dashboard({
                         {letItem.status === 'expired' ? 'ملغي/منتهي' : 'ينتهي قريباً'}
                       </span>
                     </div>
-                    <div className="flex justify-between text-[11px] text-slate-500 mt-1">
+                    <div className="flex justify-between text-[11px] text-slate-700 mt-1">
                       <span>رقم: {letItem.letterNumber}</span>
                       <span className="font-mono text-red-700 font-medium">الانتهاء: {letItem.expiryDate}</span>
                     </div>
@@ -519,7 +519,7 @@ export default function Dashboard({
                 ))}
 
                 {letters.filter(l => l.status === 'expired' || l.status === 'expiring_soon').length === 0 && (
-                  <div className="text-center py-6 text-slate-400 text-xs">
+                  <div className="text-center py-6 text-slate-700 text-xs">
                     <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
                     <span>جميع الكتب والقرارات الوزارية نشطة وصالحة تماماً.</span>
                   </div>
@@ -529,9 +529,9 @@ export default function Dashboard({
 
             {/* الجزء الثاني: مستمسكات الطلبة المنتهية */}
             <div className="space-y-3 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
-              <h4 className="text-xs font-bold text-slate-600 flex items-center justify-between">
+              <h4 className="text-xs font-bold text-slate-800 flex items-center justify-between">
                 <span>🪪 هوية وفحوصات الطلاب الحرجة:</span>
-                <span className="text-[10px] text-slate-400">تدقيق إلكتروني</span>
+                <span className="text-[10px] text-slate-700">تدقيق إلكتروني</span>
               </h4>
 
               <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
@@ -570,7 +570,7 @@ export default function Dashboard({
                               {isExpired ? 'وثيقة منتهية' : 'تجديد فوري'}
                             </span>
                           </div>
-                          <div className="text-[11px] text-slate-600 mt-1 flex justify-between">
+                          <div className="text-[11px] text-slate-800 mt-1 flex justify-between">
                             <span>{doc.name}</span>
                             <span className="font-mono text-red-600 font-bold">{doc.expiryDate}</span>
                           </div>
@@ -578,7 +578,7 @@ export default function Dashboard({
                       );
                     })
                 ).filter(Boolean).length === 0 && (
-                  <div className="text-center py-6 text-slate-400 text-xs">
+                  <div className="text-center py-6 text-slate-700 text-xs">
                     <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
                     <span>تم التحقق من كافة وثائق الطلبة وهي صالحة تماماً!</span>
                   </div>
@@ -596,7 +596,7 @@ export default function Dashboard({
               <GraduationCap className="w-5 h-5 text-univ-emerald" />
               <span>الطاقة الاستيعابية للتسجيل بالأقسام</span>
             </h3>
-            <p className="text-slate-400 text-xs mt-1">نسبة امتلاء المقاعد الدراسية المتاحة للعام الأول</p>
+            <p className="text-slate-700 text-xs mt-1">نسبة امتلاء المقاعد الدراسية المتاحة للعام الأول</p>
           </div>
 
           <div className="space-y-4 py-2 flex-grow justify-center flex flex-col">
@@ -614,16 +614,16 @@ export default function Dashboard({
                       style={{ width: `${Math.min(100, Math.round((dept.totalEnrolled / dept.availableSeats) * 100))}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-[11px] text-slate-400">
+                  <div className="flex justify-between text-[11px] text-slate-700">
                     <span>{dept.college}</span>
-                    <span className="font-mono font-bold text-slate-500">القسط: {(dept.annualFeeMorning / 1000000).toFixed(1)} مليون د.ع</span>
+                    <span className="font-mono font-bold text-slate-700">القسط: {(dept.annualFeeMorning / 1000000).toFixed(1)} مليون د.ع</span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="pt-3 border-t border-slate-100 text-center text-xs text-slate-500">
+          <div className="pt-3 border-t border-slate-100 text-center text-xs text-slate-700">
             <span>لمراجعة الموقف المالي والمطابقة الكاملة، اذهب إلى</span>
             <span 
               onClick={() => setActiveTab('finance')} 
@@ -649,10 +649,10 @@ export default function Dashboard({
                 <span>📡 البث السحابي التلقائي وإرسال معلومات المقبولين فوراً للعمادات</span>
                 <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-black">نشط فوري</span>
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">تبث المنظومة تلقائياً الاسم والمعلومات فور تسجيل الطالب أو استيراده إلى لوحة كليته المعنية لمدير التسجيل ومدير النظام</p>
+              <p className="text-xs text-slate-700 mt-0.5">تبث المنظومة تلقائياً الاسم والمعلومات فور تسجيل الطالب أو استيراده إلى لوحة كليته المعنية لمدير التسجيل ومدير النظام</p>
             </div>
           </div>
-          <span className="text-[11px] text-slate-400 font-mono font-bold bg-slate-50 px-3 py-1 rounded-lg">
+          <span className="text-[11px] text-slate-700 font-mono font-bold bg-slate-50 px-3 py-1 rounded-lg">
             بروتوكول بث القيد: SECURE-REST API v2 (AES-256)
           </span>
         </div>
@@ -674,9 +674,9 @@ export default function Dashboard({
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-slate-550 font-bold">
                   <span>الجهة المستقبلة: {dept?.name || 'عمادة الكلية'}</span>
-                  <span className="font-mono text-slate-400">IP: 192.168.1.{30 + idx}</span>
+                  <span className="font-mono text-slate-700">IP: 192.168.1.{30 + idx}</span>
                 </div>
-                <div className="pt-2 border-t border-dashed border-slate-200 flex justify-between items-center text-[9px] text-slate-400">
+                <div className="pt-2 border-t border-dashed border-slate-200 flex justify-between items-center text-[9px] text-slate-700">
                   <span>تاريخ التسجيل: {student.registrationDate}</span>
                   <span className="text-emerald-750 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md text-[9px] border border-emerald-100">آمن بالكامل ✓</span>
                 </div>
@@ -694,7 +694,7 @@ export default function Dashboard({
               <MessageSquare className="w-5 h-5 text-amber-600 animate-pulse" />
               <span>دليل بروتوكول الـ IP ونقاط الاتصال السريع المباشر بالأقسام</span>
             </h3>
-            <p className="text-slate-400 text-xs mt-1">تواصل فوري مرخص وآمن مع العمداء وإدارة الحسابات عبر الشبكة الداخلية المغلقة للجامعة</p>
+            <p className="text-slate-700 text-xs mt-1">تواصل فوري مرخص وآمن مع العمداء وإدارة الحسابات عبر الشبكة الداخلية المغلقة للجامعة</p>
           </div>
           <div className="bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200 flex items-center gap-1.5 shrink-0">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -702,7 +702,7 @@ export default function Dashboard({
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 leading-relaxed">
+        <p className="text-xs text-slate-700 leading-relaxed">
           🔒 <span className="font-bold text-slate-700">تنويه تقني بخصوص الـ IP:</span> عناوين الـ IP المدرجة أدناه هي عناوين <span className="text-amber-850 font-bold bg-amber-50 px-1.5 py-0.5 rounded">ثابتة ومحصنة (Static Intranet IPs)</span> مخصصة يدوياً وجغرافياً لكل مكتب في الحرم الجامعي لضمان بقاء الشبكة مغلقة بالكامل؛ لا تتغير هذه العناوين عند إعادة تشغيل الأجهزة لضمان عدم تزييف العقد السجيلة (Anti-Spoofing) وتتبع مصدر المعاملة والكتب الصادرة بدقة مطلقة.
         </p>
 
@@ -733,7 +733,7 @@ export default function Dashboard({
                   </div>
                   <div>
                     <h4 className="font-bold text-xs text-slate-800 truncate">{dept.name}</h4>
-                    <p className="text-[10px] text-slate-400 font-bold truncate mt-0.5">{dept.label}</p>
+                    <p className="text-[10px] text-slate-700 font-bold truncate mt-0.5">{dept.label}</p>
                     <p className="text-[10px] text-slate-550 mt-1 truncate">👤 المسؤول: {dept.head}</p>
                   </div>
                 </div>
@@ -789,14 +789,14 @@ export default function Dashboard({
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-slate-800">{msg.senderName}</span>
                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${
-                    msg.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-slate-150 text-slate-600'
+                    msg.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-slate-150 text-slate-800'
                   }`}>
                     {msg.priority === 'high' ? 'هام عاجل' : 'عادي'}
                   </span>
                 </div>
                 <p className="font-medium text-indigo-900 line-clamp-1 mt-1">{msg.subject}</p>
                 <p className="text-slate-505 line-clamp-2 leading-relaxed">{msg.content}</p>
-                <span className="text-[10px] text-slate-400 font-mono mt-1 text-left">
+                <span className="text-[10px] text-slate-700 font-mono mt-1 text-left">
                   {new Date(msg.timestamp).toLocaleString('ar-IQ')}
                 </span>
               </div>
@@ -820,7 +820,7 @@ export default function Dashboard({
             </div>
 
             <div className="flex justify-between items-center pt-3 border-t border-slate-700/50">
-              <span className="text-[11px] text-slate-400">بايثون 3 • SQLite mdmj • OOP Architecture</span>
+              <span className="text-[11px] text-slate-700">بايثون 3 • SQLite mdmj • OOP Architecture</span>
               <button 
                 onClick={() => setActiveTab('python')}
                 className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
@@ -839,13 +839,13 @@ export default function Dashboard({
               <h3 className="font-bold text-base md:text-lg text-slate-100 leading-normal">
                 صلاحيات الموظف وبلوغ السجلات المقيدة
               </h3>
-              <p className="text-slate-400 text-xs leading-relaxed">
+              <p className="text-slate-700 text-xs leading-relaxed">
                 بصفتك موظفاً مفعلاً، تنحصر صلاحيتك في قراءة ومطابقة ملفات كليتك الأكاديمية لتأمين الخصوصية العالية. للتبليغ عن مشاكل تقنية أو طلب كود الربط البرمجي الكامل (Python Module)، يرجى مخاطبة رئيس الجامعة مباشرة.
               </p>
             </div>
 
             <div className="flex justify-between items-center pt-3 border-t border-slate-800 text-[11px]">
-              <span className="text-slate-500 font-bold text-emerald-500 flex items-center gap-1">
+              <span className="text-slate-700 font-bold text-emerald-500 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span>الخادم نشط وسري</span>
               </span>

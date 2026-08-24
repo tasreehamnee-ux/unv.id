@@ -128,11 +128,11 @@ export default function FinancePortal({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs">
-          <span className="text-slate-400 text-xs font-bold block mb-1">إجمالي استحقاقات الكليات السنوية:</span>
+          <span className="text-slate-700 text-xs font-bold block mb-1">إجمالي استحقاقات الكليات السنوية:</span>
           <div className="text-2xl font-black text-slate-800 font-mono">
-            {totalTuitionExpected.toLocaleString()} <span className="text-xs font-sans font-medium text-slate-400">د.ع</span>
+            {totalTuitionExpected.toLocaleString()} <span className="text-xs font-sans font-medium text-slate-700">د.ع</span>
           </div>
-          <p className="text-[10px] text-slate-400 mt-1">المبلغ الإجمالي على أساس كشوفات التسجيل الجارية</p>
+          <p className="text-[10px] text-slate-700 mt-1">المبلغ الإجمالي على أساس كشوفات التسجيل الجارية</p>
         </div>
 
         <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100/60 shadow-xs">
@@ -188,7 +188,7 @@ export default function FinancePortal({
                 <div className="font-bold text-amber-900">الموقف الذمي الحالي لـ {currentSelectedStudent.name}:</div>
                 <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
                   <div className="bg-white p-1 rounded-sm border border-amber-100/50">
-                    <span className="text-slate-400 block text-[9px]">القسط السنوي:</span>
+                    <span className="text-slate-700 block text-[9px]">القسط السنوي:</span>
                     <span className="font-bold text-slate-800 font-mono">{studentFeeStats.total.toLocaleString()}</span>
                   </div>
                   <div className="bg-white p-1 rounded-sm border border-amber-100/50">
@@ -223,7 +223,7 @@ export default function FinancePortal({
               <div className="space-y-1 text-xs">
                 <label className="font-bold text-slate-700 block">رقم الوصل المالي الورقي:</label>
                 <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg overflow-hidden focus-within:border-univ-emerald focus-within:bg-white">
-                  <span className="bg-slate-200 px-2 text-slate-500 font-mono py-2 py-2.5 text-[11px]">REC-2026-</span>
+                  <span className="bg-slate-200 px-2 text-slate-700 font-mono py-2 py-2.5 text-[11px]">REC-2026-</span>
                   <input 
                     type="text" 
                     placeholder="9450"
@@ -285,7 +285,7 @@ export default function FinancePortal({
 
             {/* ملاحظات الوصل ودليل التسوية */}
             <div className="space-y-1 text-xs">
-              <label className="font-bold text-slate-700 block font-normal text-slate-500">ملاحظات توضيحية إضافية:</label>
+              <label className="font-bold text-slate-700 block font-normal text-slate-700">ملاحظات توضيحية إضافية:</label>
               <input 
                 type="text" 
                 placeholder="مثال: دفعة مؤقتة لتنظيم الأوراق الموقوفة..."
@@ -321,7 +321,7 @@ export default function FinancePortal({
                 <Receipt className="w-5 h-5 text-indigo-500" />
                 <span>شريطة السجلات المالية والوصيلات المرجعية العامة</span>
               </h3>
-              <p className="text-slate-400 text-xs mt-1">تتبع الحركات المالية لجميع الكليات والأقسام المسجلة</p>
+              <p className="text-slate-700 text-xs mt-1">تتبع الحركات المالية لجميع الكليات والأقسام المسجلة</p>
             </div>
             
             <span className="text-xs bg-indigo-50 text-indigo-800 px-2.5 py-1 rounded-full font-bold">
@@ -334,7 +334,7 @@ export default function FinancePortal({
             
             {/* بحث باسم الطالب أو رقم الوصل */}
             <div className="relative">
-              <Search className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-slate-400" />
+              <Search className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-slate-700" />
               <input 
                 type="text" 
                 placeholder="بحث باسم الطالب أو رقم الوصل..."
@@ -377,7 +377,7 @@ export default function FinancePortal({
           <div className="overflow-x-auto">
             <table className="w-full text-right border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold">
+                <tr className="bg-slate-50 border-b border-slate-100 text-slate-700 font-bold">
                   <th className="p-3">رقم الوصل</th>
                   <th className="p-3">الطالب المعني</th>
                   <th className="p-3">الكلية الأكاديمية</th>
@@ -393,9 +393,9 @@ export default function FinancePortal({
                     <td className="p-3 font-mono font-bold text-slate-800">{pay.receiptNumber}</td>
                     <td className="p-3">
                       <div className="font-bold text-slate-900">{pay.studentName}</div>
-                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">{pay.studentId}</div>
+                      <div className="text-[10px] text-slate-700 font-mono mt-0.5">{pay.studentId}</div>
                     </td>
-                    <td className="p-3 text-slate-600 font-semibold">{pay.departmentName}</td>
+                    <td className="p-3 text-slate-800 font-semibold">{pay.departmentName}</td>
                     <td className="p-3 text-center">
                       <span className={`px-2 py-0.5 rounded-sm font-bold text-[9px] ${
                         pay.category === 'tuition' ? 'bg-amber-100 text-amber-900' :
@@ -406,7 +406,7 @@ export default function FinancePortal({
                          pay.category === 'registration_fee' ? 'رسوم تسجيل' : 'أجور وخدمات'}
                       </span>
                     </td>
-                    <td className="p-3 text-center font-bold text-slate-600">
+                    <td className="p-3 text-center font-bold text-slate-800">
                       {pay.method === 'cash' ? 'نقدي' :
                        pay.method === 'bank_transfer' ? 'مصرفي' :
                        pay.method === 'e-wallet' ? 'زين كاش' : 'بطاقة ذكية'}
@@ -429,7 +429,7 @@ export default function FinancePortal({
 
                 {filteredPayments.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="text-center py-10 text-slate-400">
+                    <td colSpan={7} className="text-center py-10 text-slate-700">
                       <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
                       <span>لا يوجد أي إيصالات مالية في الجدول تطابق الفلاتر المحددة حالياً.</span>
                     </td>
@@ -439,7 +439,7 @@ export default function FinancePortal({
             </table>
           </div>
 
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-[11px] text-slate-500 leading-relaxed font-bold">
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-[11px] text-slate-700 leading-relaxed font-bold">
             <span className="text-amber-700">📌 تنبيه الحسابات:</span>
             <span>كافة المعاملات المالية تتبع الدليل المحاسبي وموثقة بالتوثيق الضريبي لوزارة التعليم العالي والبحث العلمي العراقية.</span>
           </div>
@@ -459,30 +459,30 @@ export default function FinancePortal({
                 <Building className="w-5 h-5 text-amber-700" />
                 <span>{universityName} - {subText}</span>
               </div>
-              <p className="text-slate-400 text-xs">وصل قبض وقبض أجور دراسية رسمي رقم: <span className="font-mono font-bold text-slate-800">{selectedPrintReceipt.receiptNumber}</span></p>
-              <div className="text-[11px] text-slate-500 font-mono mt-1">تاريخ المعاملة: {selectedPrintReceipt.date}</div>
+              <p className="text-slate-700 text-xs">وصل قبض وقبض أجور دراسية رسمي رقم: <span className="font-mono font-bold text-slate-800">{selectedPrintReceipt.receiptNumber}</span></p>
+              <div className="text-[11px] text-slate-700 font-mono mt-1">تاريخ المعاملة: {selectedPrintReceipt.date}</div>
             </div>
 
             {/* تفاصيل السند المالي المطبوع */}
             <div className="space-y-3 text-xs leading-relaxed text-slate-700">
               <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-50">
                 <div>
-                  <span className="text-slate-400 font-bold block">إسم الطالب الثلاثي:</span>
+                  <span className="text-slate-700 font-bold block">إسم الطالب الثلاثي:</span>
                   <span className="font-bold text-slate-800 text-sm">{selectedPrintReceipt.studentName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-bold block">الرقم الجامعي للطلبة:</span>
+                  <span className="text-slate-700 font-bold block">الرقم الجامعي للطلبة:</span>
                   <span className="font-mono font-bold text-slate-800 text-sm">{selectedPrintReceipt.studentId}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-50">
                 <div>
-                  <span className="text-slate-400 font-bold block">الكلية الأكاديمية:</span>
+                  <span className="text-slate-700 font-bold block">الكلية الأكاديمية:</span>
                   <span className="font-bold text-slate-800">{selectedPrintReceipt.departmentName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-bold block">فئة ووجه المقبوض الزمني:</span>
+                  <span className="text-slate-700 font-bold block">فئة ووجه المقبوض الزمني:</span>
                   <span className="font-bold text-slate-800">
                     {selectedPrintReceipt.category === 'tuition' ? 'قسط دراسي معتمد' :
                      selectedPrintReceipt.category === 'registration_fee' ? 'رسوم وخدمات التسجيل' : 'أخرى'}
@@ -495,10 +495,10 @@ export default function FinancePortal({
                 <span className="text-slate-900 font-black font-mono text-xl md:text-2xl">
                   {selectedPrintReceipt.amount.toLocaleString()} دينار عراقي
                 </span>
-                <p className="text-[10px] text-slate-400">فقط مليون وخمسمائة ألف دينار عراقي لا غير.</p>
+                <p className="text-[10px] text-slate-700">فقط مليون وخمسمائة ألف دينار عراقي لا غير.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-3 text-[11px] text-slate-500">
+              <div className="grid grid-cols-2 gap-4 pt-3 text-[11px] text-slate-700">
                 <div>
                   <span className="block">طريقة السداد: <span className="font-bold text-slate-700">
                     {selectedPrintReceipt.method === 'cash' ? 'نقدي' :
@@ -516,7 +516,7 @@ export default function FinancePortal({
               </div>
 
               {noteText && (
-                <div className="border-t border-slate-100 pt-3 text-[10px] text-slate-500 leading-relaxed text-right font-sans">
+                <div className="border-t border-slate-100 pt-3 text-[10px] text-slate-700 leading-relaxed text-right font-sans">
                   {noteText}
                 </div>
               )}
