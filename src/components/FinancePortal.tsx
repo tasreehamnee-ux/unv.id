@@ -551,12 +551,12 @@ export default function FinancePortal({
                             <meta charset="utf-8">
                             <link href="https://cdn.jsdelivr.net/npm/tailwindcss@4.0.0/dist/tailwind.min.css" rel="stylesheet">
                             <style>
-                              body { font-family: 'Inter', sans-serif; direction: rtl; padding: 40px; background-color: white; color: black; }
+                              body { font-family: 'system-ui', sans-serif; direction: rtl; padding: 20px; background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { size: A4 portrait; margin: 15mm; }
                               .no-print { display: none !important; }
                             </style>
                           </head>
                           <body onload="window.focus(); window.print(); setTimeout(function(){ window.close(); }, 500);">
-                            <div class="max-w-xl mx-auto p-4 border border-slate-350 rounded-3xl">
+                            <div class="w-full max-w-4xl mx-auto p-8 border-2 border-slate-400 rounded-2xl shadow-sm" style="font-size: 1.15rem; min-height: 50vh;">
                               ${cloned.innerHTML}
                             </div>
                           </body>
