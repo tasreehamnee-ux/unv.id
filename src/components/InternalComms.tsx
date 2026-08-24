@@ -274,9 +274,9 @@ export default function InternalComms({
       timestamp: new Date().toISOString(),
       priority: mailPriority,
       readBy: [currentUserRole],
-      relatedLetterId: mailRelatedLetter || undefined,
-      attachmentName: attachmentName || undefined,
-      attachmentData: attachmentData || undefined
+      relatedLetterId: mailRelatedLetter || null,
+      attachmentName: attachmentName || null,
+      attachmentData: attachmentData || null
     };
 
     onSendMessage(newMessage);
@@ -872,7 +872,7 @@ export default function InternalComms({
                     body: extBody,
                     date: new Date().toLocaleString('ar-IQ') + ' ص',
                     status: 'sent' as const,
-                    attachment: extAttachment || undefined
+                    attachment: extAttachment || null
                   };
 
                   setExternalEmails(prev => [newExt, ...prev]);
