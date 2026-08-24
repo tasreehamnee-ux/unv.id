@@ -52,6 +52,7 @@ import StudentList from './components/StudentList';
 import StudentPortal from './components/StudentPortal';
 import FinancePortal from './components/FinancePortal';
 import LettersArchive from './components/LettersArchive';
+import LabsPortal from './components/LabsPortal';
 import InternalComms from './components/InternalComms';
 import PythonCodeViewer from './components/PythonCodeViewer';
 import AuditLog from './components/AuditLog';
@@ -1146,6 +1147,7 @@ export default function App() {
     { id: 'finance', label: 'قسم الحسابات والقبض المالي', icon: CreditCard },
     { id: 'letters', label: 'أرشيف الكتب والقرارات', icon: FolderLock, badge: letters.filter(l => l.status === 'expired' || l.status === 'expiring_soon').length },
     { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: messages.filter(m => m.priority === 'high').length },
+    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock },
     { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
     ...(currentRole === 'admin' ? [
       { id: 'admin_security', label: 'التحكم الإداري والأمني 🛡️', icon: ShieldAlert },
@@ -1155,7 +1157,7 @@ export default function App() {
 
   const allowedTabs = (() => {
     if (!currentRole) return [];
-    if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
+    if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'labs_portal', 'python', 'admin_security', 'audit_log'];
     if (currentRole === 'registration_director') return ['students', 'portal', 'letters', 'comms'];
     if (currentRole === 'finance_director') return ['finance', 'portal', 'comms'];
     if (currentRole === 'labs_director') return ['portal', 'letters', 'comms'];
@@ -1232,6 +1234,16 @@ export default function App() {
             setActiveTab={setActiveTab}
             universityName={receiptUniversityName}
             universityEmail={receiptUniversityEmail}
+          />
+        );
+      case 'labs_portal':
+        return (
+          <LabsPortal 
+            messages={messages}
+            letters={letters}
+            onSendMessage={handleSendMessage}
+            setActiveTab={setActiveTab}
+            rolesList={rolesList}
           />
         );
       case 'comms':
