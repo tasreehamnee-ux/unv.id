@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { InternalMessage, MessageRole, OfficialLetter } from '../types';
 import { SYSTEM_CURRENT_DATE } from '../data/mockData';
+import { storage } from '../firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 interface InternalCommsProps {
   messages: InternalMessage[];
@@ -156,22 +158,23 @@ export default function InternalComms({
   const [mailRelatedLetter, setMailRelatedLetter] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // حالات ومستندات المرفقات الإدارية في الإرسال
+  // حالات ومستندات المرفقات الإدارية في الإرسال (حتى 1 غيغابايت عبر Firebase Storage)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [attachmentName, setAttachmentName] = useState<string>('');
   const [attachmentData, setAttachmentData] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [dragOver, setDragOver] = useState(false);
 
   const readAndSetFile = (file: File) => {
-    if (file.size > 250 * 1024) {
-      alert("حجم الملف كبير جداً! يرجى اختيار ملف بحجم أقل من 250 كيلوبايت لضمان سرعة المراسلة.");
+    // حد أقصى 1 غيغابايت (1024 ميغابايت)
+    const MAX_SIZE = 1024 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert("⚠️ حجم الملف كبير جداً! الحد الأقصى المسموح به لرفع الملفات هو 1 غيغابايت (1GB).");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setAttachmentName(file.name);
-      setAttachmentData(event.target?.result as string || '');
-    };
-    reader.readAsDataURL(file);
+    setSelectedFile(file);
+    setAttachmentName(file.name);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,8 +202,11 @@ export default function InternalComms({
   };
 
   const removeAttachment = () => {
+    setSelectedFile(null);
     setAttachmentName('');
     setAttachmentData('');
+    setUploadProgress(0);
+    setIsUploading(false);
   };
 
   // تأثير لمزامنة مراسلة الأقسام الفورية عند الدخول من لوحة التحكم
@@ -810,7 +816,9 @@ export default function InternalComms({
                     <Paperclip className="w-4 h-4 text-indigo-500 shrink-0" />
                     <div className="text-right">
                       <p className="font-bold text-slate-800 truncate text-xs" title={attachmentName}>{attachmentName}</p>
-                      <p className="text-[9px] text-indigo-600 font-mono">جاهز للإرسال والبث ⚡</p>
+                      <p className="text-[9px] text-indigo-600 font-mono">
+                        {selectedFile ? `الحجم: ${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • جاهز للرفع السحابي ⚡` : 'جاهز للإرسال والبث ⚡'}
+                      </p>
                     </div>
                   </div>
                   <button
@@ -824,9 +832,34 @@ export default function InternalComms({
               )}
             </div>
 
+            {/* شريط نسبة الرفع السحابي */}
+            {isUploading && (
+              <div className="bg-indigo-50 border border-indigo-200 p-3.5 rounded-xl space-y-2 animate-fade-in">
+                <div className="flex justify-between text-xs font-bold text-indigo-900">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+                    جاري رفع الملف إلى مستودع التخزين السحابي...
+                  </span>
+                  <span className="font-mono text-indigo-700">{Math.round(uploadProgress)}%</span>
+                </div>
+                <div className="w-full bg-indigo-200 rounded-full h-2.5 overflow-hidden">
+                  <div 
+                    className="bg-indigo-600 h-2.5 transition-all duration-150 rounded-full" 
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500 text-center">يرجى الانتظار حتى اكتمال الرفع وبث الرسالة تلقائياً</p>
+              </div>
+            )}
+
             <button 
               type="submit" 
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs p-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isUploading}
+              className={`w-full text-white font-bold text-xs p-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+                isUploading 
+                  ? 'bg-slate-400 cursor-not-allowed' 
+                  : 'bg-indigo-600 hover:bg-indigo-700'
+              }`}
             >
               <Send className="w-4 h-4 text-indigo-100" />
               <span>بث وإرسال الخطاب الفوري في النظام</span>
