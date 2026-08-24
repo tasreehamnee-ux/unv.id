@@ -1,0 +1,6 @@
+{
+  "name": "بوابة جامعة الكوت",
+  "description": "نظام أتمتة المعلومات والبيانات - نظام متكامل لتسجيل الطلبة، الدفع الإلكتروني، أرشفة الكتب وصحة الصدور والمراسلات الخارجية وتنبيهات الوثائق.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
