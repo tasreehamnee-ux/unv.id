@@ -221,8 +221,7 @@ export default function App() {
       if (prevLatestMsgIdRef.current && prevLatestMsgIdRef.current !== latestMsg.id) {
         if (latestMsg.sender !== currentRole && currentRole) {
           const isRecipient = latestMsg.recipients.includes(currentRole) || 
-                              latestMsg.recipients.includes('all_departments') ||
-                              currentRole === 'admin';
+                              latestMsg.recipients.includes('all_departments');
           if (isRecipient) {
             const senderObj = rolesList.find(r => r.role === latestMsg.sender);
             const senderName = senderObj ? senderObj.title : latestMsg.sender;
