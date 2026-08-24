@@ -101,7 +101,13 @@ export default function App() {
 
   // مزامنة الكوادر ديناميكيا
   useEffect(() => {
-    localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(rolesList));
+    // Ensure labs_director is present for backwards compatibility with saved localStorage
+    const hasLabs = rolesList.some(r => r.role === 'labs_director');
+    if (!hasLabs) {
+      setRolesList(prev => [...prev, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }]);
+    } else {
+      localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(rolesList));
+    }
   }, [rolesList]);
 
   const [roleCodes, setRoleCodes] = useState<{ [key: string]: string }>(() => {
