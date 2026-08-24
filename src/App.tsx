@@ -101,9 +101,6 @@ export default function App() {
   // مزامنة الكوادر ديناميكيا
   useEffect(() => {
     localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(rolesList));
-    if (rolesList.length > 0) {
-      setDoc(doc(db, "settings", "rolesList"), { list: rolesList }).catch(console.error);
-    }
   }, [rolesList]);
 
   const [roleCodes, setRoleCodes] = useState<{ [key: string]: string }>(() => {
@@ -329,14 +326,6 @@ export default function App() {
     localStorage.setItem('AL_AHLIYA_RECEIPT_UNI_EMAIL', receiptUniversityEmail);
     localStorage.setItem('AL_AHLIYA_RECEIPT_SUB_TEXT', receiptSubText);
     localStorage.setItem('AL_AHLIYA_RECEIPT_NOTE_TEXT', receiptNoteText);
-    
-    // Save to Firebase
-    setDoc(doc(db, "settings", "receipt"), {
-      name: receiptUniversityName,
-      email: receiptUniversityEmail,
-      subText: receiptSubText,
-      note: receiptNoteText
-    }).catch(console.error);
   }, [receiptUniversityName, receiptUniversityEmail, receiptSubText, receiptNoteText]);
 
   // 1.10 حالات وإعدادات خدمة الإشعارات المنبثقة للتنبيه بسلامة وثائق الطلاب المستهدفة
@@ -902,9 +891,6 @@ export default function App() {
   // 2. مزامنة البيانات تلقائياً مع المتصفح عند تعديلها
   useEffect(() => {
     localStorage.setItem('AL_AHLIYA_ROLE_CODES', JSON.stringify(roleCodes));
-    if (Object.keys(roleCodes).length > 0) {
-      setDoc(doc(db, "settings", "roleCodes"), roleCodes).catch(console.error);
-    }
   }, [roleCodes]);
 
   useEffect(() => {
