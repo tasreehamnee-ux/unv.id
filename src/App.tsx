@@ -192,10 +192,7 @@ export default function App() {
     return () => unsub();
   }, []);
 
-  const [messages, setMessages] = useState<InternalMessage[]>(() => {
-    const saved = localStorage.getItem('AL_AHLIYA_COMMS');
-    return saved ? JSON.parse(saved) : mockMessages;
-  });
+  const [messages, setMessages] = useState<InternalMessage[]>([]);
 
   // مزامنة رسائل التواصل الداخلي مع Firebase
   useEffect(() => {
@@ -204,7 +201,11 @@ export default function App() {
         const data = docSnap.data();
         if (data.list) {
           setMessages(data.list);
+        } else {
+          setMessages([]);
         }
+      } else {
+        setMessages([]);
       }
     });
     return () => unsub();

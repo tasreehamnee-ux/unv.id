@@ -352,43 +352,8 @@ export const mockPayments: Payment[] = [
 
 export const mockLetters: OfficialLetter[] = [];
 
-export const mockMessages: InternalMessage[] = [
-  {
-    id: 'msg-1',
-    sender: 'presidency',
-    senderName: 'رئاسة الجامعة - مكتب رئيس الجامعة',
-    recipients: ['registration', 'finance'],
-    subject: 'هام وعاجل: تدقيق قوائم الطلبة الحاصلين على تخفيض بنسبة ٥٠٪ والمستندات',
-    content: 'يرجى من الإخوة في مركز تسجيل الطلبة بالتنسيق العاجل مع شعبة الحسابات لتهيئة القوائم الكاملة المعتمدة بأسماء الطلبة المشمولين بتخفيض عوائل الشهداء والمنح الخاصة لمراجعتها والمطابقة مع الكتب الوزارية المرفقة قبل نهاية الأسبوع الحالي.',
-    timestamp: '2026-05-25T09:30:00Z',
-    priority: 'high',
-    readBy: ['registration'],
-    relatedLetterId: 'LET-2026-0001'
-  },
-  {
-    id: 'msg-2',
-    sender: 'registration',
-    senderName: 'عميد مركز تسجيل الطلبة وشؤون التسجيل',
-    recipients: ['presidency'],
-    subject: 'موقف التسجيل المبدئي وحالات عدم اكتمال الأوراق الرسمية الممهلة',
-    content: 'إشارة إلى توجيهاتكم الكريمة، باشر كوادرنا بتدقيق القيود الممهلة حتى ٥ حزيران، ويتبين وجود ٢٨ طالباً لم يودعوا بعد وثيقة الشهادة الإعدادية السنوية الأصلية مصدقة، جاري إصدار إشعار تذكير لهم عبر البوابة مع ربط القرار المرفق للإيفاء به.',
-    timestamp: '2026-05-26T12:15:00Z',
-    priority: 'normal',
-    readBy: ['presidency'],
-    relatedLetterId: 'LET-2026-0002'
-  },
-  {
-    id: 'msg-3',
-    sender: 'finance',
-    senderName: 'شعبة الحسابات والتدقيق المالي',
-    recipients: ['registration', 'engineering', 'dentistry', 'pharmacy', 'law', 'business'],
-    subject: 'تعميم: التبليغ برفع نسب السداد للأقساط الدراسية قبل بدء الامتحانات النهائية',
-    content: 'الزملاء الأعزاء عمداء ومدراء الكليات المحترمين، يرجى التكرم بالتعميم لطلبة المراحل كافة من خلال مرشديهم الأكاديميين بضرورة مراجعة الحسابات لتسوية أي ذمم مالية أو متأخرات وتثبيت الوصولات لتلافي حجب الأرقام الامتحانية الإلكترونية.',
-    timestamp: '2026-05-27T08:00:00Z',
-    priority: 'high',
-    readBy: ['engineering', 'law']
-  }
-];
+export const mockMessages: InternalMessage[] = [];
+
 
 // دالة لمعالجة أو تصنيف صلاحية الكتاب الرسمي نسبة للتاريخ الحالي
 export function getLetterExpiryStatus(expiryDate?: string): 'active' | 'expired' | 'expiring_soon' {
