@@ -22,7 +22,8 @@ import {
   Terminal,
   Activity,
   Globe,
-  FolderLock
+  FolderLock,
+  Trash2
 } from 'lucide-react';
 import { InternalMessage, MessageRole, OfficialLetter } from '../types';
 import { SYSTEM_CURRENT_DATE } from '../data/mockData';
@@ -33,6 +34,8 @@ interface InternalCommsProps {
   messages: InternalMessage[];
   letters: OfficialLetter[];
   onSendMessage: (newMessage: InternalMessage) => void;
+  onDeleteMessage?: (messageId: string) => void;
+  onClearAllMessages?: () => void;
   onAddLetter?: (newLetter: OfficialLetter) => void;
   setActiveTab: (tab: string) => void;
   currentRole: string;
@@ -97,6 +100,8 @@ export default function InternalComms({
   messages, 
   letters, 
   onSendMessage,
+  onDeleteMessage,
+  onClearAllMessages,
   onAddLetter,
   setActiveTab,
   currentRole,
@@ -637,24 +642,44 @@ export default function InternalComms({
 
         {/* القسم الأيمن: صندوق البريد والمراسلات المستلمة */}
         <div className="lg:col-span-12 xl:col-span-7 bg-white p-5 rounded-2xl border border-slate-150 shadow-xs space-y-4">
-          <div className="flex justify-between items-center border-b border-slate-50 pb-2">
+          <div className="flex justify-between items-center border-b border-slate-50 pb-2 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Inbox className="w-5 h-5 text-indigo-600 animate-pulse" />
               <h3 className="font-bold text-slate-800 text-sm md:text-base">الوارد والصادر ذو الصلاحيات المتبادلة</h3>
             </div>
             
-            <button 
-              onClick={() => {
-                setShowCompose(!showCompose);
-              }}
-              className="bg-univ-blue hover:bg-slate-850 text-white font-bold text-xs p-2.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>{showCompose ? 'إلغاء المراسلة' : 'تحرير مراسلة داخلية'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {onClearAllMessages && userInbox.length > 0 && (
+                <button
+                  type="button"
+                  onClick={onClearAllMessages}
+                  className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs p-2.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title="مسح وتفريغ كافة الرسائل"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>تفريغ الرسائل ({userInbox.length})</span>
+                </button>
+              )}
+              <button 
+                onClick={() => {
+                  setShowCompose(!showCompose);
+                }}
+                className="bg-univ-blue hover:bg-slate-850 text-white font-bold text-xs p-2.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>{showCompose ? 'إلغاء المراسلة' : 'تحرير مراسلة داخلية'}</span>
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+            {userInbox.length === 0 && (
+              <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 space-y-2">
+                <Inbox className="w-8 h-8 mx-auto text-slate-400" />
+                <p className="font-bold text-xs">صندوق المراسلات فارغ حالياً</p>
+                <p className="text-[11px] text-slate-400">لا توجد رسائل واردة أو صادرة مسجلة في النظام.</p>
+              </div>
+            )}
             {userInbox.map((msg) => {
               const isMine = areRolesMatching(msg.sender, currentUserRole);
               const relatedLet = letters.find(l => l.id === msg.relatedLetterId);
@@ -692,12 +717,26 @@ export default function InternalComms({
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${
                         msg.priority === 'high' ? 'bg-red-100 text-red-800' : 'bg-slate-150 text-slate-800'
                       }`}>
                         {msg.priority === 'high' ? 'عالي ذات أولوية' : 'عادي'}
                       </span>
+                      {onDeleteMessage && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm('هل أنت متأكد من حذف هذه الرسالة؟')) {
+                              onDeleteMessage(msg.id);
+                            }
+                          }}
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-md transition-colors cursor-pointer"
+                          title="حذف هذه الرسالة نهائياً"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 

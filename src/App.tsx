@@ -1378,6 +1378,50 @@ export default function App() {
     });
   };
 
+  // حذف رسالة فردية
+  const handleDeleteMessage = (id: string) => {
+    setMessages(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      try {
+        localStorage.setItem('AL_AHLIYA_COMMS', JSON.stringify(updated));
+        setDoc(doc(db, "appData", "messages"), { list: updated }).catch(console.error);
+      } catch (e) {}
+      return updated;
+    });
+    setInAppToasts(prev => [
+      {
+        id: `toast-${Date.now()}`,
+        title: 'حذف رسالة',
+        message: '✓ تم حذف الرسالة بنجاح من الصندوق والسحابة.',
+        type: 'info',
+        timestamp: new Date().toLocaleTimeString('ar-IQ')
+      },
+      ...prev
+    ]);
+  };
+
+  // تفريغ ومسح كافة الرسائل
+  const handleClearAllMessages = () => {
+    if (window.confirm('⚠️ هل أنت متأكد من رغبتك في تفريغ وحذف كافة الرسائل والمراسلات الداخلية نهائياً؟')) {
+      setMessages([]);
+      try {
+        localStorage.setItem('AL_AHLIYA_COMMS', JSON.stringify([]));
+        setDoc(doc(db, "appData", "messages"), { list: [] }).catch(console.error);
+        addAuditLog('comms_clear', 'تصفير المراسلات', 'تم مسح وتفريغ كافة الرسائل والمراسلات الداخلية بالنظام');
+      } catch (e) {}
+      setInAppToasts(prev => [
+        {
+          id: `toast-${Date.now()}`,
+          title: 'تفريغ المراسلات',
+          message: '✓ تم مسح وتفريغ كافة الرسائل الداخلية بنجاح.',
+          type: 'success',
+          timestamp: new Date().toLocaleTimeString('ar-IQ')
+        },
+        ...prev
+      ]);
+    }
+  };
+
   // إعادة تهيئة قاعدة البيانات بالقيم الأساسية لسهولة التحرير والتثبيت
   const handleResetData = () => {
     if (currentRole !== 'admin') {
@@ -1530,6 +1574,8 @@ export default function App() {
             messages={messages}
             letters={letters}
             onSendMessage={handleSendMessage}
+            onDeleteMessage={handleDeleteMessage}
+            onClearAllMessages={handleClearAllMessages}
             onAddLetter={handleAddLetter}
             setActiveTab={setActiveTab}
             currentRole={currentRole}
