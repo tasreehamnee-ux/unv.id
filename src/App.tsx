@@ -1421,7 +1421,7 @@ export default function App() {
                       : 'border-transparent text-slate-550 hover:text-slate-800'
                   }`}
                 >
-                  👥 حسابات الموظفين والملفات الدوليـة ({rolesList.length})
+                  👥 حسابات الموظفين والكوادر الإدارية
                 </button>
                 <button
                   onClick={() => setAdminSubTab('deans')}
@@ -1431,7 +1431,7 @@ export default function App() {
                       : 'border-transparent text-slate-550 hover:text-slate-800'
                   }`}
                 >
-                  🎓 عمادات وحسابات الكليات والأقسام ({departments.length})
+                  🎓 عمادات وحسابات الكليات والأقسام
                 </button>
                 <button
                   onClick={() => setAdminSubTab('email_alerts')}
@@ -1441,7 +1441,7 @@ export default function App() {
                       : 'border-transparent text-slate-550 hover:text-slate-800'
                   }`}
                 >
-                  📨 تنبيهات بريد وثائق الطلاب ({emailLogs.length})
+                  📨 تنبيهات بريد وثائق الطلاب
                 </button>
                 <button
                   onClick={() => setAdminSubTab('receipt_settings')}
@@ -1774,7 +1774,7 @@ export default function App() {
 
                       {/* جدول الأقسام الحالية والحذف الفوري */}
                       <div className="lg:col-span-7 bg-white p-4 rounded-xl border border-slate-200 space-y-3">
-                        <span className="font-black text-xs text-slate-700 block border-b pb-2">📋 كشف الأقسام الأكاديمية والكليات الفعالة حالياً ({departments.length} قسم)</span>
+                        <span className="font-black text-xs text-slate-700 block border-b pb-2">📋 كشف الأقسام الأكاديمية والكليات الفعالة حالياً</span>
                         <div className="overflow-x-auto max-h-[300px] overflow-y-auto rounded-lg border border-slate-150 text-right">
                           <table className="w-full text-right text-xs">
                             <thead>
