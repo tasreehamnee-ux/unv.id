@@ -2010,6 +2010,28 @@ export default function App() {
     }
   }, [activeTab, messages, currentRole, unreadMessagesCount]);
 
+  // التحقق الشامل من صلاحية رئاسة الجامعة (سواء كان الدور المباشر presidency أو عميد مكتب رئاسة الجامعة أو أي مسمى يتبع الرئاسة)
+  const isPresidencyRole = (roleKey: string | null | undefined): boolean => {
+    if (!roleKey) return false;
+    const lower = roleKey.toLowerCase();
+    if (lower === 'presidency' || lower.includes('presidency') || lower.includes('reasa') || lower.includes('raees')) {
+      return true;
+    }
+    const roleObj = rolesList.find(r => r.role === roleKey);
+    if (roleObj) {
+      const text = `${roleObj.title || ''} ${roleObj.categoryName || ''} ${roleObj.departmentId || ''}`.toLowerCase();
+      if (text.includes('رئاسة') || text.includes('رئيس الجامعة') || text.includes('presidency') || text.includes('الرئاسة')) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const isSuperAdminOrPresidency = (roleKey: string | null | undefined): boolean => {
+    if (!roleKey) return false;
+    return roleKey === 'admin' || isPresidencyRole(roleKey);
+  };
+
   const menuItems = [
     
     { id: 'students', label: 'شؤون وتسجيل الطلبة', icon: Users, badge: filteredStudentsForRole.filter(s => s.status === 'pending_documents').length },
@@ -2018,24 +2040,25 @@ export default function App() {
     { id: 'letters', label: 'أرشيف الكتب والقرارات', icon: FolderLock, badge: letters.filter(l => l.status === 'expired' || l.status === 'expiring_soon').length },
     { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: unreadMessagesCount > 0 ? unreadMessagesCount : undefined },
     { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
-    ...(currentRole === 'admin' ? [
-      { id: 'admin_security', label: 'التحكم الإداري والأمني 🛡️', icon: ShieldAlert },
+    ...(isSuperAdminOrPresidency(currentRole) ? [
+      ...(currentRole === 'admin' ? [{ id: 'admin_security', label: 'التحكم الإداري والأمني 🛡️', icon: ShieldAlert }] : []),
       { id: 'audit_log', label: 'سجل العمليات والمراقبة 🔒', icon: Database }
     ] : [])
   ];
 
   const allowedTabs = (() => {
     if (!currentRole) return [];
-    // 🛡️ مدير النظام الأول ورئاسة الجامعة فقط هم من يمتلكون صلاحية الوصول لأرشيف الكتب والقرارات
+    // 👑 مدير النظام الأول
     if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
-    if (currentRole === 'presidency') return ['students', 'portal', 'finance', 'letters', 'comms', 'audit_log'];
+    // 🏛️ رئاسة الجامعة (تشمل أي مسمى أو دور يخص رئاسة الجامعة وعميد مكتب رئاسة الجامعة)
+    if (isPresidencyRole(currentRole)) return ['students', 'portal', 'finance', 'letters', 'comms', 'audit_log'];
     // 🎓 شؤون وتسجيل الطلبة (محجوب عنها أرشيف الكتب تماماً بناءً على التوجيه الإداري)
     if (currentRole === 'registration_director') return ['students', 'portal', 'comms'];
     // 💰 المالية والحسابات
     if (currentRole === 'finance_director') return ['finance', 'portal', 'comms'];
     // 🧪 المختبرات المركزية
     if (currentRole === 'labs_director') return ['portal', 'comms'];
-    // 🏛️ عمداء الكليات (رئاسة القسم العلمي)
+    // 🏛️ عمداء الكليات الأخرى (رئاسة القسم العلمي)
     if (currentRole.startsWith('head_')) return ['students', 'portal', 'comms'];
     return ['students', 'portal', 'comms'];
   })();

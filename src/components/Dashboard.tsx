@@ -41,6 +41,10 @@ export default function Dashboard({
   setSelectedStudentId,
   currentRole
 }: DashboardProps) {
+  // التحقق من صلاحيات المشاهدة الخاصة بالأدمن ورئاسة الجامعة
+  const isPresidency = currentRole === 'presidency' || currentRole?.toLowerCase().includes('presidency') || currentRole?.toLowerCase().includes('reasa') || currentRole?.includes('رئاسة');
+  const canViewLetters = currentRole === 'admin' || isPresidency;
+
   // 1. حساب الإحصائيات العامة
   const totalStudents = students.length;
   
@@ -349,7 +353,7 @@ export default function Dashboard({
         </motion.div>
 
         {/* أرشفة الكتب الرسمية (مقتصرة على مدير النظام ورئاسة الجامعة) */}
-        {(currentRole === 'admin' || currentRole === 'presidency') && (
+        {canViewLetters && (
           <motion.div 
             variants={itemVariants}
             onClick={() => setActiveTab('letters')}
