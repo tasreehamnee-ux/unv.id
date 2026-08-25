@@ -1426,8 +1426,7 @@ export default function App() {
     { id: 'finance', label: 'قسم الحسابات والقبض المالي', icon: CreditCard },
     { id: 'letters', label: 'أرشيف الكتب والقرارات', icon: FolderLock, badge: letters.filter(l => l.status === 'expired' || l.status === 'expiring_soon').length },
     { id: 'comms', label: 'التواصل والخطوط الداخلية', icon: MessageSquare, badge: unreadMessagesCount > 0 ? unreadMessagesCount : undefined },
-    { id: 'labs_portal', label: 'إدارة المختبرات', icon: FolderLock, badge: (messages.filter(m => m.sender !== 'labs_director' && (m.recipients.includes('labs_director') || m.recipients.includes('all_departments')) && !(m.readBy || []).includes('labs_director')).length) || undefined },
-        { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
+    { id: 'python', label: 'كود بايثون المتكامل للعميل', icon: Terminal },
     ...(currentRole === 'admin' ? [
       { id: 'admin_security', label: 'التحكم الإداري والأمني 🛡️', icon: ShieldAlert },
       { id: 'audit_log', label: 'سجل العمليات والمراقبة 🔒', icon: Database }
@@ -1436,7 +1435,7 @@ export default function App() {
 
   const allowedTabs = (() => {
     if (!currentRole) return [];
-    if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'labs_portal', 'python', 'admin_security', 'audit_log'];
+    if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
     if (currentRole === 'registration_director') return ['students', 'portal', 'letters', 'comms'];
     if (currentRole === 'finance_director') return ['finance', 'portal', 'comms'];
     if (currentRole === 'labs_director') return ['portal', 'letters', 'comms'];
