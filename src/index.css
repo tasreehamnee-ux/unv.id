@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@450;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Almarai:wght@400;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Arial", "Cairo", system-ui, -apple-system, sans-serif;
+  --font-sans: "Cairo", "Almarai", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   
   --color-univ-blue: #0f172a;
@@ -11,26 +11,27 @@
 }
 
 body {
-  font-weight: 600;
-  font-family: "Arial", "Cairo", system-ui, -apple-system, sans-serif;
-  font-weight: 700; /* تجعل الخط عريض بشكل افتراضي بناءً على طلب المستخدم */
-  font-size: 15px;  /* خط أكبر وأكثر وضوحاً */
+  font-family: "Cairo", "Almarai", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 700; /* خط عريض ومقروء بوضوح فائق لجميع المستخدمين */
+  font-size: 15px;
+  line-height: 1.6;
   background-color: #f8fafc;
   color: #0f172a;
-  direction: rtl; /* Set default text direction to Right-to-Left (Arabic) */
+  direction: rtl;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* تحسينات إضافية لجعل محاذاة العناوين والأزرار والمدخلات عريضة وواضحة جداً */
-input, select, textarea, button {
-  font-family: "Arial", "Cairo", system-ui, sans-serif !important;
-  font-weight: 700 !important;
+/* تحسينات خطوط العناوين والأزرار والمدخلات والجداول */
+input, select, textarea, button, table, span, p, label {
+  font-family: "Cairo", "Almarai", system-ui, sans-serif !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Arial", "Cairo", system-ui, sans-serif !important;
-  font-weight: 900 !important; /* عريض جداً ومميز */
+  font-family: "Cairo", "Almarai", system-ui, sans-serif !important;
+  font-weight: 900 !important;
+  color: #0f172a;
 }
 
 /* Custom scrollbar */
@@ -50,14 +51,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .pdf-style-container {
-  font-family: "Arial", sans-serif;
+  font-family: "Cairo", "Almarai", sans-serif;
   font-weight: bold;
 }
 
 @media print {
   /* Hide every element on the page */
   body {
-  font-weight: 600;
+    font-family: "Cairo", "Almarai", sans-serif;
+    font-weight: 700;
     background-color: white !important;
     color: black !important;
   }
@@ -86,5 +88,3 @@ h1, h2, h3, h4, h5, h6 {
     color: black !important;
   }
 }
-
-

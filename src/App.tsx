@@ -707,38 +707,51 @@ export default function App() {
   // دالة برمجية لإضافة موظف/عضو كادر جديد بنظام الصلاحيات
   const handleAddStaff = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newStaffTitle || !newStaffCode || !newStaffRole) {
+    if (!newStaffTitle || !newStaffCode) {
       alert('يرجى ملء جميع الحقول الضرورية لإضافة الموظف!');
       return;
     }
 
-    const cleanRole = newStaffRole.trim().toLowerCase().replace(/\s+/g, '_');
-    
-    // منع تكرار المعرف
-    if (rolesList.some(r => r.role === cleanRole)) {
-      alert('اسم المعرف الوظيفي مستخدم بالفعل! يرجى اختيار اسم غير مكرر.');
-      return;
-    }
+    const cleanTitle = newStaffTitle.trim();
+    const cleanRole = `staff_${Date.now()}_${Math.floor(100 + Math.random() * 900)}`;
 
     const newStaff = {
       role: cleanRole,
-      title: newStaffTitle,
+      title: cleanTitle,
       categoryName: newStaffCategory,
       defaultCode: newStaffCode,
       departmentId: newStaffDept || undefined,
       isCustom: true
     };
 
-    setRolesList(prev => [...prev, newStaff]);
-    setRoleCodes(prev => ({ ...prev, [cleanRole]: newStaffCode }));
+    const updatedRoles = [...rolesList, newStaff];
+    setRolesList(updatedRoles);
+    localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(updatedRoles));
+    setDoc(doc(db, "settings", "rolesList"), { list: updatedRoles }).catch(console.error);
+
+    setRoleCodes(prev => {
+      const updatedCodes = { ...prev, [cleanRole]: newStaffCode };
+      localStorage.setItem('AL_AHLIYA_ROLE_CODES', JSON.stringify(updatedCodes));
+      setDoc(doc(db, "settings", "roleCodes"), updatedCodes).catch(console.error);
+      return updatedCodes;
+    });
 
     // إعادة تصفير النموذج
-    setNewStaffRole('');
     setNewStaffTitle('');
     setNewStaffCode('');
     setNewStaffDept('');
-    addAuditLog('staff_add', 'إضافة موظف وتعيين صلاحية', `تم تسجيل وإضافة الموظف الجديد [${newStaffTitle}] كـ [${newStaffCategory}] وتوليد كود المرور الخاص به`);
-    alert(`🎉 تم إضافة الموظف الجديد "${newStaffTitle}" بنجاح وتعيين الرمز السري له.`);
+    addAuditLog('staff_add', 'إضافة موظف وتعيين صلاحية', `تم تسجيل وإضافة الموظف الجديد [${cleanTitle}] كـ [${newStaffCategory}] وتوليد كود المرور الخاص به`);
+    
+    setInAppToasts(prev => [
+      {
+        id: `toast-${Date.now()}`,
+        title: 'إضافة موظف جديد',
+        message: `✓ تم بنجاح تسجيل الموظف "${cleanTitle}" وتعيين الرمز السري له.`,
+        type: 'success',
+        timestamp: new Date().toLocaleTimeString('ar-IQ')
+      },
+      ...prev
+    ]);
   };
 
   // دالة برمجية لحذف موظف/عضو كادر وسحب الصلاحية منه
@@ -1537,35 +1550,24 @@ export default function App() {
                     </h4>
                     <p className="text-xs text-slate-550 leading-relaxed">تتيح لك هذه الأداة تسجيل موظف جديد، وتحديد صلاحياته (هل يتبع لعمادة كاملة أو عميد قسم الكلية الأكاديمي)، لمنحهم مساحة عمل مخصصة للدخول بالرمز الفردي:</p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-700 font-bold block">الاسم الرباعي والصفة الوظيفية:</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-slate-800 font-extrabold block">الاسم والصفة الوظيفية:</label>
                         <input
                           type="text"
                           required
                           placeholder="مثال: د. صفاء أحمد الهاشمي"
                           value={newStaffTitle}
                           onChange={(e) => setNewStaffTitle(e.target.value)}
-                          className="w-full bg-white border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-slate-300 text-xs font-bold p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
                         />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-700 font-bold block">المعرف الوظيفي بالإنجليزية (للربط التقني):</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="مثال: head_dentistry_assistant"
-                          value={newStaffRole}
-                          onChange={(e) => setNewStaffRole(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                          className="w-full bg-white border border-slate-200 text-xs font-mono p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-700 font-bold block">الفئة وسلطة الصلاحية:</label>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-slate-800 font-extrabold block">الفئة وسلطة الصلاحية:</label>
                         <select
                           value={newStaffCategory}
                           onChange={(e) => setNewStaffCategory(e.target.value)}
-                          className="w-full bg-white border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 cursor-pointer outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-slate-300 text-xs font-bold p-2.5 rounded-lg text-slate-800 cursor-pointer outline-none focus:border-amber-500"
                         >
                           <option value="العمادة والتسجيل العام">العمادة والتسجيل العام</option>
                           <option value="القسم الحسابي والمالي العام">القسم الحسابي والمالي العام</option>
@@ -1573,12 +1575,12 @@ export default function App() {
                           <option value="معاون إداري">معاون إداري</option>
                         </select>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-700 font-bold block">الكلية الأكاديمية المرتبطة (محدودية البيانات):</label>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-slate-800 font-extrabold block">الكلية الأكاديمية المرتبطة:</label>
                         <select
                           value={newStaffDept}
                           onChange={(e) => setNewStaffDept(e.target.value)}
-                          className="w-full bg-white border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 cursor-pointer outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-slate-300 text-xs font-bold p-2.5 rounded-lg text-slate-800 cursor-pointer outline-none focus:border-amber-500"
                         >
                           <option value="">لا توجد كلية محددة (دخول إداري عام)</option>
                           {departments.map(d => (
@@ -1586,8 +1588,8 @@ export default function App() {
                           ))}
                         </select>
                       </div>
-                      <div className="space-y-1 md:col-span-2">
-                        <label className="text-xs text-slate-700 font-bold block">الرمز السري الخاص بالدخول (رقمي):</label>
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-xs text-slate-800 font-extrabold block">الرمز السري الخاص بالدخول (رقمي):</label>
                         <input
                           type="text"
                           maxLength={6}
@@ -1595,16 +1597,16 @@ export default function App() {
                           placeholder="مثال: 5566"
                           value={newStaffCode}
                           onChange={(e) => setNewStaffCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full bg-white border border-slate-200 text-xs font-mono text-center p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-slate-300 text-xs font-mono font-black text-center p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
                         />
                       </div>
-                      <div className="md:col-span-2 flex items-end">
+                      <div className="md:col-span-1 flex items-end">
                         <button
                           type="submit"
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs p-3 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs p-3 rounded-xl transition-all shadow-md shadow-emerald-600/10 flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Plus className="w-4 h-4" />
-                          <span>تسجيل الكادر وبث صلاحياته فوراً</span>
+                          <span>تسجيل الكادر وتفعيل الرمز فوراً</span>
                         </button>
                       </div>
                     </div>
@@ -1612,13 +1614,12 @@ export default function App() {
 
                   {/* ب) دليل الكوادر النشطين مع إمكانية حذف الموظف */}
                   <div className="space-y-3">
-                    <h4 className="font-extrabold text-xs text-slate-800">📋 دليل كوادر الجامعة النشطين حالياً وإمكانية تصفية وإدارة وسحب صلاحياتهم (الحذف والتعليق):</h4>
+                    <h4 className="font-extrabold text-xs text-slate-800">📋 دليل كوادر الجامعة النشطين حالياً وإمكانية سحب صلاحياتهم:</h4>
                     <div className="overflow-x-auto rounded-xl border border-slate-150 shadow-xs text-right">
                       <table className="w-full text-right text-xs">
                         <thead>
                           <tr className="bg-slate-50 text-slate-800 border-b border-slate-150 font-bold">
                             <th className="p-3.5">الاسم والصفة الوظيفية للموظف</th>
-                            <th className="p-3.5 font-mono">المعرف الوظيفي الدولي (Role)</th>
                             <th className="p-3.5">تصنيف الصلاحيات العامة</th>
                             <th className="p-3.5">رمز المرور الحالي للتسجيل</th>
                             <th className="p-3.5">الدائرة/الكلية الأكاديمية للجامعة</th>
@@ -1631,7 +1632,6 @@ export default function App() {
                             return (
                               <tr key={cfg.role} className="hover:bg-slate-50/50 transition-colors">
                                 <td className="p-3.5 font-bold text-slate-800">{cfg.title}</td>
-                                <td className="p-3.5 font-mono text-slate-700">{cfg.role}</td>
                                 <td className="p-3.5">
                                   <span className="bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md font-bold text-[10px]">
                                     {cfg.categoryName}
