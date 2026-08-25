@@ -23,12 +23,15 @@ import {
   Activity,
   Globe,
   FolderLock,
-  Trash2
+  Trash2,
+  ExternalLink,
+  Printer
 } from 'lucide-react';
 import { InternalMessage, MessageRole, OfficialLetter } from '../types';
 import { SYSTEM_CURRENT_DATE } from '../data/mockData';
 import { storage } from '../firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutHeaderConfig } from './KutLogo';
 
 interface InternalCommsProps {
   messages: InternalMessage[];
@@ -42,6 +45,7 @@ interface InternalCommsProps {
   rolesList: any[];
   universityName?: string;
   universityEmail?: string;
+  headerConfig?: KutHeaderConfig;
 }
 
 // دالة رفع سحابية مجانية تدعم ملفات حتى 1 غيغابايت (1000 ميغابايت) مع شريط النسبة

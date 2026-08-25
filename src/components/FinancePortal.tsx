@@ -17,7 +17,8 @@ import {
   Calendar,
   AlertCircle,
   Printer,
-  Building
+  Building,
+  Trash2
 } from 'lucide-react';
 import { Student, Payment, Department, PaymentCategory, PaymentMethod } from '../types';
 import { calculateStudentFees, SYSTEM_CURRENT_DATE } from '../data/mockData';
@@ -28,6 +29,8 @@ interface FinancePortalProps {
   payments: Payment[];
   departments: Department[];
   onAddPayment: (newPayment: Payment) => void;
+  onDeletePayment?: (paymentId: string) => void;
+  onClearAllPayments?: () => void;
   selectedStudentId: string | null;
   onSelectStudent: (id: string | null) => void;
   setActiveTab: (tab: string) => void;
@@ -35,6 +38,7 @@ interface FinancePortalProps {
   subText?: string;
   noteText?: string;
   headerConfig?: KutHeaderConfig;
+  currentRole?: string;
 }
 
 export default function FinancePortal({ 
@@ -42,13 +46,16 @@ export default function FinancePortal({
   payments, 
   departments, 
   onAddPayment, 
+  onDeletePayment,
+  onClearAllPayments,
   selectedStudentId, 
   onSelectStudent, 
   setActiveTab, 
   universityName = 'الجامعة الأهلية العراقية', 
   subText = 'شعبة الإيرادات والحسابات العامة', 
   noteText = 'ملاحظة: يرجى الاحتفاظ بهذا الوصل كونه مستنداً رسمياً للمراجعة والبريد الموحد للطلاب المبتدئين في كليتنا.',
-  headerConfig
+  headerConfig,
+  currentRole
 }: FinancePortalProps) {
   
   // حالات الفلترة والتحصيل المالي
@@ -327,9 +334,22 @@ export default function FinancePortal({
               <p className="text-slate-700 text-xs mt-1">تتبع الحركات المالية لجميع الكليات والأقسام المسجلة</p>
             </div>
             
-            <span className="text-xs bg-indigo-50 text-indigo-800 px-2.5 py-1 rounded-full font-bold">
-              تظهر {filteredPayments.length} حركة تسجيل مالي
-            </span>
+            <div className="flex items-center gap-2">
+              {currentRole === 'admin' && onClearAllPayments && filteredPayments.length > 0 && (
+                <button
+                  type="button"
+                  onClick={onClearAllPayments}
+                  className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs p-2 px-3 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title="مسح وتفريغ كافة السجلات والوصولات المالية"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>تفريغ السجلات المالية ({filteredPayments.length})</span>
+                </button>
+              )}
+              <span className="text-xs bg-indigo-50 text-indigo-800 px-2.5 py-1 rounded-full font-bold">
+                تظهر {filteredPayments.length} حركة تسجيل مالي
+              </span>
+            </div>
           </div>
 
           {/* فلاتر الحركات المباشرة */}
@@ -418,14 +438,28 @@ export default function FinancePortal({
                       {pay.amount.toLocaleString()} د.ع
                     </td>
                     <td className="p-3 text-center">
-                      <button 
-                        onClick={() => setSelectedPrintReceipt(pay)}
-                        className="p-1 px-2.5 text-indigo-950 bg-indigo-50 hover:bg-indigo-900 hover:text-white border border-indigo-200 hover:border-indigo-900 rounded-lg font-black text-[10px] transition-all flex items-center justify-center gap-1 cursor-pointer mx-auto"
-                        title="تحميل وطبع الوصل المالي للقبول"
-                      >
-                        <Printer className="w-3.5 h-3.5 shrink-0" />
-                        <span>طباعة الوصل</span>
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button 
+                          type="button"
+                          onClick={() => setSelectedPrintReceipt(pay)}
+                          className="p-1 px-2.5 text-indigo-950 bg-indigo-50 hover:bg-indigo-900 hover:text-white border border-indigo-200 hover:border-indigo-900 rounded-lg font-black text-[10px] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                          title="تحميل وطبع الوصل المالي للقبول"
+                        >
+                          <Printer className="w-3.5 h-3.5 shrink-0" />
+                          <span>طباعة</span>
+                        </button>
+                        {currentRole === 'admin' && onDeletePayment && (
+                          <button
+                            type="button"
+                            onClick={() => onDeletePayment(pay.id)}
+                            className="p-1 px-2 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 hover:border-red-600 rounded-lg font-bold text-[10px] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                            title="حذف هذا السند والوصل نهائياً (خاص بالأدمن)"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                            <span>حذف</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

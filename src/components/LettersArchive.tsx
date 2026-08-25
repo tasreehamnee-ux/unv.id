@@ -180,6 +180,126 @@ export default function LettersArchive({
   const [formSummary, setFormSummary] = useState('');
   const [formFileName, setFormFileName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [selectedLetterForView, setSelectedLetterForView] = useState<OfficialLetter | null>(null);
+
+  // دالة طباعة الكتاب الرسمي مع الترويسة المعتمدة
+  const handlePrintOfficialLetter = (letter: OfficialLetter) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('يرجى السماح بالنوافذ المنبثقة لإتمام عملية الطباعة الرسمية.');
+      return;
+    }
+
+    const headerHtml = getOfficialPrintHeaderHtml(headerConfig, universityName);
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="utf-8">
+        <title>كتاب رسمي - ${letter.letterNumber}</title>
+        <style>
+          @page { size: A4; margin: 15mm; }
+          body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+            background: #fff;
+          }
+          .letter-box {
+            border: 2px solid #0f172a;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+          }
+          .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 70px;
+            color: rgba(15, 23, 42, 0.04);
+            font-weight: 900;
+            pointer-events: none;
+            white-space: nowrap;
+          }
+          .meta-grid {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            border-bottom: 2px dashed #cbd5e1;
+            padding-bottom: 12px;
+            font-size: 13px;
+          }
+          .title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 800;
+            margin: 24px 0 16px 0;
+            color: #0f172a;
+            text-decoration: underline;
+          }
+          .content {
+            font-size: 14px;
+            line-height: 2;
+            text-align: justify;
+            margin: 20px 0;
+            min-height: 180px;
+          }
+          .footer-signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+          }
+          .signature-box {
+            text-align: center;
+            width: 200px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="letter-box">
+          <div class="watermark">${universityName}</div>
+          ${headerHtml}
+          <div class="meta-grid">
+            <div><strong>الرقم الإداري:</strong> ${letter.letterNumber}</div>
+            <div><strong>تاريخ الصدور:</strong> ${letter.dateIssued}</div>
+            <div><strong>كود الأرشفة:</strong> ${letter.id}</div>
+          </div>
+          <div style="margin: 10px 0; font-size: 13px;">
+            <div><strong>إلى /</strong> ${letter.destination}</div>
+            <div><strong>من /</strong> ${letter.source}</div>
+          </div>
+          <div class="title">م / ${letter.title}</div>
+          <div class="content">${letter.summary.replace(/\n/g, '<br/>')}</div>
+          ${letter.attachedFileName ? `<div style="font-size: 12px; color: #475569; margin-top: 15px;"><strong>المرفقات:</strong> ${letter.attachedFileName}</div>` : ''}
+          <div class="footer-signatures">
+            <div class="signature-box">
+              <p style="font-size: 12px; font-weight: bold; margin-bottom: 30px;">المسؤول المؤرشف</p>
+              <p style="font-size: 12px;">${letter.archivedBy || 'قسم الأرشيف والتوثيق'}</p>
+            </div>
+            <div class="signature-box">
+              <p style="font-size: 12px; font-weight: bold; margin-bottom: 30px;">رئاسة الجامعة / الجهة المصدرة</p>
+              <p style="font-size: 12px;">الختم والتوقيع الرسمي</p>
+            </div>
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 300);
+          }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
 
   // معالجة حفظ الكتاب الرسمي
   const handleSaveLetter = (e: React.FormEvent) => {
@@ -616,42 +736,79 @@ export default function LettersArchive({
                   <div className="font-mono text-slate-700 text-[10px] md:text-xs">
                     كود الحفظ: {letItem.id} • إداري: <span className="font-bold text-slate-750">{letItem.letterNumber}</span>
                   </div>
-                  <h4 className="font-extrabold text-slate-800 text-sm leading-snug line-clamp-1 hover:text-univ-blue transition-colors cursor-pointer" title={letItem.title}>
-                    {letItem.title}
+                  <h4 
+                    onClick={() => setSelectedLetterForView(letItem)}
+                    className="font-extrabold text-slate-800 text-sm leading-snug line-clamp-1 hover:text-indigo-600 transition-colors cursor-pointer" 
+                    title={letItem.title}
+                  >
+                    {letItem.title} 🔍
                   </h4>
                 </div>
 
                 {/* نص الخلاصة المودع */}
-                <p className="text-slate-700 text-xs mt-2.5 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100 line-clamp-3">
+                <p 
+                  onClick={() => setSelectedLetterForView(letItem)}
+                  className="text-slate-700 text-xs mt-2.5 leading-relaxed bg-slate-50 hover:bg-slate-100/70 transition-colors p-3 rounded-lg border border-slate-100 line-clamp-3 cursor-pointer"
+                  title="انقر لفتح وقراءة الكتاب بالكامل"
+                >
                   {letItem.summary}
                 </p>
 
               </div>
 
-              {/* الفوتر وتوضيح الصادر والوارد مع تدوين تاريخ الانتهاء */}
-              <div className="border-t border-slate-100 pt-3 flex flex-col gap-2 Text-xs">
+              {/* الفوتر وتوضيح الصادر والوارد مع تدوين تاريخ الانتهاء وأزرار الإجراءات */}
+              <div className="border-t border-slate-100 pt-3 flex flex-col gap-2.5 text-xs">
                 
-                <div className="flex justify-between items-center text-[11px] text-slate-700">
+                <div className="flex justify-between items-center text-[11px] text-slate-700 flex-wrap gap-1">
                   <span>صادر عن: <span className="font-bold text-slate-700">{letItem.source}</span></span>
                   <span>موجه إلى: <span className="font-bold text-slate-705 truncate max-w-[150px] inline-block align-bottom">{letItem.destination}</span></span>
                 </div>
 
                 {/* تاريخ انتهاء الصلاحية والملف المرفق */}
-                <div className="flex justify-between items-center bg-slate-50/50 p-1.5 rounded-lg text-[10px] font-mono text-slate-700">
+                <div className="flex justify-between items-center bg-slate-50/70 p-2 rounded-lg text-[10px] font-mono text-slate-700 flex-wrap gap-2">
                   <div className="flex items-center gap-1 font-bold text-red-800">
                     <Calendar className="w-3.5 h-3.5 text-red-650" />
-                    <span>تاريخ انتهاء الصلاحية: {letItem.expiryDate || 'مفتوح للعمل'}</span>
+                    <span>انتهاء الصلاحية: {letItem.expiryDate || 'مفتوح للعمل'}</span>
                   </div>
                   {letItem.attachedFileName && (
                     <a 
-                      href="#" 
-                      onClick={(e) => { e.preventDefault(); alert(`محاكاة تحميل الملف الرقمي المؤرشف: \n${letItem.attachedFileName} \nالملف محفوظ بنجاح بالسحابة في الأرشيف المركزي.`); }}
-                      className="text-indigo-600 hover:underline font-bold flex items-center gap-1 uppercase"
+                      href={letItem.attachedFileName.startsWith('http') ? letItem.attachedFileName : '#'} 
+                      target={letItem.attachedFileName.startsWith('http') ? "_blank" : undefined}
+                      rel="noopener noreferrer"
+                      onClick={(e) => { 
+                        if (!letItem.attachedFileName?.startsWith('http')) {
+                          e.preventDefault(); 
+                          setSelectedLetterForView(letItem);
+                        }
+                      }}
+                      className="text-indigo-600 hover:text-indigo-800 hover:underline font-bold flex items-center gap-1 uppercase truncate max-w-[180px]"
+                      title="فتح المرفق السحابي"
                     >
-                      <ExternalLink className="w-3 h-3" />
-                      <span>{letItem.attachedFileName}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{letItem.attachedFileName}</span>
                     </a>
                   )}
+                </div>
+
+                {/* أزرار الإجراءات السريعة: فتح المعاينة + فتح في تبويبة التواصل */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedLetterForView(letItem)}
+                    className="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold p-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-indigo-200"
+                  >
+                    <span>📖 قراءة ومعاينة الكتاب</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.setItem('AL_AHLIYA_COMMS_PRESELECT', letItem.source);
+                      setActiveTab('comms');
+                    }}
+                    className="bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold p-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-purple-200"
+                  >
+                    <span>💬 فتح في التواصل الداخلي</span>
+                  </button>
                 </div>
 
               </div>
@@ -668,6 +825,120 @@ export default function LettersArchive({
           </div>
         )}
       </div>
+
+      {/* 📄 نافذة العرض والمعاينة الفخمة للكتاب الرسمي (Letter Modal Viewer) */}
+      {selectedLetterForView && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 md:p-8 space-y-6 shadow-2xl border border-slate-200 text-right max-h-[90vh] overflow-y-auto">
+            
+            {/* الترويسة الرسمية */}
+            <div className="pb-4 border-b border-slate-200">
+              <OfficialKutHeader config={headerConfig} defaultCollege={universityName} />
+            </div>
+
+            {/* تفاصيل الرقم وتاريخ الصدور والصلاحية */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono text-slate-700">
+              <div>
+                <span className="text-slate-500 font-sans block text-[10px]">الرقم الإداري:</span>
+                <span className="font-bold text-slate-900 text-sm">{selectedLetterForView.letterNumber}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 font-sans block text-[10px]">تاريخ الصدور:</span>
+                <span className="font-bold text-slate-900">{selectedLetterForView.dateIssued}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 font-sans block text-[10px]">سريان الصلاحية:</span>
+                <span className="font-bold text-emerald-700">{selectedLetterForView.expiryDate || 'مفتوح للعمل'}</span>
+              </div>
+            </div>
+
+            {/* الجهات الصادرة والموجه إليها */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-150">
+              <div>
+                <span className="text-indigo-700 font-bold block text-[11px] mb-0.5">الجهة المصدرة (من):</span>
+                <span className="font-extrabold text-slate-900">{selectedLetterForView.source}</span>
+              </div>
+              <div>
+                <span className="text-indigo-700 font-bold block text-[11px] mb-0.5">الجهة الموجه إليها (إلى):</span>
+                <span className="font-extrabold text-slate-900">{selectedLetterForView.destination}</span>
+              </div>
+            </div>
+
+            {/* عنوان وموضوع الكتاب */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-100 text-purple-900 border border-purple-200">
+                  {selectedLetterForView.category === 'comms_letter' ? '📨 كتاب تواصل داخلي' : '📜 وثيقة رسمية'}
+                </span>
+                <span className="text-xs text-slate-500 font-mono">كود الأرشفة: {selectedLetterForView.id}</span>
+              </div>
+              <h2 className="text-lg md:text-xl font-black text-slate-900 leading-snug">
+                م / {selectedLetterForView.title}
+              </h2>
+            </div>
+
+            {/* نص الخطاب الكامل */}
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-slate-800 text-sm md:text-base leading-relaxed whitespace-pre-wrap font-sans">
+              {selectedLetterForView.summary}
+            </div>
+
+            {/* المرفقات إن وجدت */}
+            {selectedLetterForView.attachedFileName && (
+              <div className="p-4 bg-purple-50/70 border border-purple-200 rounded-2xl flex items-center justify-between flex-wrap gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="w-5 h-5 text-purple-700 shrink-0" />
+                  <div>
+                    <span className="font-bold text-slate-900 block">الملف الرقمي المرفق:</span>
+                    <span className="text-slate-600 font-mono text-[11px]">{selectedLetterForView.attachedFileName}</span>
+                  </div>
+                </div>
+                {selectedLetterForView.attachedFileName.startsWith('http') && (
+                  <a
+                    href={selectedLetterForView.attachedFileName}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-purple-700 hover:bg-purple-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                  >
+                    <span>فتح وتنزيل الملف السحابي 📥</span>
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* أزرار التحكم والطباعة والانتقال للتواصل */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePrintOfficialLetter(selectedLetterForView)}
+                  className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all shadow-md cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>طباعة رسمية كاملة 🖨️</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.setItem('AL_AHLIYA_COMMS_PRESELECT', selectedLetterForView.source);
+                    setActiveTab('comms');
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all shadow-md cursor-pointer"
+                >
+                  <span>💬 الانتقال للمراسلة في التواصل الداخلي</span>
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedLetterForView(null)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-xs transition-all cursor-pointer"
+              >
+                إغلاق النافذة ✖
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
         </>
       ) : (
         /* 🛡️ بوابة ومنظومة صحة الصدور المعتمدة للشبكة الداخلية لجامعة الكوت */

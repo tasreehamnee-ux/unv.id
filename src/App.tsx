@@ -241,11 +241,33 @@ export default function App() {
       const saved = localStorage.getItem('AL_AHLIYA_PAYMENTS');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {}
     return mockPayments;
   });
+
+  const syncPayments = (newPayments: Payment[]) => {
+    setPayments(newPayments);
+    try {
+      localStorage.setItem('AL_AHLIYA_PAYMENTS', JSON.stringify(newPayments));
+      setDoc(doc(db, "appData", "payments"), { list: newPayments }).catch(console.error);
+    } catch (e) {}
+  };
+
+  // مزامنة حية للسجلات والوصولات المالية من Firebase
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "appData", "payments"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.list && Array.isArray(data.list)) {
+          setPayments(data.list);
+          localStorage.setItem('AL_AHLIYA_PAYMENTS', JSON.stringify(data.list));
+        }
+      }
+    });
+    return () => unsub();
+  }, []);
 
   const [letters, setLetters] = useState<OfficialLetter[]>([]);
 
@@ -1842,6 +1864,53 @@ export default function App() {
     }
   };
 
+  // حذف وصل/سند مالي فردي (حصراً لمدير النظام - الأدمن)
+  const handleDeletePayment = (paymentId: string) => {
+    if (currentRole !== 'admin') {
+      alert('⚠️ إجراء مرفوض: خاصية حذف السجلات والوصولات المالية مصرحة حصراً لمدير النظام (الأدمن)!');
+      return;
+    }
+    const targetPay = payments.find(p => p.id === paymentId);
+    if (!targetPay) return;
+    if (window.confirm(`هل أنت متأكد من حذف الوصل المالي رقم: [${targetPay.receiptNumber}] العائد للطالب: [${targetPay.studentName}] بقيمة [${targetPay.amount.toLocaleString()} د.ع] نهائياً؟`)) {
+      const updated = payments.filter(p => p.id !== paymentId);
+      syncPayments(updated);
+      addAuditLog('receipt_delete', 'حذف وصل مالي', `تم حذف الوصل المالي رقم [${targetPay.receiptNumber}] للطالب [${targetPay.studentName}] بقيمة [${targetPay.amount.toLocaleString()} د.ع]`);
+      setInAppToasts(prev => [
+        {
+          id: `toast-${Date.now()}`,
+          title: 'حذف وصل مالي',
+          message: `✓ تم حذف السند والوصل المالي [${targetPay.receiptNumber}] بنجاح.`,
+          type: 'info',
+          timestamp: new Date().toLocaleTimeString('ar-IQ')
+        },
+        ...prev
+      ]);
+    }
+  };
+
+  // تفريغ ومسح كافة السجلات والوصولات المالية من النظام (حصراً لمدير النظام - الأدمن)
+  const handleClearAllPayments = () => {
+    if (currentRole !== 'admin') {
+      alert('⚠️ إجراء مرفوض: خاصية تفريغ الحسابات المالية مصرحة حصراً لمدير النظام (الأدمن)!');
+      return;
+    }
+    if (window.confirm('⚠️ تحذير مالي حرج: هل أنت متأكد من مسح وتفريغ كافة السجلات والوصولات المالية من النظام بالكامل؟')) {
+      syncPayments([]);
+      addAuditLog('payments_clear', 'تفريغ السجلات المالية', 'قام مدير النظام بتفريغ ومسح كافة السجلات المالية والوصولات المرجعية من النظام وقاعدة البيانات');
+      setInAppToasts(prev => [
+        {
+          id: `toast-${Date.now()}`,
+          title: 'تفريغ السجلات المالية',
+          message: '✓ تم تفريغ ومسح كافة الوصولات والسجلات المالية بنجاح.',
+          type: 'success',
+          timestamp: new Date().toLocaleTimeString('ar-IQ')
+        },
+        ...prev
+      ]);
+    }
+  };
+
   // أرشفة كتاب رسمي جديد (مستقل ومحفوظ بشكل دائم في خزانة الكتب والقرارات)
   const handleAddLetter = (newLetter: OfficialLetter) => {
     const newArr = [newLetter, ...letters].slice(0, 2000);
@@ -2130,6 +2199,8 @@ export default function App() {
             payments={filteredPaymentsForRole}
             departments={filteredDepartmentsForRole}
             onAddPayment={handleAddPayment}
+            onDeletePayment={handleDeletePayment}
+            onClearAllPayments={handleClearAllPayments}
             selectedStudentId={selectedStudentId}
             onSelectStudent={setSelectedStudentId}
             setActiveTab={setActiveTab}
@@ -2137,6 +2208,7 @@ export default function App() {
             subText={headerOfficeAr}
             noteText={receiptNoteText}
             headerConfig={headerConfig}
+            currentRole={currentRole}
           />
         );
       case 'letters':
@@ -2188,6 +2260,7 @@ export default function App() {
             rolesList={rolesList}
             universityName={receiptUniversityName}
             universityEmail={receiptUniversityEmail}
+            headerConfig={headerConfig}
           />
         );
       case 'python':
