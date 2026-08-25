@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
 import { 
   User, 
   MapPin, 
@@ -27,52 +29,141 @@ import {
 import { Student, Department, Payment, RequiredDocument } from '../types';
 import { calculateStudentFees, SYSTEM_CURRENT_DATE } from '../data/mockData';
 
-// 📊 مولد الباركود المخصص للتحقق من تفاصيل قيد الطالب وصحة الصدور
-const BarcodePattern = ({ code }: { code: string }) => {
-  const widths = [2, 3, 1, 4, 2, 1, 3, 2, 1, 4, 2, 3, 1, 2, 1, 4, 2];
-  return (
-    <div className="flex flex-col items-center">
-      <div className="flex items-center justify-center gap-[1.5px] bg-white p-1 rounded-md border border-slate-200 select-none overflow-hidden h-8 w-full max-w-[150px]">
-        {widths.map((w, idx) => (
-          <span 
-            key={idx} 
-            style={{ width: `${w}px` }} 
-            className="h-6 bg-slate-900 shrink-0" 
-          />
-        ))}
-        {widths.reverse().map((w, idx) => (
-          <span 
-            key={`rev-${idx}`} 
-            style={{ width: `${w}px` }} 
-            className="h-6 bg-slate-900 shrink-0" 
-          />
-        ))}
+// 📊 دالة توليد كود SVG احترافي ودقيق لمعيار Code 128 Barcode من بيانات الطالب باستخدام JsBarcode
+export const generateBarcodeSvg = (text: string, height = 46): string => {
+  try {
+    const cleanText = (text || 'VAL-KUT-2026').replace(/[^0-9A-Za-z_-]/g, '') || 'KUT-STUDENT';
+    const svgNode = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    JsBarcode(svgNode, cleanText, {
+      format: 'CODE128',
+      height: height,
+      displayValue: true,
+      fontSize: 12,
+      font: 'monospace',
+      textMargin: 3,
+      margin: 8,
+      background: '#ffffff',
+      lineColor: '#000000'
+    });
+    return `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;">
+        ${svgNode.outerHTML}
       </div>
-      <span className="text-[8px] font-mono tracking-[1.5px] mt-0.5 text-slate-700 font-bold uppercase">{code}</span>
+    `;
+  } catch (e) {
+    console.error("Barcode generation error:", e);
+    return `<div style="font-family:monospace; font-weight:bold; font-size:12px; padding:6px; border:1px solid #ccc; text-align:center;">${text}</div>`;
+  }
+};
+
+// 🗺️ دالة تجهيز نصوص بيانات الطالب الشاملة لتضمينها في الـ QR Code متضمنة أرقام وصولات القبض
+export const getStudentQrData = (student: Student, deptName?: string, payments?: Payment[]) => {
+  const studentPayments = payments ? payments.filter(p => p.studentId === student.id) : [];
+  const receiptLines = studentPayments.length > 0
+    ? studentPayments.map((p, idx) => `• وصل قبض رقم: ${p.receiptNumber || p.id} | المبلغ: ${p.amount.toLocaleString()} د.ع | التاريخ: ${p.date}`).join('\n')
+    : '• لا توجد وصولات مالية مسجلة بعد';
+
+  return [
+    `🎓 جامعة الكوت الأهلية - صحة صدور القيد الدراسي`,
+    `========================================`,
+    `👤 إسم الطالب: ${student.name}`,
+    `🏛️ الكلية والقسم: ${deptName || 'غير محدد'}`,
+    `🆔 الرقم الجامعي: ${student.id}`,
+    `🪪 الرقم الموحد: ${student.nationalId || 'بدون'}`,
+    `📚 المرحلة والوجبة: المرحلة ${student.stage} (${student.shift === 'morning' ? 'صباحي' : 'مسائي'})`,
+    `📅 تاريخ المباشرة: ${student.registrationDate}`,
+    `📱 رقم الهاتف: ${student.phone}`,
+    `----------------------------------------`,
+    `🧾 بيانات وصولات القبض المالي:`,
+    `${receiptLines}`,
+    `----------------------------------------`,
+    `🔐 رمز التحقق المعتمد: VAL-KUT-${student.id.replace(/[^0-9A-Za-z]/g, '')}-${student.registrationDate.replace(/[^0-9]/g, '')}`,
+    `✅ الحالة: مقيد ومصادق عليه رسمياً`
+  ].join('\n');
+};
+
+// 🗺️ توليد صورة base64 نقية لرمز الاستجابة السريعة (QR Code) محلياً بدون إنترنت
+export const generateQrCodeDataUrl = async (text: string, width = 300): Promise<string> => {
+  try {
+    return await QRCode.toDataURL(text, {
+      width,
+      margin: 2,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    });
+  } catch (err) {
+    console.error("QR Code generation error:", err);
+    return '';
+  }
+};
+
+// 📊 مكون الباركود في الواجهة التفاعلية
+const BarcodePattern = ({ code }: { code: string }) => {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
+  useEffect(() => {
+    if (svgRef.current && code) {
+      try {
+        const cleanText = code.replace(/[^0-9A-Za-z_-]/g, '') || 'KUT-STU';
+        JsBarcode(svgRef.current, cleanText, {
+          format: 'CODE128',
+          height: 36,
+          displayValue: true,
+          fontSize: 11,
+          font: 'monospace',
+          textMargin: 2,
+          margin: 6,
+          background: '#ffffff',
+          lineColor: '#000000'
+        });
+      } catch (e) {
+        console.error("JsBarcode render error:", e);
+      }
+    }
+  }, [code]);
+
+  return (
+    <div className="flex justify-center select-none overflow-hidden max-w-full bg-white rounded-lg border border-slate-200 p-1">
+      <svg ref={svgRef} className="max-w-full h-auto" />
     </div>
   );
 };
 
-// 🗺️ مولد الـ QR Code للتحقق الفوري من صحة الصدور والمطابقة الإلكترونية
-const QRCodeMock = ({ code }: { code: string }) => {
-  return (
-    <div className="w-14 h-14 border border-slate-900 p-0.5 bg-white relative flex flex-wrap items-center justify-center shrink-0 rounded-lg shadow-3xs select-none">
-      {/* ركائز الـ QR الأساسية */}
-      <span className="absolute top-0.5 left-0.5 w-3.5 h-3.5 border border-slate-900 bg-white flex items-center justify-center rounded-xs"><span className="w-1.5 h-1.5 bg-slate-950 rounded-6xs" /></span>
-      <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 border border-slate-900 bg-white flex items-center justify-center rounded-xs"><span className="w-1.5 h-1.5 bg-slate-950 rounded-6xs" /></span>
-      <span className="absolute bottom-0.5 left-0.5 w-3.5 h-3.5 border border-slate-900 bg-white flex items-center justify-center rounded-xs"><span className="w-1.5 h-1.5 bg-slate-950 rounded-6xs" /></span>
-      
-      {/* خلايا مصفوفية عشوائية */}
-      <div className="grid grid-cols-3 gap-0.5 w-6 h-6 opacity-85 mt-0.5">
-        <span className="w-1.5 h-1.5 bg-slate-900 rounded-7xs" />
-        <span className="w-1.5 h-1.5 bg-transparent" />
-        <span className="w-1.5 h-1.5 bg-slate-900 rounded-7xs" />
-        <span className="w-1.5 h-1.5 bg-transparent" />
-        <span className="w-1.5 h-1.5 bg-slate-900 rounded-7xs" />
-        <span className="w-1.5 h-1.5 bg-slate-900 rounded-7xs" />
+// 🗺️ مكون الـ QR Code في الواجهة التفاعلية
+export const QRCodeMock = ({ text, code, size = 95 }: { text?: string; code?: string; size?: number }) => {
+  const [qrSrc, setQrSrc] = useState<string>('');
+  const content = text || code || '';
+
+  useEffect(() => {
+    let isMounted = true;
+    if (!content) return;
+    generateQrCodeDataUrl(content, size * 3).then(url => {
+      if (isMounted && url) setQrSrc(url);
+    });
+    return () => { isMounted = false; };
+  }, [content, size]);
+
+  if (!qrSrc) {
+    return (
+      <div 
+        style={{ width: `${size}px`, height: `${size}px` }} 
+        className="bg-slate-100 border border-slate-300 rounded-xl flex items-center justify-center animate-pulse text-[10px] text-slate-400 font-bold"
+      >
+        توليد QR...
       </div>
-      <span className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-slate-950 rounded-7xs" />
-    </div>
+    );
+  }
+
+  return (
+    <img 
+      src={qrSrc} 
+      alt="QR Code" 
+      style={{ width: `${size}px`, height: `${size}px` }} 
+      className="rounded-xl border-2 border-slate-900 bg-white p-1 shadow-sm block mx-auto" 
+    />
   );
 };
 
@@ -267,111 +358,183 @@ export default function StudentPortal({
               <span className="font-extrabold text-slate-800 text-xs flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 animate-pulse" />
-                  <span>رمز التحقق وصحة الصدور 🔐</span>
+                  <span>رمز التحقق وصحة الصدور (QR Code) 🔐</span>
                 </span>
                 <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded-full">✔ مصدق إلكترونياً</span>
               </span>
 
-              <div className="bg-slate-50 border border-slate-150 p-3 rounded-2xl flex items-center justify-between gap-3 shadow-3xs">
-                <div className="space-y-1 block w-2/3">
-                  <span className="text-[9px] text-slate-700 block font-sans">الترميز التعريفي الفريد (Verification QR):</span>
-                  <span className="font-mono text-[9px] font-bold text-slate-800 break-all select-all block bg-white border border-slate-200 p-1 rounded-md text-center">
+              {/* مربع الـ QR Code المتولد من بيانات الطالب الشاملة */}
+              <div className="bg-slate-50 border border-slate-150 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-3xs">
+                <div className="space-y-1 block w-3/5">
+                  <span className="text-[10px] text-slate-700 block font-bold">رمز الاستجابة السريعة (QR Code):</span>
+                  <span className="text-[9px] text-slate-500 block leading-tight">يتضمن كامل بيانات الطالب والكلية ورقم القيد ورقم وصل القبض للتحقق الفوري بالكاميرا</span>
+                  <span className="font-mono text-[9px] font-bold text-emerald-800 break-all select-all block bg-white border border-slate-200 p-1.5 rounded-md text-center mt-1.5">
                     {getStudentVerificationCode(currentStudent.id, currentStudent.registrationDate)}
                   </span>
                 </div>
-                <div className="w-1/3 shrink-0 flex justify-center">
-                  <QRCodeMock code={getStudentVerificationCode(currentStudent.id, currentStudent.registrationDate)} />
+                <div className="w-2/5 shrink-0 flex justify-center">
+                  <QRCodeMock code={getStudentQrData(currentStudent, studentDept?.name, payments)} size={85} />
                 </div>
               </div>
               
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   const valCode = getStudentVerificationCode(currentStudent.id, currentStudent.registrationDate);
+                  const studentQrText = getStudentQrData(currentStudent, studentDept?.name, payments);
+                  const qrDataUrl = await generateQrCodeDataUrl(studentQrText, 400);
                   const printWin = window.open('', '_blank_' + Date.now());
                   if (!printWin) return;
                   printWin.document.open();
-                      printWin.document.write(`
-                    <html>
+                  printWin.document.write(`
+                    <!DOCTYPE html>
+                    <html dir="rtl" lang="ar">
                       <head>
                         <title>وثيقة صحة صدور القيد الدراسي - ${currentStudent.name}</title>
                         <meta charset="utf-8">
-                        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@4.0.0/dist/tailwind.min.css" rel="stylesheet">
                         <style>
-                          body { font-family: 'system-ui', sans-serif; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { size: A4 portrait; margin: 15mm; }
+                          * { box-sizing: border-box; margin: 0; padding: 0; }
+                          body { 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                            direction: rtl; 
+                            background: #f8fafc; 
+                            padding: 25px; 
+                            color: #0f172a; 
+                            -webkit-print-color-adjust: exact; 
+                            print-color-adjust: exact; 
+                          }
+                          @page { size: A4 portrait; margin: 12mm; }
                           @media print {
                             .no-print { display: none !important; }
                             body { background: #fff; padding: 0; margin: 0; }
+                            .cert-card { border: 2px solid #059669 !important; box-shadow: none !important; }
+                          }
+                          .cert-card {
+                            background: #ffffff;
+                            max-width: 820px;
+                            margin: 0 auto;
+                            padding: 40px;
+                            border-radius: 24px;
+                            border: 2px solid #059669;
+                            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+                          }
+                          .header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-bottom: 2px solid #e2e8f0;
+                            padding-bottom: 20px;
+                            margin-bottom: 25px;
+                          }
+                          .univ-title { font-size: 24px; font-weight: 900; color: #0f172a; }
+                          .univ-sub { font-size: 13.5px; color: #64748b; margin-top: 4px; }
+                          .badge {
+                            background: #d1fae5;
+                            color: #065f46;
+                            font-weight: 800;
+                            font-size: 12px;
+                            padding: 6px 14px;
+                            border-radius: 9999px;
+                            display: inline-block;
+                          }
+                          .code-label { font-size: 11px; color: #64748b; font-family: monospace; margin-top: 6px; }
+                          .cert-heading {
+                            font-size: 18px;
+                            font-weight: 900;
+                            color: #065f46;
+                            border-right: 4px solid #059669;
+                            padding-right: 12px;
+                            margin-bottom: 15px;
+                          }
+                          .cert-desc { font-size: 14px; line-height: 1.9; color: #334155; margin-bottom: 25px; text-align: justify; }
+                          .security-section {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            text-align: center;
+                            background: #f8fafc;
+                            border: 2px dashed #059669;
+                            border-radius: 24px;
+                            padding: 30px 20px;
+                            margin-bottom: 30px;
+                          }
+                          .footer {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-top: 1px solid #cbd5e1;
+                            padding-top: 18px;
+                            font-size: 12.5px;
+                            color: #64748b;
+                          }
+                          .btn-container {
+                            display: flex;
+                            justify-content: center;
+                            gap: 12px;
+                            margin-top: 25px;
+                          }
+                          .btn-print {
+                            background: #059669;
+                            color: white;
+                            font-weight: bold;
+                            padding: 12px 30px;
+                            border-radius: 12px;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 14px;
+                            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                          }
+                          .btn-close {
+                            background: #475569;
+                            color: white;
+                            font-weight: bold;
+                            padding: 12px 30px;
+                            border-radius: 12px;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 14px;
                           }
                         </style>
                       </head>
-                      <body class="p-8 w-full max-w-4xl mx-auto bg-white">
-                        <div class="bg-white p-8 rounded-3xl border-2 border-emerald-600 shadow-md space-y-6">
-                          <div class="flex justify-between items-center pb-4 border-b-2 border-slate-200">
-                            <div class="text-right space-y-1">
-                              <h1 class="text-xl font-black text-slate-800">${universityName}</h1>
-                              <p class="text-xs text-slate-700">${subText}</p>
+                      <body>
+                        <div class="cert-card">
+                          <div class="header">
+                            <div>
+                              <h1 class="univ-title">${universityName}</h1>
+                              <p class="univ-sub">${subText}</p>
                             </div>
-                            <div class="text-left space-y-1">
-                              <div class="text-xs bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full">صحة صدور معتمدة وإلكترونية</div>
-                              <p class="text-[10px] text-slate-700 font-mono mt-0.5">رمز الصدور: ${valCode}</p>
-                            </div>
-                          </div>
-
-                          <div class="space-y-4 my-6 text-sm">
-                            <h2 class="text-md font-extrabold text-emerald-800 border-r-4 border-emerald-600 pr-2">شهادة إثبات قيد وصحة صدور الطالب</h2>
-                            <p class="leading-relaxed text-slate-700 font-bold">
-                              تؤيد عمادة القبول والتسجيل لـ <span class="font-bold">${universityName}</span> بأن الطالب المذكورة بياناته أدناه مسجل ومقيد رسمياً في سجلاتنا للعام الدراسي الحالي:
-                            </p>
-
-                            <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-150">
-                              <div><span class="text-slate-700 block text-xs">إسم الطالب الثلاثي:</span> <strong class="text-slate-900">${currentStudent.name}</strong></div>
-                              <div><span class="text-slate-700 block text-xs">الكلية والفرع الدراسي:</span> <strong class="text-slate-900">${studentDept?.name || 'غير محدد'}</strong></div>
-                              <div class="mt-2"><span class="text-slate-700 block text-xs">الرقم الموحد المعتمد:</span> <strong class="text-slate-900 font-mono">${currentStudent.nationalId || 'بدون'}</strong></div>
-                              <div class="mt-2"><span class="text-slate-700 block text-xs">تاريخ المباشرة المعتمد:</span> <strong class="text-slate-900 font-mono">${currentStudent.registrationDate}</strong></div>
-                              <div class="mt-2"><span class="text-slate-700 block text-xs">المرحلة الدراسية والوجبة:</span> <strong class="text-slate-900">المرحلة ${currentStudent.stage} - ${currentStudent.shift === 'morning' ? 'صباحي' : 'مسائي'}</strong></div>
-                              <div class="mt-2"><span class="text-slate-700 block text-xs">رقم الموبايل:</span> <strong class="text-slate-900 font-mono">${currentStudent.phone}</strong></div>
+                            <div style="text-align: left;">
+                              <div class="badge">صحة صدور معتمدة وإلكترونية</div>
+                              <p class="code-label">رمز الصدور: ${valCode}</p>
                             </div>
                           </div>
 
-                          <div class="grid grid-cols-2 gap-4 items-center border-t border-slate-150 pt-3">
-                            <div class="text-center py-2">
-                              <p class="text-xs text-slate-700 font-bold block mb-1">الترميز التوليدي وصحة الصدور</p>
-                              <div class="inline-block">
-                                <div class="flex items-center justify-center gap-[1.5px] bg-white p-2 rounded-lg border border-slate-200 select-none overflow-hidden h-10 w-44">
-                                  ${[2, 3, 1, 4, 2, 1, 3, 2, 1, 4, 2, 3, 1, 2, 1].map((w) => `<span style="width: ${w}px;" class="h-6 bg-slate-900 shrink-0"></span>`).join('')}
-                                </div>
-                                <span class="text-[9px] font-mono tracking-[2px] mt-1 text-slate-700 font-extrabold uppercase">${valCode}</span>
-                              </div>
-                            </div>
+                          <div class="cert-heading">شهادة إثبات قيد وصحة صدور الطالب المشفرة</div>
+                          <p class="cert-desc">
+                            تؤيد عمادة القبول والتسجيل لـ <strong>${universityName}</strong> بأن القيد الدراسي والأكاديمي والمالي للطالب مصادق عليه ومقيد رسمياً في السجلات المركزية للعام الدراسي الحالي.
+                            <br/>
+                            <strong>📌 تنبيه التحقق الأمني:</strong> كافة بيانات الطالب الشخصية والدراسية وتفاصيل وصولات القبض المالي مشفرة ومحفوظة بالكامل داخل رمز الاستجابة السريعة (QR Code) المعتمد أدناه للتحقق الفوري عبر كاميرا الهاتف.
+                          </p>
 
-                            <div class="flex justify-center items-center">
-                              <div class="text-center">
-                                <p class="text-[11px] text-slate-700 font-bold block mb-1">رمز التحقق السريع (QR Code)</p>
-                                <div class="w-16 h-16 border-2 border-slate-900 p-1 bg-white relative flex flex-wrap items-center justify-center shrink-0 rounded-xl shadow-xs mx-auto">
-                                  <span class="absolute top-0.5 left-0.5 w-4 h-4 border border-slate-900 bg-white"><span class="w-1.5 h-1.5 bg-slate-950 block m-auto mt-0.5 animate-pulse"></span></span>
-                                  <span class="absolute top-0.5 right-0.5 w-4 h-4 border border-slate-900 bg-white"><span class="w-1.5 h-1.5 bg-slate-950 block m-auto mt-0.5 animate-pulse"></span></span>
-                                  <span class="absolute bottom-0.5 left-0.5 w-4 h-4 border border-slate-900 bg-white"><span class="w-1.5 h-1.5 bg-slate-950 block m-auto mt-0.5 animate-pulse"></span></span>
-                                  <div class="grid grid-cols-3 gap-0.5 w-6 h-6 mt-1 opacity-80">
-                                    <span class="w-1 h-1 bg-slate-900"></span><span class="w-1 h-1 bg-transparent"></span><span class="w-1 h-1 bg-slate-900"></span>
-                                    <span class="w-1 h-1 bg-slate-900"></span><span class="w-1 h-1 bg-slate-900"></span><span class="w-1 h-1 bg-transparent"></span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                          <div class="security-section">
+                            <p style="font-size:14px; font-weight:900; color:#065f46; margin-bottom:12px;">رمز التحقق والاستجابة السريعة الشامل (QR Code)</p>
+                            <img src="${qrDataUrl}" width="185" height="185" alt="QR Code" style="display:block; margin:0 auto; border:3px solid #0f172a; border-radius:14px; background:#fff; padding:6px; box-shadow:0 4px 10px rgba(0,0,0,0.08);" />
+                            <p style="font-size:12px; color:#065f46; margin-top:12px; font-weight:800;">امسح الرمز بكاميرا الهاتف لقراءة كافة معلومات الطالب وأرقام وصولات القبض المالي</p>
+                            <p style="font-family:monospace; font-size:11px; color:#64748b; margin-top:6px; letter-spacing:1px;">${valCode}</p>
                           </div>
 
-                          <div class="border-t border-slate-250 pt-4 flex justify-between items-center text-xs text-slate-700">
-                            <span>تاريخ طباعة هذه البطاقة التلقائية: ${new Date().toLocaleDateString('ar-IQ')}</span>
-                            <span class="font-bold">عمادة القبول والتسجيل الإلكترونية</span>
+                          <div class="footer">
+                            <span>تاريخ طباعة هذه الوثيقة: ${new Date().toLocaleDateString('ar-IQ')}</span>
+                            <strong style="color: #0f172a;">عمادة القبول والتسجيل الإلكترونية الموحدة</strong>
                           </div>
                         </div>
 
-                        <div class="mt-6 flex justify-center gap-3 no-print">
-                          <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-750 text-white font-bold p-3 px-8 rounded-xl cursor-pointer text-sm shadow-md">
+                        <div class="btn-container no-print">
+                          <button onclick="window.print()" class="btn-print">
                             طباعة وثيقة التحقق وصحة الصدور 🖨️
                           </button>
-                          <button onclick="window.close()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold p-3 px-8 rounded-xl cursor-pointer text-sm shadow-md">
+                          <button onclick="window.close()" class="btn-close">
                             إغلاق ✖
                           </button>
                         </div>

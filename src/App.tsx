@@ -1136,16 +1136,16 @@ export default function App() {
     }
   };
 
-  // أرشفة كتاب رسمي جديد
+  // أرشفة كتاب رسمي جديد (مستقل ومحفوظ بشكل دائم في خزانة الكتب والقرارات)
   const handleAddLetter = (newLetter: OfficialLetter) => {
-    const newArr = [newLetter, ...letters].slice(0, 50);
+    const newArr = [newLetter, ...letters].slice(0, 2000);
     setLetters(newArr);
     setDoc(doc(db, "appData", "letters"), { list: newArr }).catch(console.error);
   };
 
   const handleSendMessage = (newMessage: InternalMessage) => {
-    // Slice to 50 to avoid Firestore 1MB limits
-    const newArray = [newMessage, ...messages].slice(0, 50);
+    // الاحتفاظ بآخر 2000 رسالة لضمان استيعاب ضخم وأرشيف واسع لكافة الأقسام والمراسلات الجامعية
+    const newArray = [newMessage, ...messages].slice(0, 2000);
     setMessages(newArray);
     
     setDoc(doc(db, "appData", "messages"), { list: newArray }).then(() => {
@@ -1309,6 +1309,7 @@ export default function App() {
             messages={messages}
             letters={letters}
             onSendMessage={handleSendMessage}
+            onAddLetter={handleAddLetter}
             setActiveTab={setActiveTab}
             currentRole={currentRole}
             rolesList={rolesList}

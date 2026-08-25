@@ -21,7 +21,8 @@ import {
   Wifi,
   Terminal,
   Activity,
-  Globe
+  Globe,
+  FolderLock
 } from 'lucide-react';
 import { InternalMessage, MessageRole, OfficialLetter } from '../types';
 import { SYSTEM_CURRENT_DATE } from '../data/mockData';
@@ -32,6 +33,7 @@ interface InternalCommsProps {
   messages: InternalMessage[];
   letters: OfficialLetter[];
   onSendMessage: (newMessage: InternalMessage) => void;
+  onAddLetter?: (newLetter: OfficialLetter) => void;
   setActiveTab: (tab: string) => void;
   currentRole: string;
   rolesList: any[];
@@ -95,6 +97,7 @@ export default function InternalComms({
   messages, 
   letters, 
   onSendMessage,
+  onAddLetter,
   setActiveTab,
   currentRole,
   rolesList,
@@ -102,6 +105,9 @@ export default function InternalComms({
   universityEmail = 'info@alkut.edu.iq'
 }: InternalCommsProps) {
   
+  // حفظ وتأمين الكتب الرسمية تلقائياً في الأرشيف الدائم
+  const [autoArchiveLetter, setAutoArchiveLetter] = useState(true);
+
   // الاختيار الفعال للدور الحالي المستكشف للبريد للتجربة (CurrentUser role)
   const [currentUserRole, setCurrentUserRole] = useState<string>(currentRole || 'admin');
 
@@ -339,14 +345,32 @@ export default function InternalComms({
       };
 
       onSendMessage(newMessage);
+
+      // 📁 أرشفة الخطاب تلقائياً ومستقلاً في خزانة الكتب والقرارات (لتأمينه وبقائه حتى لو حُذفت الرسائل)
+      if (autoArchiveLetter && onAddLetter) {
+        const autoLetter: OfficialLetter = {
+          id: `let-auto-${Date.now()}`,
+          letterNumber: `KUT/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
+          title: mailSubject,
+          issuer: rolesMap[currentUserRole] || currentUserRole,
+          recipient: mailRecipient === 'all_departments' ? 'كافة عمادات الكليات والأقسام العلمية' : (rolesMap[mailRecipient] || mailRecipient),
+          issueDate: new Date().toISOString().split('T')[0],
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'active',
+          category: 'decision',
+          description: mailContent,
+          attachmentUrl: downloadUrl || undefined
+        };
+        onAddLetter(autoLetter);
+      }
       
       // تصفير وتهنئة
       setMailSubject('');
       setMailContent('');
       removeAttachment();
       setShowCompose(false);
-      alert('تم إرسال الرسالة والملف السحابي بنجاح!');
-      setSuccessMsg('✔ تم إرسال وبث البريد الموجه الفوري إلى الجهات المعنية عبر الشبكة السحابية للجامعة!');
+      alert('تم إرسال الرسالة وأرشفة الكتاب الرسمي بنجاح في أرشيف الكتب والقرارات!');
+      setSuccessMsg('✔ تم إرسال وبث البريد وأرشفة المستند تلقائياً في خزانة الكتب والقرارات الرسمية!');
 
       setTimeout(() => {
         setSuccessMsg('');
@@ -926,6 +950,18 @@ export default function InternalComms({
                 <p className="text-[10px] text-slate-500 text-center">يرجى الانتظار حتى اكتمال الرفع وبث الرسالة تلقائياً</p>
               </div>
             )}
+
+            {/* خيار الحفظ التلقائي في أرشيف الكتب والقرارات */}
+            <label className="flex items-center gap-2.5 p-3 bg-emerald-50/80 hover:bg-emerald-100/70 border border-emerald-200 rounded-xl cursor-pointer select-none text-xs text-emerald-950 font-bold transition-all shadow-3xs">
+              <input 
+                type="checkbox" 
+                checked={autoArchiveLetter} 
+                onChange={(e) => setAutoArchiveLetter(e.target.checked)} 
+                className="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600"
+              />
+              <FolderLock className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>📁 حفظ وأرشفة هذا الخطاب تلقائياً في "أرشيف الكتب والقرارات" (لحمايته وبقائه حتى لو حُذفت الرسائل)</span>
+            </label>
 
             <button 
               type="submit" 

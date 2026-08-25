@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { OfficialLetter, LetterCategory } from '../types';
 import { SYSTEM_CURRENT_DATE, getLetterExpiryStatus } from '../data/mockData';
+import { generateBarcodeSvg, generateQrCodeDataUrl } from './StudentPortal';
 
 // 📊 مولد الباركود المخصص لصحّة صدور الوثائق لجامعة الكوت
 const BarcodePattern = ({ code }: { code: string }) => {
@@ -688,98 +689,187 @@ export default function LettersArchive({
                         <div className="pt-2 flex justify-end">
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               const printWin = window.open('', '_blank_' + Date.now());
                               if (!printWin) return;
+                              const barcodeSvg = generateBarcodeSvg(scannedCert.certCode);
+                              const certQrText = [
+                                `🎓 جامعة الكوت الأهلية - صحة صدور وثيقة التخرج`,
+                                `👤 اسم الطالب: ${scannedCert.studentName}`,
+                                `🏛️ الكلية / القسم: ${scannedCert.college}`,
+                                `📄 رقم الوثيقة: ${scannedCert.docNumber}`,
+                                `📅 سنة التخرج: ${scannedCert.gradYear}`,
+                                `🔐 رقم الكود المعتمد: ${scannedCert.certCode}`,
+                                `✅ مصادق عليه رسمياً من منظومة الأتمتة الموحدة`
+                              ].join('\n');
+                              const qrDataUrl = await generateQrCodeDataUrl(certQrText, 350);
                               printWin.document.open();
-                      printWin.document.write(`
-                                <html>
+                              printWin.document.write(`
+                                <!DOCTYPE html>
+                                <html dir="rtl" lang="ar">
                                   <head>
                                     <title>وثيقة صحة الصدور الرسمية - ${scannedCert.studentName}</title>
                                     <meta charset="utf-8">
-                                    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@4.0.0/dist/tailwind.min.css" rel="stylesheet">
                                     <style>
-                                      body { font-family: 'system-ui', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; }
+                                      * { box-sizing: border-box; margin: 0; padding: 0; }
+                                      body { 
+                                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                                        direction: rtl; 
+                                        background: #f8fafc; 
+                                        padding: 25px; 
+                                        color: #0f172a; 
+                                        -webkit-print-color-adjust: exact; 
+                                        print-color-adjust: exact; 
+                                      }
+                                      @page { size: A4 portrait; margin: 12mm; }
                                       @media print {
-                                        .no-print { display: none; }
-                                        body { padding: 0; margin: 0; background: #fff; }
+                                        .no-print { display: none !important; }
+                                        body { background: #fff; padding: 0; margin: 0; }
+                                        .cert-card { border: 2px solid #059669 !important; box-shadow: none !important; }
+                                      }
+                                      .cert-card {
+                                        background: #ffffff;
+                                        max-width: 820px;
+                                        margin: 0 auto;
+                                        padding: 35px;
+                                        border-radius: 24px;
+                                        border: 2px solid #059669;
+                                        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+                                      }
+                                      .header {
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                        border-bottom: 2px solid #e2e8f0;
+                                        padding-bottom: 18px;
+                                        margin-bottom: 22px;
+                                      }
+                                      .univ-title { font-size: 22px; font-weight: 900; color: #0f172a; }
+                                      .univ-sub { font-size: 13px; color: #64748b; margin-top: 4px; }
+                                      .badge {
+                                        background: #d1fae5;
+                                        color: #065f46;
+                                        font-weight: 800;
+                                        font-size: 12px;
+                                        padding: 6px 14px;
+                                        border-radius: 9999px;
+                                        display: inline-block;
+                                      }
+                                      .code-label { font-size: 11px; color: #64748b; font-family: monospace; margin-top: 6px; }
+                                      .cert-heading {
+                                        font-size: 17px;
+                                        font-weight: 900;
+                                        color: #065f46;
+                                        border-right: 4px solid #059669;
+                                        padding-right: 10px;
+                                        margin-bottom: 12px;
+                                      }
+                                      .cert-desc { font-size: 13.5px; line-height: 1.8; color: #334155; margin-bottom: 20px; }
+                                      .grid-info {
+                                        display: grid;
+                                        grid-template-columns: 1fr 1fr;
+                                        gap: 14px;
+                                        background: #f8fafc;
+                                        border: 1px solid #e2e8f0;
+                                        border-radius: 16px;
+                                        padding: 20px;
+                                        margin-bottom: 24px;
+                                      }
+                                      .info-item span { display: block; font-size: 12px; color: #64748b; margin-bottom: 4px; }
+                                      .info-item strong { font-size: 14px; color: #0f172a; }
+                                      .security-section {
+                                        display: grid;
+                                        grid-template-columns: 1fr 1fr;
+                                        gap: 20px;
+                                        align-items: center;
+                                        border-top: 1px solid #e2e8f0;
+                                        padding-top: 20px;
+                                        margin-bottom: 20px;
+                                      }
+                                      .sec-box { text-align: center; }
+                                      .sec-box p { font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 8px; }
+                                      .footer {
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                        border-top: 1px solid #cbd5e1;
+                                        padding-top: 15px;
+                                        font-size: 12px;
+                                        color: #64748b;
+                                      }
+                                      .btn-container {
+                                        display: flex;
+                                        justify-content: center;
+                                        gap: 12px;
+                                        margin-top: 25px;
+                                      }
+                                      .btn-print {
+                                        background: #059669;
+                                        color: white;
+                                        font-weight: bold;
+                                        padding: 12px 30px;
+                                        border-radius: 12px;
+                                        border: none;
+                                        cursor: pointer;
+                                        font-size: 14px;
+                                        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                                      }
+                                      .btn-close {
+                                        background: #475569;
+                                        color: white;
+                                        font-weight: bold;
+                                        padding: 12px 30px;
+                                        border-radius: 12px;
+                                        border: none;
+                                        cursor: pointer;
+                                        font-size: 14px;
                                       }
                                     </style>
                                   </head>
-                                  <body className="p-8 max-w-4xl mx-auto bg-slate-50">
-                                    <div className="bg-white p-8 rounded-2xl border-2 border-emerald-600 shadow-md space-y-6">
-                                      <div className="flex justify-between items-center pb-4 border-b-2 border-slate-200">
-                                        <div className="text-right space-y-1">
-                                          <h1 className="text-2xl font-black text-emerald-850">${universityName}</h1>
-                                          <p className="text-xs text-slate-505 font-bold">بوابة التحقق وصحة الصدور الإلكترونية</p>
-                                          <p className="text-[10px] text-slate-700">البريد الرسمي: ${universityEmail}</p>
+                                  <body>
+                                    <div class="cert-card">
+                                      <div class="header">
+                                        <div>
+                                          <h1 class="univ-title">${universityName}</h1>
+                                          <p class="univ-sub">بوابة التحقق وصحة الصدور الإلكترونية</p>
+                                          <p style="font-size: 11px; color: #64748b; margin-top: 2px;">البريد الرسمي: ${universityEmail}</p>
                                         </div>
-                                        <div className="text-left space-y-1">
-                                          <div className="text-xs bg-emerald-105 text-emerald-800 font-extrabold px-3 py-1 rounded-full uppercase inline-block">وثيقة معتمدة ومصادق عليها</div>
-                                          <p className="text-[11px] text-slate-700 font-mono mt-1 block">رقم الكود: <span className="font-bold">${scannedCert.certCode}</span></p>
-                                        </div>
-                                      </div>
-
-                                      <div className="space-y-4 my-6">
-                                        <h2 className="text-lg font-extrabold text-slate-800 border-r-4 border-emerald-600 pr-2">بيان وتفاصيل صحة الصدور التوليدي</h2>
-                                        <p className="text-sm leading-relaxed text-slate-700">
-                                          بناءً على الصلاحيات المخولة لعمادة القبول والتسجيل بـ <span className="font-bold">${universityName}</span>، وبعد فحص سجلات الخريجين في منظومة الأتمتة الموحدة، نؤكد صحة صدور الوثيقة وتطابق البيانات علمياً وإدارياً كما هي مدونة أدناه:
-                                        </p>
-
-                                        <div className="grid grid-cols-2 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-150 text-sm mt-3">
-                                          <div><span className="text-slate-700 block mb-1">اسم الطالب المعتمد:</span> <strong className="text-slate-900 text-base">${scannedCert.studentName}</strong></div>
-                                          <div><span className="text-slate-700 block mb-1">الكلية / القسم الأكاديمي:</span> <strong className="text-slate-900">${scannedCert.college}</strong></div>
-                                          <div className="mt-2"><span className="text-slate-700 block mb-1">رقم وتاريخ وثيقة التخرج:</span> <strong className="text-slate-900 font-mono">${scannedCert.docNumber}</strong></div>
-                                          <div className="mt-2"><span className="text-slate-700 block mb-1">العام الدراسي للمعدل والتقدير:</span> <strong className="text-slate-900 font-mono">${scannedCert.gradYear}</strong></div>
+                                        <div style="text-align: left;">
+                                          <div class="badge">وثيقة معتمدة ومصادق عليها</div>
+                                          <p class="code-label">رقم الكود: <strong>${scannedCert.certCode}</strong></p>
                                         </div>
                                       </div>
 
-                                      <div className="grid grid-cols-2 gap-6 items-center border-t border-slate-200 pt-6">
-                                        <div className="space-y-2 text-center border-l border-slate-150 pl-4 py-2">
-                                          <p className="text-xs text-slate-700 font-bold block mb-1">الترميز والشريط التعريفي للوثيقة (Barcode)</p>
-                                          <div className="flex justify-center flex-col items-center">
-                                            <div className="flex items-center justify-center gap-[1.5px] bg-white p-2 rounded-lg border border-slate-200 select-none overflow-hidden h-12 w-48">
-                                              ${[2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 4, 1, 3].map((w, idx) => `<span style="width: ${w}px;" class="h-8 bg-slate-900 shrink-0"></span>`).join('')}
-                                              ${[2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 4, 1, 3].reverse().map((w, idx) => `<span style="width: ${w}px;" class="h-8 bg-slate-900 shrink-0"></span>`).join('')}
-                                            </div>
-                                            <span class="text-[9px] font-mono tracking-[4px] mt-1 text-slate-700 font-extrabold uppercase">${scannedCert.certCode}</span>
-                                          </div>
-                                        </div>
+                                      <div class="cert-heading">بيان وتفاصيل صحة الصدور التوليدي</div>
+                                      <p class="cert-desc">
+                                        بناءً على الصلاحيات المخولة لعمادة القبول والتسجيل بـ <strong>${universityName}</strong>، وبعد فحص سجلات الخريجين في منظومة الأتمتة الموحدة، نؤكد صحة صدور الوثيقة وتطابق البيانات علمياً وإدارياً كما هي مدونة أدناه:
+                                      </p>
 
-                                        <div className="flex justify-around items-center">
-                                          <div className="text-center space-y-1">
-                                            <p className="text-xs text-slate-550 font-bold block">مربع التحقق السريع (QR Code)</p>
-                                            <div class="w-20 h-20 border-2 border-slate-900 p-1 bg-white relative flex flex-wrap items-center justify-center shrink-0 rounded-xl shadow-xs mx-auto">
-                                              <span class="absolute top-1 left-1 w-5 h-5 border-2 border-slate-900 bg-white flex items-center justify-center"><span class="w-2 h-2 bg-slate-950"></span></span>
-                                              <span class="absolute top-1 right-1 w-5 h-5 border-2 border-slate-900 bg-white flex items-center justify-center"><span class="w-2 h-2 bg-slate-950"></span></span>
-                                              <span class="absolute bottom-1 left-1 w-5 h-5 border-2 border-slate-900 bg-white flex items-center justify-center"><span class="w-2 h-2 bg-slate-950"></span></span>
-                                              <div class="grid grid-cols-4 gap-1 w-10 h-10 mt-1">
-                                                <span class="w-1.5 h-1.5 bg-slate-900"></span><span class="w-1.5 h-1.5 bg-transparent"></span>
-                                                <span class="w-1.5 h-1.5 bg-slate-900"></span><span class="w-1.5 h-1.5 bg-slate-900"></span>
-                                                <span class="w-1.5 h-1.5 bg-transparent"></span><span class="w-1.5 h-1.5 bg-slate-900"></span>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
+                                      <div class="grid-info">
+                                        <div class="info-item"><span>اسم الطالب المعتمد:</span> <strong>${scannedCert.studentName}</strong></div>
+                                        <div class="info-item"><span>الكلية / القسم الأكاديمي:</span> <strong>${scannedCert.college}</strong></div>
+                                        <div class="info-item"><span>رقم وتاريخ وثيقة التخرج:</span> <strong style="font-family: monospace;">${scannedCert.docNumber}</strong></div>
+                                        <div class="info-item"><span>العام الدراسي للمعدل والتقدير:</span> <strong style="font-family: monospace;">${scannedCert.gradYear}</strong></div>
                                       </div>
 
-                                      <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-xs text-slate-700 text-right">
+                                      <div class="security-section" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:25px; background:#f8fafc; border:2px dashed #059669; border-radius:20px; margin:20px 0;">
+                                        <p style="font-size:14px; font-weight:900; color:#065f46; margin-bottom:10px;">رمز التحقق والاستجابة السريعة (QR Code)</p>
+                                        <img src="${qrDataUrl}" width="165" height="165" alt="QR Code" style="display:block; margin:0 auto; border:3px solid #0f172a; border-radius:12px; background:#fff; padding:5px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);" />
+                                        <p style="font-size:11px; color:#065f46; margin-top:8px; font-weight:800;">امسح بالكاميرا للتحقق الرقمي المعتمد من صحة الصدور</p>
+                                        <p style="font-family:monospace; font-size:11px; color:#64748b; margin-top:4px;">${scannedCert.certCode}</p>
+                                      </div>
+
+                                      <div class="footer">
                                         <span>تاريخ الطباعة الفنية والمطابقة: ${new Date().toLocaleDateString('ar-IQ')}</span>
-                                        <span className="font-bold">عمادة القبول والتسجيل الإلكتروني</span>
+                                        <strong style="color: #0f172a;">عمادة القبول والتسجيل الإلكتروني</strong>
                                       </div>
                                     </div>
 
-                                    <div className="mt-6 flex justify-center gap-3 no-print">
-                                      <button 
-                                        onclick="window.print()" 
-                                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 px-8 rounded-xl cursor-pointer text-sm shadow-md transition-all"
-                                      >
+                                    <div class="btn-container no-print">
+                                      <button onclick="window.print()" class="btn-print">
                                         طباعة وثيقة صحة الصدور الرسمية 🖨️
                                       </button>
-                                      <button 
-                                        onclick="window.close()" 
-                                        class="bg-slate-700 hover:bg-slate-800 text-white font-bold p-3 px-8 rounded-xl cursor-pointer text-sm shadow-md transition-all"
-                                      >
+                                      <button onclick="window.close()" class="btn-close">
                                         إغلاق النافذة ✖
                                       </button>
                                     </div>
