@@ -351,21 +351,21 @@ export default function InternalComms({
 
       onSendMessage(newMessage);
 
-      // 📁 أرشفة الخطاب تلقائياً ومستقلاً في خزانة الكتب والقرارات (لتأمينه وبقائه حتى لو حُذفت الرسائل)
+      // 📁 أرشفة الخطاب تلقائياً ومستقلاً في خزانة الكتب والقرارات في خانة "كتب التواصل الداخلي" الخاصة بها
       if (autoArchiveLetter && onAddLetter) {
         const autoLetter: OfficialLetter = {
-          id: `let-auto-${Date.now()}`,
-          letterNumber: `KUT/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
+          id: `let-comms-${Date.now()}`,
+          letterNumber: `COMMS-KUT/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
           title: mailSubject,
           source: rolesMap[currentUserRole] || currentUserRole,
           destination: mailRecipient === 'all_departments' ? 'كافة عمادات الكليات والأقسام العلمية' : (rolesMap[mailRecipient] || mailRecipient),
           dateIssued: new Date().toISOString().split('T')[0],
           expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           status: 'active',
-          category: 'decision',
+          category: 'comms_letter',
           summary: mailContent,
           archivedBy: rolesMap[currentUserRole] || currentUserRole,
-          attachedFileName: downloadUrl || undefined
+          attachedFileName: downloadUrl || attachmentName || undefined
         };
         onAddLetter(autoLetter);
       }
@@ -375,8 +375,8 @@ export default function InternalComms({
       setMailContent('');
       removeAttachment();
       setShowCompose(false);
-      alert('تم إرسال الرسالة وأرشفة الكتاب الرسمي بنجاح في أرشيف الكتب والقرارات!');
-      setSuccessMsg('✔ تم إرسال وبث البريد وأرشفة المستند تلقائياً في خزانة الكتب والقرارات الرسمية!');
+      alert('✔ تم إرسال الرسالة وحفظ الكتاب الرسمي تلقائياً في الأرشيف (خانة كتب ومراسلات التواصل الداخلي)!');
+      setSuccessMsg('✔ تم إرسال وبث البريد وأرشفة المستند تلقائياً في خانة التواصل الداخلي بالأرشيف!');
 
       setTimeout(() => {
         setSuccessMsg('');
@@ -649,12 +649,18 @@ export default function InternalComms({
             </div>
             
             <div className="flex items-center gap-2">
-              {onClearAllMessages && userInbox.length > 0 && (
+              {currentRole === 'admin' && onClearAllMessages && userInbox.length > 0 && (
                 <button
                   type="button"
-                  onClick={onClearAllMessages}
+                  onClick={() => {
+                    if (currentRole !== 'admin') {
+                      alert('⚠️ إجراء مرفوض: خاصية تفريغ وحذف الرسائل مصرحة حصراً لمدير النظام (الأدمن)!');
+                      return;
+                    }
+                    onClearAllMessages();
+                  }}
                   className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs p-2.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  title="مسح وتفريغ كافة الرسائل"
+                  title="مسح وتفريغ كافة الرسائل (خاص بالأدمن)"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>تفريغ الرسائل ({userInbox.length})</span>

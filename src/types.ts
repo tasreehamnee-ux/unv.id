@@ -93,7 +93,8 @@ export type LetterCategory =
   | 'internal_circular' // تعميم داخلي
   | 'student_excuse' // عذر طالب
   | 'graduation_order' // أمر تخرج
-  | 'decision'; // قرار إداري
+  | 'decision' // قرار إداري
+  | 'comms_letter'; // كتب ومراسلات التواصل الداخلي (خانة خاصة)
 
 export interface OfficialLetter {
   id: string; // LET-2026-XXXX

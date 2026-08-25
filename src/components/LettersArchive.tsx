@@ -380,11 +380,13 @@ export default function LettersArchive({
                   onChange={(e) => setFormCategory(e.target.value as LetterCategory)}
                   className="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-slate-800 font-bold cursor-pointer"
                 >
+                  <option value="comms_letter">📨 كتب ومراسلات التواصل الداخلي المتداولة</option>
                   <option value="ministry_directive">كتاب وزاري سيادي (وزارة التعليم العالي)</option>
                   <option value="administrative_order">أمر إداري جامعي (رئاسة الجامعة)</option>
                   <option value="internal_circular">تعميم وقرار داخلي للأقسام</option>
                   <option value="student_excuse">عذر طبي أو إجازة معلّقة لطالب</option>
                   <option value="graduation_order">أمر تخرج والمنح الدراسية</option>
+                  <option value="decision">قرار أو توجيه إداري رسمي</option>
                 </select>
               </div>
 
@@ -461,6 +463,45 @@ export default function LettersArchive({
         </div>
       )}
 
+      {/* أزرار التبويبات السريعة للتصنيفات بما فيها خانة التواصل الداخلي المخصصة */}
+      <div className="flex flex-wrap items-center gap-2 pb-1">
+        {[
+          { id: 'all', label: '📁 جميع الكتب والوثائق', count: letters.length },
+          { id: 'comms_letter', label: '📨 كتب ومراسلات التواصل الداخلي', count: letters.filter(l => l.category === 'comms_letter').length, isSpecial: true },
+          { id: 'ministry_directive', label: '🏛️ الكتب الوزارية', count: letters.filter(l => l.category === 'ministry_directive').length },
+          { id: 'administrative_order', label: '📜 الأوامر الإدارية', count: letters.filter(l => l.category === 'administrative_order').length },
+          { id: 'internal_circular', label: '📢 تعميمات الأقسام', count: letters.filter(l => l.category === 'internal_circular').length },
+          { id: 'graduation_order', label: '🎓 أوامر التخرج', count: letters.filter(l => l.category === 'graduation_order').length },
+          { id: 'decision', label: '⚖️ القرارات الإدارية', count: letters.filter(l => l.category === 'decision').length }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setCategoryFilter(tab.id)}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-3xs ${
+              categoryFilter === tab.id
+                ? tab.isSpecial 
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
+                  : 'bg-univ-blue text-white shadow-md shadow-slate-900/20'
+                : tab.isSpecial
+                  ? 'bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+            }`}
+          >
+            <span>{tab.label}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${
+              categoryFilter === tab.id 
+                ? 'bg-white/20 text-white' 
+                : tab.isSpecial 
+                  ? 'bg-purple-200 text-purple-900' 
+                  : 'bg-slate-100 text-slate-600'
+            }`}>
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {/* فلاتر البحث في الأرشيف المركزي */}
       <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-xs flex flex-col md:flex-row gap-3">
         
@@ -482,12 +523,14 @@ export default function LettersArchive({
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs text-slate-700 font-bold cursor-pointer"
         >
-          <option value="all">كل تصانيف الأرشيف</option>
-          <option value="ministry_directive">كتاب وزاري حكومي</option>
-          <option value="administrative_order">أمر إداري رئاسي</option>
-          <option value="internal_circular">تعميمات الأقسام</option>
-          <option value="student_excuse">أعذار الطلبة المرضية</option>
-          <option value="graduation_order">أوامر التخرج</option>
+          <option value="all">كل تصانيف الأرشيف ({letters.length})</option>
+          <option value="comms_letter">📨 كتب ومراسلات التواصل الداخلي ({letters.filter(l => l.category === 'comms_letter').length})</option>
+          <option value="ministry_directive">🏛️ كتاب وزاري حكومي</option>
+          <option value="administrative_order">📜 أمر إداري رئاسي</option>
+          <option value="internal_circular">📢 تعميمات الأقسام</option>
+          <option value="student_excuse">🩺 أعذار الطلبة المرضية</option>
+          <option value="graduation_order">🎓 أوامر التخرج</option>
+          <option value="decision">⚖️ قرارات إدارية</option>
         </select>
 
         {/* فرز صلاحية القرار (فكرة هامة لمراقبة الصلاحيات) */}
@@ -514,6 +557,7 @@ export default function LettersArchive({
             <div 
               key={letItem.id}
               className={`p-5 bg-white rounded-2xl border transition-all hover:shadow-md flex flex-col justify-between gap-4 relative overflow-hidden ${
+                letItem.category === 'comms_letter' ? 'border-purple-200 bg-purple-50/15 shadow-xs' :
                 currentStatus === 'expired' ? 'border-red-200 shadow-red-50/50' :
                 currentStatus === 'expiring_soon' ? 'border-amber-200 shadow-amber-50/50' : 'border-slate-100'
               }`}
@@ -525,11 +569,13 @@ export default function LettersArchive({
                 <div className="flex justify-between items-start gap-2">
                   <div className="flex items-center gap-1.5">
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                      letItem.category === 'comms_letter' ? 'bg-purple-100 text-purple-900 border border-purple-300 font-black' :
                       letItem.category === 'ministry_directive' ? 'bg-indigo-50 text-indigo-800 border border-indigo-100' :
                       letItem.category === 'administrative_order' ? 'bg-sky-50 text-sky-800 border border-sky-100' :
                       'bg-slate-50 text-slate-700 border border-slate-100'
                     }`}>
-                      {letItem.category === 'ministry_directive' ? 'كتاب وزاري' :
+                      {letItem.category === 'comms_letter' ? '📨 كتاب تواصل داخلي' :
+                       letItem.category === 'ministry_directive' ? 'كتاب وزاري' :
                        letItem.category === 'administrative_order' ? 'أمر إداري' :
                        letItem.category === 'internal_circular' ? 'تعميم أقسام' : 'معاملة رسمية'}
                     </span>
