@@ -19,7 +19,8 @@ import {
   ArrowRight,
   Printer,
   QrCode,
-  Building
+  Building,
+  Trash2
 } from 'lucide-react';
 import { OfficialLetter, LetterCategory } from '../types';
 import { SYSTEM_CURRENT_DATE, getLetterExpiryStatus } from '../data/mockData';
@@ -84,6 +85,8 @@ const QRCodeMock = ({ code }: { code: string }) => {
 interface LettersArchiveProps {
   letters: OfficialLetter[];
   onAddLetter: (newLetter: OfficialLetter) => void;
+  onDeleteLetter?: (letterId: string) => void;
+  onClearAllLetters?: () => void;
   setActiveTab: (tab: string) => void;
   universityName?: string;
   universityEmail?: string;
@@ -92,6 +95,8 @@ interface LettersArchiveProps {
 export default function LettersArchive({ 
   letters, 
   onAddLetter,
+  onDeleteLetter,
+  onClearAllLetters,
   setActiveTab,
   universityName = 'جامعة الكوت الأهلية',
   universityEmail = 'info@alkut.edu.iq'
@@ -268,13 +273,26 @@ export default function LettersArchive({
           <h2 className="text-xl md:text-2xl font-bold text-slate-800">الأرشيف المركزي والكتب والتعميمات الرسمية</h2>
           <p className="text-slate-700 text-xs md:text-sm mt-1">تداول وأرشفة الأوامر الإدارية والوزارية وتثبيت فترات نفاذ القوانين</p>
         </div>
-        <button 
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-univ-blue hover:bg-slate-800 text-white font-bold text-xs md:text-sm px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
-        >
-          {showAddForm ? <Clock className="w-4 h-4" /> : <FolderPlus className="w-4 h-4" />}
-          <span>{showAddForm ? 'معاينة القائمة' : 'أرشفة وثيقة رسمية جديدة'}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {onClearAllLetters && letters.length > 0 && (
+            <button
+              type="button"
+              onClick={onClearAllLetters}
+              className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs md:text-sm px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs"
+              title="حذف وتفريغ كافة الكتب من قاعدة البيانات"
+            >
+              <Trash2 className="w-4 h-4 text-red-600" />
+              <span>تفريغ الأرشيف ({letters.length})</span>
+            </button>
+          )}
+          <button 
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-univ-blue hover:bg-slate-800 text-white font-bold text-xs md:text-sm px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+          >
+            {showAddForm ? <Clock className="w-4 h-4" /> : <FolderPlus className="w-4 h-4" />}
+            <span>{showAddForm ? 'معاينة القائمة' : 'أرشفة وثيقة رسمية جديدة'}</span>
+          </button>
+        </div>
       </div>
 
       {/* نجاح الإرسال */}
@@ -494,15 +512,31 @@ export default function LettersArchive({
                 
                 {/* وسم فحص الصلاحية الرأسي ليكون واضحاً جداً */}
                 <div className="flex justify-between items-start gap-2">
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                    letItem.category === 'ministry_directive' ? 'bg-indigo-50 text-indigo-800 border border-indigo-100' :
-                    letItem.category === 'administrative_order' ? 'bg-sky-50 text-sky-800 border border-sky-100' :
-                    'bg-slate-50 text-slate-700 border border-slate-100'
-                  }`}>
-                    {letItem.category === 'ministry_directive' ? 'كتاب وزاري' :
-                     letItem.category === 'administrative_order' ? 'أمر إداري' :
-                     letItem.category === 'internal_circular' ? 'تعميم أقسام' : 'معاملة رسمية'}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                      letItem.category === 'ministry_directive' ? 'bg-indigo-50 text-indigo-800 border border-indigo-100' :
+                      letItem.category === 'administrative_order' ? 'bg-sky-50 text-sky-800 border border-sky-100' :
+                      'bg-slate-50 text-slate-700 border border-slate-100'
+                    }`}>
+                      {letItem.category === 'ministry_directive' ? 'كتاب وزاري' :
+                       letItem.category === 'administrative_order' ? 'أمر إداري' :
+                       letItem.category === 'internal_circular' ? 'تعميم أقسام' : 'معاملة رسمية'}
+                    </span>
+                    {onDeleteLetter && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`هل أنت متأكد من حذف الوثيقة: "${letItem.title}" من الأرشيف نهائياً؟`)) {
+                            onDeleteLetter(letItem.id);
+                          }
+                        }}
+                        className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="حذف هذه الوثيقة من الأرشيف"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                   
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0 ${
                     currentStatus === 'expired' ? 'bg-red-100 text-red-800' :

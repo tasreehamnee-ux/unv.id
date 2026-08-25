@@ -1774,7 +1774,54 @@ export default function App() {
   const handleAddLetter = (newLetter: OfficialLetter) => {
     const newArr = [newLetter, ...letters].slice(0, 2000);
     setLetters(newArr);
-    setDoc(doc(db, "appData", "letters"), { list: newArr }).catch(console.error);
+    try {
+      localStorage.setItem('AL_AHLIYA_LETTERS', JSON.stringify(newArr));
+      setDoc(doc(db, "appData", "letters"), { list: newArr }).catch(console.error);
+    } catch (e) {}
+  };
+
+  // حذف كتاب أو وثيقة فردية من الأرشيف
+  const handleDeleteLetter = (id: string) => {
+    setLetters(prev => {
+      const updated = prev.filter(l => l.id !== id);
+      try {
+        localStorage.setItem('AL_AHLIYA_LETTERS', JSON.stringify(updated));
+        setDoc(doc(db, "appData", "letters"), { list: updated }).catch(console.error);
+      } catch (e) {}
+      return updated;
+    });
+    setInAppToasts(prev => [
+      {
+        id: `toast-${Date.now()}`,
+        title: 'حذف وثيقة',
+        message: '✓ تم حذف الوثيقة بنجاح من الأرشيف وقاعدة البيانات.',
+        type: 'info',
+        timestamp: new Date().toLocaleTimeString('ar-IQ')
+      },
+      ...prev
+    ]);
+  };
+
+  // تفريغ ومسح كافة الكتب المؤرشفة من قاعدة البيانات
+  const handleClearAllLetters = () => {
+    if (window.confirm('⚠️ تحذير: هل أنت متأكد من رغبتك في تفريغ وحذف كافة الكتب والوثائق من الأرشيف وقاعدة البيانات نهائياً؟')) {
+      setLetters([]);
+      try {
+        localStorage.setItem('AL_AHLIYA_LETTERS', JSON.stringify([]));
+        setDoc(doc(db, "appData", "letters"), { list: [] }).catch(console.error);
+        addAuditLog('letters_clear', 'تصفير الأرشيف', 'تم مسح وتفريغ كافة الوثائق والكتب المؤرشفة من قاعدة البيانات');
+      } catch (e) {}
+      setInAppToasts(prev => [
+        {
+          id: `toast-${Date.now()}`,
+          title: 'تفريغ الأرشيف',
+          message: '✓ تم تفريغ ومسح كافة الكتب المؤرشفة من قاعدة البيانات بنجاح.',
+          type: 'success',
+          timestamp: new Date().toLocaleTimeString('ar-IQ')
+        },
+        ...prev
+      ]);
+    }
   };
 
   const handleSendMessage = (newMessage: InternalMessage) => {
@@ -1965,6 +2012,8 @@ export default function App() {
           <LettersArchive 
             letters={letters}
             onAddLetter={handleAddLetter}
+            onDeleteLetter={handleDeleteLetter}
+            onClearAllLetters={handleClearAllLetters}
             setActiveTab={setActiveTab}
             universityName={receiptUniversityName}
             universityEmail={receiptUniversityEmail}
