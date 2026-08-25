@@ -37,7 +37,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 // استيراد الأنواع والبيانات الافتراضية والتابع المساعد
-import { Student, Payment, OfficialLetter, InternalMessage, Department } from './types';
+import { Student, Payment, OfficialLetter, InternalMessage, Department, AdminDepartment, AcademicSubDepartment } from './types';
 import { 
   mockDepartments, 
   mockStudents, 
@@ -420,7 +420,7 @@ export default function App() {
     localStorage.setItem('AL_AHLIYA_COMM_MODE', communicationMode);
   }, [communicationMode]);
 
-  const [adminSubTab, setAdminSubTab] = useState<'passcodes' | 'employees' | 'email_alerts' | 'deans' | 'receipt_settings' | 'network_settings'>('passcodes');
+  const [adminSubTab, setAdminSubTab] = useState<'deans' | 'dept_heads' | 'admin_depts' | 'passcodes' | 'employees' | 'receipt_settings' | 'network_settings'>('deans');
 
   // 1.11 إعدادات اسم الجامعة والبيانات المطبوعة على الوصل المالي للقبول (يدوي من مدير النظام)
   const [receiptUniversityName, setReceiptUniversityName] = useState<string>(() => {
@@ -458,7 +458,6 @@ export default function App() {
     localStorage.setItem('AL_AHLIYA_RECEIPT_SUB_TEXT', receiptSubText);
     localStorage.setItem('AL_AHLIYA_RECEIPT_NOTE_TEXT', receiptNoteText);
   }, [receiptUniversityName, receiptUniversityEmail, receiptSubText, receiptNoteText]);
-
 
   // Sync Students and Departments from Firebase
   useEffect(() => {
@@ -509,49 +508,216 @@ export default function App() {
     }
   };
 
-  // مزامنة الكوادر ديناميكياً مع الأقسام لضمان ظهور كافة الكليات والأقسام برمز دخول دائم في القوائم
-  useEffect(() => {
-    if (!departments || departments.length === 0) return;
+  // 🏢 1.12 الأقسام والمديريات الإدارية والخدمية (غير التدريسية - بدون طلبة أو أقساط)
+  const [adminDepts, setAdminDepts] = useState<AdminDepartment[]>(() => {
+    const saved = localStorage.getItem('AL_AHLIYA_ADMIN_DEPTS');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return [
+      { id: 'ad-hr', name: 'قسم الموارد البشرية والذاتية', manager: 'أ. حسام كريم العبيدي', category: 'شؤون إدارية وتوظيف', ip: '192.168.1.30', role: 'admin_dept_hr', defaultCode: '3310' },
+      { id: 'ad-legal', name: 'قسم الشؤون القانونية والعقود', manager: 'أ.م.د. علي شاكر الدليمي', category: 'استشارات وتحقيق قانوني', ip: '192.168.1.31', role: 'admin_dept_legal', defaultCode: '3320' },
+      { id: 'ad-media', name: 'قسم الإعلام والعلاقات العامة', manager: 'أ. ضياء فالح الزبيدي', category: 'علاقات وإعلام جامعي', ip: '192.168.1.32', role: 'admin_dept_media', defaultCode: '3330' },
+      { id: 'ad-services', name: 'قسم الصيانة والخدمات العامة', manager: 'م. حيدر جاسم المعموري', category: 'خدمات وتشغيل هندسي', ip: '192.168.1.33', role: 'admin_dept_services', defaultCode: '3340' },
+      { id: 'ad-labs', name: 'إدارة المختبرات والورش المركزية', manager: 'د. مهند عبد الرحيم', category: 'مختبرات وتجهيز تقني', ip: '192.168.1.34', role: 'labs_director', defaultCode: '3333' },
+      { id: 'ad-audit', name: 'شعبة الرقابة والتدقيق الداخلي', manager: 'أ. كمال عزيز الجبوري', category: 'تدقيق مالي وإداري', ip: '192.168.1.35', role: 'admin_dept_audit', defaultCode: '3350' },
+      { id: 'ad-it', name: 'مركز الحاسبة وتكنولوجيا المعلومات', manager: 'م. م. أحمد صبيح الربيعي', category: 'أنظمة وشبكات', ip: '192.168.1.36', role: 'admin_dept_it', defaultCode: '3360' }
+    ];
+  });
 
+  const syncAdminDepts = (list: AdminDepartment[]) => {
+    setAdminDepts(list);
+    try {
+      localStorage.setItem('AL_AHLIYA_ADMIN_DEPTS', JSON.stringify(list));
+      setDoc(doc(db, "appData", "adminDepts"), { list }).catch((err) => {
+        console.warn("adminDepts cloud sync notice:", err);
+      });
+    } catch (e) {
+      console.warn("syncAdminDepts local write notice:", e);
+    }
+  };
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "appData", "adminDepts"), (docSnap) => {
+      if (docSnap.exists() && Array.isArray(docSnap.data()?.list)) {
+        setAdminDepts(docSnap.data().list);
+        localStorage.setItem('AL_AHLIYA_ADMIN_DEPTS', JSON.stringify(docSnap.data().list));
+      }
+    }, (err) => console.warn("adminDepts sync notice:", err));
+    return () => unsub();
+  }, []);
+
+  // 👨‍🏫 1.13 الأقسام الأكاديمية التخصصية ورؤساء الأقسام العلمية
+  const [academicSubDepts, setAcademicSubDepts] = useState<AcademicSubDepartment[]>(() => {
+    const saved = localStorage.getItem('AL_AHLIYA_ACADEMIC_SUB_DEPTS');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return [
+      { id: 'sub-dent-1', name: 'قسم جراحة الفم والأسنان', collegeId: 'dentistry', headName: 'أ.م.د. رائد فؤاد الحكيم', ip: '192.168.10.21', role: 'head_sub_dent1', defaultCode: '4501' },
+      { id: 'sub-pharm-1', name: 'قسم الصيدلة السريرية', collegeId: 'pharmacy', headName: 'د. سرى حامد الخزرجي', ip: '192.168.11.22', role: 'head_sub_pharm1', defaultCode: '4502' },
+      { id: 'sub-eng-1', name: 'قسم هندسة الذكاء الاصطناعي', collegeId: 'engineering', headName: 'د. ثامر جبار الكناني', ip: '192.168.12.23', role: 'head_sub_eng1', defaultCode: '4503' },
+      { id: 'sub-law-1', name: 'قسم القانون العام', collegeId: 'law', headName: 'أ.د. ماجد نجم الربيعي', ip: '192.168.13.24', role: 'head_sub_law1', defaultCode: '4504' }
+    ];
+  });
+
+  const syncAcademicSubDepts = (list: AcademicSubDepartment[]) => {
+    setAcademicSubDepts(list);
+    try {
+      localStorage.setItem('AL_AHLIYA_ACADEMIC_SUB_DEPTS', JSON.stringify(list));
+      setDoc(doc(db, "appData", "academicSubDepts"), { list }).catch((err) => {
+        console.warn("academicSubDepts cloud sync notice:", err);
+      });
+    } catch (e) {
+      console.warn("syncAcademicSubDepts local write notice:", e);
+    }
+  };
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "appData", "academicSubDepts"), (docSnap) => {
+      if (docSnap.exists() && Array.isArray(docSnap.data()?.list)) {
+        setAcademicSubDepts(docSnap.data().list);
+        localStorage.setItem('AL_AHLIYA_ACADEMIC_SUB_DEPTS', JSON.stringify(docSnap.data().list));
+      }
+    }, (err) => console.warn("academicSubDepts sync notice:", err));
+    return () => unsub();
+  }, []);
+
+  // حالات فورم رؤساء الأقسام العلمية
+  const [subDeptName, setSubDeptName] = useState('');
+  const [subDeptCollegeId, setSubDeptCollegeId] = useState('');
+  const [subDeptHeadName, setSubDeptHeadName] = useState('');
+  const [subDeptIp, setSubDeptIp] = useState('');
+  const [subDeptCode, setSubDeptCode] = useState('');
+  const [editingSubDeptId, setEditingSubDeptId] = useState<string | null>(null);
+
+  // حالات فورم الأقسام الإدارية والخدمية (غير التدريسية)
+  const [adminDeptName, setAdminDeptName] = useState('');
+  const [adminDeptManager, setAdminDeptManager] = useState('');
+  const [adminDeptCategory, setAdminDeptCategory] = useState('شؤون إدارية وخدمات');
+  const [adminDeptIp, setAdminDeptIp] = useState('');
+  const [adminDeptCode, setAdminDeptCode] = useState('');
+  const [editingAdminDeptId, setEditingAdminDeptId] = useState<string | null>(null);
+
+  // مزامنة الكوادر ديناميكياً مع الأقسام والعمادات ورؤساء الأقسام والأقسام الإدارية لضمان ظهور الجميع برمز دائم
+  useEffect(() => {
     let rolesChanged = false;
     let codesChanged = false;
     let updatedRoles = [...rolesList];
     let updatedCodes = { ...roleCodes };
 
-    departments.forEach((dept, index) => {
-      const deanRole = `head_${dept.id}`;
-      const existingIndex = updatedRoles.findIndex(r => r.role === deanRole || r.departmentId === dept.id);
-      const deanName = dept.headOfDepartment && dept.headOfDepartment !== 'شاغر' 
-        ? dept.headOfDepartment 
-        : 'شاغر';
-      const expectedTitle = `عميد ${dept.name} (${deanName})`;
+    // 1. مزامنة عمداء الكليات الأكاديمية
+    if (departments && departments.length > 0) {
+      departments.forEach((dept, index) => {
+        const deanRole = `head_${dept.id}`;
+        const existingIndex = updatedRoles.findIndex(r => r.role === deanRole || r.departmentId === dept.id);
+        const deanName = dept.headOfDepartment && dept.headOfDepartment !== 'شاغر' 
+          ? dept.headOfDepartment 
+          : 'شاغر';
+        const expectedTitle = `عميد ${dept.name} (العميد: ${deanName})`;
 
-      if (existingIndex === -1) {
-        const defaultCode = updatedCodes[deanRole] || `44${String(index + 1).padStart(2, '0')}`;
-        updatedRoles.push({
-          role: deanRole,
-          title: expectedTitle,
-          categoryName: 'عميد كلية',
-          defaultCode: defaultCode,
-          departmentId: dept.id,
-          isCustom: true
-        });
-        if (!updatedCodes[deanRole]) {
-          updatedCodes[deanRole] = defaultCode;
-          codesChanged = true;
-        }
-        rolesChanged = true;
-      } else {
-        if (updatedRoles[existingIndex].title !== expectedTitle || updatedRoles[existingIndex].departmentId !== dept.id) {
-          updatedRoles[existingIndex] = {
-            ...updatedRoles[existingIndex],
+        if (existingIndex === -1) {
+          const defaultCode = updatedCodes[deanRole] || `44${String(index + 1).padStart(2, '0')}`;
+          updatedRoles.push({
+            role: deanRole,
             title: expectedTitle,
-            departmentId: dept.id
-          };
+            categoryName: 'عميد كلية',
+            defaultCode: defaultCode,
+            departmentId: dept.id,
+            isCustom: true
+          });
+          if (!updatedCodes[deanRole]) {
+            updatedCodes[deanRole] = defaultCode;
+            codesChanged = true;
+          }
           rolesChanged = true;
+        } else {
+          if (updatedRoles[existingIndex].title !== expectedTitle || updatedRoles[existingIndex].departmentId !== dept.id) {
+            updatedRoles[existingIndex] = {
+              ...updatedRoles[existingIndex],
+              title: expectedTitle,
+              departmentId: dept.id
+            };
+            rolesChanged = true;
+          }
         }
-      }
-    });
+      });
+    }
+
+    // 2. مزامنة رؤساء الأقسام العلمية
+    if (academicSubDepts && academicSubDepts.length > 0) {
+      academicSubDepts.forEach((sub, index) => {
+        const subRole = sub.role || `head_sub_${sub.id}`;
+        const existingIndex = updatedRoles.findIndex(r => r.role === subRole);
+        const expectedTitle = `رئيس ${sub.name} (الدكتور: ${sub.headName || 'شاغر'})`;
+
+        if (existingIndex === -1) {
+          const defaultCode = sub.defaultCode || updatedCodes[subRole] || `45${String(index + 1).padStart(2, '0')}`;
+          updatedRoles.push({
+            role: subRole,
+            title: expectedTitle,
+            categoryName: 'رئيس قسم علمي',
+            defaultCode: defaultCode,
+            departmentId: sub.collegeId,
+            isCustom: true
+          });
+          if (!updatedCodes[subRole]) {
+            updatedCodes[subRole] = defaultCode;
+            codesChanged = true;
+          }
+          rolesChanged = true;
+        } else {
+          if (updatedRoles[existingIndex].title !== expectedTitle) {
+            updatedRoles[existingIndex] = {
+              ...updatedRoles[existingIndex],
+              title: expectedTitle,
+              categoryName: 'رئيس قسم علمي'
+            };
+            rolesChanged = true;
+          }
+        }
+      });
+    }
+
+    // 3. مزامنة الأقسام الإدارية والخدمية (غير التدريسية)
+    if (adminDepts && adminDepts.length > 0) {
+      adminDepts.forEach((ad, index) => {
+        const adRole = ad.role || `admin_dept_${ad.id}`;
+        const existingIndex = updatedRoles.findIndex(r => r.role === adRole);
+        const expectedTitle = `${ad.name} (المسؤول: ${ad.manager || 'إداري'})`;
+
+        if (existingIndex === -1) {
+          const defaultCode = ad.defaultCode || updatedCodes[adRole] || `33${String(index + 1).padStart(2, '0')}`;
+          updatedRoles.push({
+            role: adRole,
+            title: expectedTitle,
+            categoryName: 'قسم إداري / خدمي',
+            defaultCode: defaultCode,
+            isCustom: true
+          });
+          if (!updatedCodes[adRole]) {
+            updatedCodes[adRole] = defaultCode;
+            codesChanged = true;
+          }
+          rolesChanged = true;
+        } else {
+          if (updatedRoles[existingIndex].title !== expectedTitle) {
+            updatedRoles[existingIndex] = {
+              ...updatedRoles[existingIndex],
+              title: expectedTitle,
+              categoryName: 'قسم إداري / خدمي'
+            };
+            rolesChanged = true;
+          }
+        }
+      });
+    }
 
     if (rolesChanged) {
       syncRolesList(updatedRoles);
@@ -559,7 +725,7 @@ export default function App() {
     if (codesChanged) {
       syncRoleCodes(updatedCodes);
     }
-  }, [departments]);
+  }, [departments, academicSubDepts, adminDepts]);
 
   // 1.10 حالات وإعدادات خدمة الإشعارات المنبثقة للتنبيه بسلامة وثائق الطلاب المستهدفة
   const [alertsEnabled, setAlertsEnabled] = useState<boolean>(() => {
@@ -1176,6 +1342,252 @@ export default function App() {
     setNewCollegeSeats(100);
   };
 
+  // 🏢 معالجة حفظ أو تعديل الأقسام والمديريات الإدارية والخدمية (غير التدريسية)
+  const handleSaveAdminDept = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentRole !== 'admin') {
+      alert('⚠️ خطأ: هذه الصلاحية حصرية لمدير النظام الفعال فقط!');
+      return;
+    }
+    if (!adminDeptName.trim()) {
+      alert('⚠️ يرجى كتابة اسم القسم أو المديرية الإدارية!');
+      return;
+    }
+    const cleanName = adminDeptName.trim();
+    const cleanManager = adminDeptManager.trim() || 'المسؤول الإداري';
+    const cleanCategory = adminDeptCategory.trim() || 'شؤون إدارية وخدمات';
+    const cleanIp = adminDeptIp.trim() || '192.168.1.50';
+    const assignedCode = adminDeptCode.trim().replace(/\D/g, '') || `33${Math.floor(10 + Math.random() * 90)}`;
+
+    if (editingAdminDeptId) {
+      const updated = adminDepts.map(ad => {
+        if (ad.id === editingAdminDeptId) {
+          return {
+            ...ad,
+            name: cleanName,
+            manager: cleanManager,
+            category: cleanCategory,
+            ip: cleanIp,
+            defaultCode: assignedCode
+          };
+        }
+        return ad;
+      });
+      syncAdminDepts(updated);
+
+      const targetDept = adminDepts.find(ad => ad.id === editingAdminDeptId);
+      const roleKey = targetDept?.role || `admin_dept_${editingAdminDeptId}`;
+      const updatedRoles = rolesList.map(r => {
+        if (r.role === roleKey) {
+          return {
+            ...r,
+            title: `${cleanName} (${cleanManager})`,
+            defaultCode: assignedCode
+          };
+        }
+        return r;
+      });
+      syncRolesList(updatedRoles);
+      const updatedCodes = { ...roleCodes, [roleKey]: assignedCode };
+      syncRoleCodes(updatedCodes);
+
+      setEditingAdminDeptId(null);
+      addAuditLog('admin_dept_update', 'تعديل قسم إداري', `تم تعديل بيانات [${cleanName}] بنجاح`);
+    } else {
+      const newId = `ad-${Date.now()}`;
+      const roleKey = `admin_dept_${newId}`;
+      const newDept: AdminDepartment = {
+        id: newId,
+        name: cleanName,
+        manager: cleanManager,
+        category: cleanCategory,
+        ip: cleanIp,
+        role: roleKey,
+        defaultCode: assignedCode
+      };
+      const updated = [...adminDepts, newDept];
+      syncAdminDepts(updated);
+
+      const newRoleItem = {
+        role: roleKey,
+        title: `${cleanName} (${cleanManager})`,
+        categoryName: 'قسم إداري / خدمي',
+        defaultCode: assignedCode,
+        isCustom: true
+      };
+      syncRolesList([...rolesList, newRoleItem]);
+      syncRoleCodes({ ...roleCodes, [roleKey]: assignedCode });
+      addAuditLog('admin_dept_add', 'إضافة قسم إداري', `تمت إضافة القسم الإداري/الخدمي [${cleanName}] برمز دخول (${assignedCode}) ومحطة [${cleanIp}]`);
+    }
+
+    setInAppToasts(prev => [
+      {
+        id: `toast-${Date.now()}`,
+        title: editingAdminDeptId ? 'تعديل قسم إداري' : 'إضافة قسم إداري',
+        message: `✓ تم بنجاح ${editingAdminDeptId ? 'تعديل' : 'إضافة'} القسم الإداري/الخدمي "${cleanName}" برمز (${assignedCode}) بالنظام.`,
+        type: 'success',
+        timestamp: new Date().toLocaleTimeString('ar-IQ')
+      },
+      ...prev
+    ]);
+
+    setAdminDeptName('');
+    setAdminDeptManager('');
+    setAdminDeptIp('');
+    setAdminDeptCode('');
+  };
+
+  const handleDeleteAdminDept = (id: string) => {
+    if (currentRole !== 'admin') return;
+    const target = adminDepts.find(ad => ad.id === id);
+    if (!target) return;
+    if (window.confirm(`هل أنت متأكد من حذف القسم الإداري "${target.name}" نهائياً من النظام؟`)) {
+      const updated = adminDepts.filter(ad => ad.id !== id);
+      syncAdminDepts(updated);
+      const roleKey = target.role || `admin_dept_${id}`;
+      syncRolesList(rolesList.filter(r => r.role !== roleKey));
+      const updatedCodes = { ...roleCodes };
+      delete updatedCodes[roleKey];
+      syncRoleCodes(updatedCodes);
+      addAuditLog('admin_dept_delete', 'حذف قسم إداري', `تم حذف القسم الإداري [${target.name}]`);
+      setInAppToasts(prev => [
+        {
+          id: `toast-${Date.now()}`,
+          title: 'حذف قسم إداري',
+          message: `✓ تم حذف "${target.name}" من التشكيلات الإدارية.`,
+          type: 'info',
+          timestamp: new Date().toLocaleTimeString('ar-IQ')
+        },
+        ...prev
+      ]);
+    }
+  };
+
+  // 👨‍🏫 معالجة حفظ وتعديل رؤساء الأقسام العلمية والأكاديمية
+  const handleSaveAcademicSubDept = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentRole !== 'admin') {
+      alert('⚠️ خطأ: هذه الصلاحية حصرية لمدير النظام الفعال فقط!');
+      return;
+    }
+    if (!subDeptName.trim() || !subDeptCollegeId) {
+      alert('⚠️ يرجى كتابة اسم القسم العلمي واختيار الكلية التابع لها!');
+      return;
+    }
+    const cleanName = subDeptName.trim();
+    const cleanHead = subDeptHeadName.trim() || 'شاغر';
+    const cleanIp = subDeptIp.trim() || '192.168.10.50';
+    const assignedCode = subDeptCode.trim().replace(/\D/g, '') || `45${Math.floor(10 + Math.random() * 90)}`;
+    const matchedCollege = departments.find(d => d.id === subDeptCollegeId);
+
+    if (editingSubDeptId) {
+      const updated = academicSubDepts.map(s => {
+        if (s.id === editingSubDeptId) {
+          return {
+            ...s,
+            name: cleanName,
+            collegeId: subDeptCollegeId,
+            collegeName: matchedCollege?.name,
+            headName: cleanHead,
+            ip: cleanIp,
+            defaultCode: assignedCode
+          };
+        }
+        return s;
+      });
+      syncAcademicSubDepts(updated);
+
+      const targetSub = academicSubDepts.find(s => s.id === editingSubDeptId);
+      const roleKey = targetSub?.role || `head_sub_${editingSubDeptId}`;
+      const updatedRoles = rolesList.map(r => {
+        if (r.role === roleKey) {
+          return {
+            ...r,
+            title: `رئيس ${cleanName} (${cleanHead})`,
+            departmentId: subDeptCollegeId,
+            defaultCode: assignedCode
+          };
+        }
+        return r;
+      });
+      syncRolesList(updatedRoles);
+      const updatedCodes = { ...roleCodes, [roleKey]: assignedCode };
+      syncRoleCodes(updatedCodes);
+
+      setEditingSubDeptId(null);
+      addAuditLog('subdept_update', 'تعديل قسم علمي', `تم تعديل بيانات القسم الأكاديمي [${cleanName}] بنجاح`);
+    } else {
+      const newId = `sub-${Date.now()}`;
+      const roleKey = `head_sub_${newId}`;
+      const newSub: AcademicSubDepartment = {
+        id: newId,
+        name: cleanName,
+        collegeId: subDeptCollegeId,
+        collegeName: matchedCollege?.name,
+        headName: cleanHead,
+        ip: cleanIp,
+        role: roleKey,
+        defaultCode: assignedCode
+      };
+      const updated = [...academicSubDepts, newSub];
+      syncAcademicSubDepts(updated);
+
+      const newRoleItem = {
+        role: roleKey,
+        title: `رئيس ${cleanName} (${cleanHead})`,
+        categoryName: 'رئيس قسم علمي',
+        departmentId: subDeptCollegeId,
+        defaultCode: assignedCode,
+        isCustom: true
+      };
+      syncRolesList([...rolesList, newRoleItem]);
+      syncRoleCodes({ ...roleCodes, [roleKey]: assignedCode });
+      addAuditLog('subdept_add', 'إضافة قسم علمي', `تمت إضافة وتعيين رئيس القسم العلمي [${cleanName}] برمز دخول (${assignedCode})`);
+    }
+
+    setInAppToasts(prev => [
+      {
+        id: `toast-${Date.now()}`,
+        title: editingSubDeptId ? 'تعديل قسم علمي' : 'إضافة قسم علمي',
+        message: `✓ تم بنجاح ${editingSubDeptId ? 'تعديل' : 'إضافة'} القسم العلمي "${cleanName}" برمز (${assignedCode}) بالنظام.`,
+        type: 'success',
+        timestamp: new Date().toLocaleTimeString('ar-IQ')
+      },
+      ...prev
+    ]);
+
+    setSubDeptName('');
+    setSubDeptHeadName('');
+    setSubDeptIp('');
+    setSubDeptCode('');
+  };
+
+  const handleDeleteAcademicSubDept = (id: string) => {
+    if (currentRole !== 'admin') return;
+    const target = academicSubDepts.find(s => s.id === id);
+    if (!target) return;
+    if (window.confirm(`هل أنت متأكد من حذف القسم الأكاديمي ورئيس القسم "${target.name}" نهائياً من النظام؟`)) {
+      const updated = academicSubDepts.filter(s => s.id !== id);
+      syncAcademicSubDepts(updated);
+      const roleKey = target.role || `head_sub_${id}`;
+      syncRolesList(rolesList.filter(r => r.role !== roleKey));
+      const updatedCodes = { ...roleCodes };
+      delete updatedCodes[roleKey];
+      syncRoleCodes(updatedCodes);
+      addAuditLog('subdept_delete', 'حذف قسم علمي', `تم حذف القسم الأكاديمي [${target.name}]`);
+      setInAppToasts(prev => [
+        {
+          id: `toast-${Date.now()}`,
+          title: 'حذف قسم علمي',
+          message: `✓ تم حذف "${target.name}" من كشف الأقسام العلمية.`,
+          type: 'info',
+          timestamp: new Date().toLocaleTimeString('ar-IQ')
+        },
+        ...prev
+      ]);
+    }
+  };
+
   // مصفوفات تصفية السجلات حسب صلاحيات الدور الفعال (عميد الكلية يرى ويطابق قسمه فقط)
   const filteredStudentsForRole = currentRoleConfig?.departmentId 
     ? students.filter(s => s.departmentId === currentRoleConfig.departmentId)
@@ -1605,61 +2017,86 @@ export default function App() {
               {/* تبويبات الإدارة الفرعية السلسة */}
               <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-px">
                 <button
+                  onClick={() => setAdminSubTab('deans')}
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    adminSubTab === 'deans'
+                      ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>🎓 عمادات الكليات</span>
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-black">
+                    {departments.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setAdminSubTab('dept_heads')}
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    adminSubTab === 'dept_heads'
+                      ? 'border-blue-600 text-blue-700 bg-blue-50/50 rounded-t-xl'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>👨‍🏫 رؤساء الأقسام العلمية</span>
+                  <span className="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-black">
+                    {academicSubDepts.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setAdminSubTab('admin_depts')}
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    adminSubTab === 'admin_depts'
+                      ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>🏢 الأقسام الإدارية والخدمية</span>
+                  <span className="bg-purple-100 text-purple-800 text-[10px] px-2 py-0.5 rounded-full font-black">
+                    {adminDepts.length}
+                  </span>
+                </button>
+
+                <button
                   onClick={() => setAdminSubTab('passcodes')}
-                  className={`px-4 py-2 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                     adminSubTab === 'passcodes'
-                      ? 'border-amber-600 text-amber-600'
-                      : 'border-transparent text-slate-550 hover:text-slate-800'
+                      ? 'border-amber-600 text-amber-600 bg-amber-50/50 rounded-t-xl'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   ⚙️ رموز الدخول وتجربة الصلاحيات
                 </button>
+
                 <button
                   onClick={() => setAdminSubTab('employees')}
-                  className={`px-4 py-2 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                     adminSubTab === 'employees'
-                      ? 'border-amber-600 text-amber-600'
-                      : 'border-transparent text-slate-550 hover:text-slate-800'
+                      ? 'border-amber-600 text-amber-600 bg-amber-50/50 rounded-t-xl'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  👥 حسابات الموظفين والكوادر الإدارية
+                  👥 حسابات الموظفين والكوادر
                 </button>
-                <button
-                  onClick={() => setAdminSubTab('deans')}
-                  className={`px-4 py-2 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-                    adminSubTab === 'deans'
-                      ? 'border-amber-600 text-amber-600'
-                      : 'border-transparent text-slate-550 hover:text-slate-800'
-                  }`}
-                >
-                  🎓 عمادات وحسابات الكليات والأقسام
-                </button>
-                <button
-                  onClick={() => setAdminSubTab('email_alerts')}
-                  className={`px-4 py-2 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-                    adminSubTab === 'email_alerts'
-                      ? 'border-amber-600 text-amber-600'
-                      : 'border-transparent text-slate-550 hover:text-slate-800'
-                  }`}
-                >
-                  📨 تنبيهات بريد وثائق الطلاب
-                </button>
+
                 <button
                   onClick={() => setAdminSubTab('receipt_settings')}
-                  className={`px-4 py-2 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                     adminSubTab === 'receipt_settings'
-                      ? 'border-amber-600 text-amber-600'
-                      : 'border-transparent text-slate-550 hover:text-slate-800'
+                      ? 'border-amber-600 text-amber-600 bg-amber-50/50 rounded-t-xl'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   🧾 إعدادات الوصل المالي واختيار اسم الجامعة ⚙️
                 </button>
+
                 <button
                   onClick={() => setAdminSubTab('network_settings')}
-                  className={`px-4 py-2 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                     adminSubTab === 'network_settings'
-                      ? 'border-indigo-600 text-indigo-600'
-                      : 'border-transparent text-slate-550 hover:text-slate-800'
+                      ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-xl'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   🌐 تخصيص حالة الربط والشبكة
@@ -1667,391 +2104,10 @@ export default function App() {
               </div>
 
               {/* محتوى التبويبات */}
-              {adminSubTab === 'passcodes' && (
-                <div className="space-y-6 animate-fade-in">
-                  {/* 1. تبديل وتجربة الأدوار */}
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/65 space-y-3">
-                    <h4 className="font-extrabold text-xs text-slate-800">🔄 الإجراء التقني: تبديل الموظف الفعال في الجلسة المباشرة</h4>
-                    <p className="text-xs text-slate-700 leading-relaxed">اختر أي موظف أو عميد كلية لتتقمص هويته وتستعرض فوراً الموقف الجذري وعمادته وصلاحياته المالية والإدارية المحددة:</p>
-                    
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {rolesList.map((cfg) => (
-                        <button
-                          key={cfg.role}
-                          onClick={() => {
-                            setCurrentRole(cfg.role);
-                          }}
-                          className={`text-xs px-3 py-2 rounded-xl border font-bold transition-all cursor-pointer ${
-                            currentRole === cfg.role 
-                              ? 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/10' 
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-105'
-                          }`}
-                        >
-                          {cfg.title}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* 2. تعديل الرموز السرية */}
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center flex-wrap gap-2">
-                      <div>
-                        <h4 className="font-extrabold text-xs text-slate-800">🔑 تعديل وتخصيص رموز الدخول للموظفين وعمداء الكليات</h4>
-                        <p className="text-xs text-slate-700">قم بتغيير كلمات المرور (الرموز السرية الدخول السداسية/الرباعية) للكوادر الإدارية. التحديث يتم فوراً في المتصفح ويحفظ سحابياً ومحلياً:</p>
-                      </div>
-                      <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200">
-                        مزامنة فورية ودائمة ⚡
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {rolesList.map((cfg) => {
-                        const currentCode = roleCodes[cfg.role] !== undefined ? roleCodes[cfg.role] : cfg.defaultCode;
-                        return (
-                          <div key={cfg.role} className="p-4 bg-white border border-slate-150 rounded-xl space-y-3 shadow-xs hover:border-amber-400/60 transition-all">
-                            <div className="flex justify-between items-center">
-                              <span className="font-bold text-xs text-slate-800">{cfg.title}</span>
-                              <span className="text-[10px] text-slate-700 font-bold bg-slate-105 px-2 py-0.5 rounded-sm">{cfg.categoryName}</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                maxLength={6}
-                                value={currentCode || ''}
-                                className="flex-grow bg-slate-50 border border-slate-150 font-mono font-bold text-center text-sm p-2 rounded-lg text-slate-800 focus:border-amber-500 outline-none"
-                                placeholder="مثال: 1234"
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, ''); // أرقام فقط
-                                  const updatedCodes = { ...roleCodes, [cfg.role]: val };
-                                  syncRoleCodes(updatedCodes);
-                                  const updatedRoles = rolesList.map(r => r.role === cfg.role ? { ...r, defaultCode: val } : r);
-                                  syncRolesList(updatedRoles);
-                                }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const val = roleCodes[cfg.role] || cfg.defaultCode;
-                                  const updatedCodes = { ...roleCodes, [cfg.role]: val };
-                                  syncRoleCodes(updatedCodes);
-                                  const updatedRoles = rolesList.map(r => r.role === cfg.role ? { ...r, defaultCode: val } : r);
-                                  syncRolesList(updatedRoles);
-                                  addAuditLog('passcode_update', 'تعديل رمز الدخول', `تم تحديث الرمز السري لـ [${cfg.title}] إلى (${val}) وحفظه بالسيرفر`);
-                                  setInAppToasts(prev => [
-                                    {
-                                      id: `toast-${Date.now()}`,
-                                      title: 'تحديث الرمز السري',
-                                      message: `✓ تم حفظ وتثبيت الرمز السري (${val}) بنجاح لـ: ${cfg.title}.`,
-                                      type: 'success',
-                                      timestamp: new Date().toLocaleTimeString('ar-IQ')
-                                    },
-                                    ...prev
-                                  ]);
-                                  alert(`✓ تم حفظ وتثبيت الرمز السري بنجاح لـ: ${cfg.title} (${val})`);
-                                }}
-                                className="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer shadow-sm shadow-amber-600/10"
-                              >
-                                تحديث وحفظ
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {adminSubTab === 'employees' && (
-                <div className="space-y-6 animate-fade-in">
-                  
-                  {/* أ) فورم لإضافة موظف جديد */}
-                  <form onSubmit={handleAddStaff} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                    <h4 className="font-extrabold text-sm text-slate-800 flex items-center gap-2">
-                      <UserPlus className="w-5 h-5 text-amber-600" />
-                      <span>إضافة موظف/عضو كادر إداري جديد بنظام الصلاحيات</span>
-                    </h4>
-                    <p className="text-xs text-slate-550 leading-relaxed">تتيح لك هذه الأداة تسجيل موظف جديد، وتحديد صلاحياته (هل يتبع لعمادة كاملة أو عميد قسم الكلية الأكاديمي)، لمنحهم مساحة عمل مخصصة للدخول بالرمز الفردي:</p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-slate-800 font-extrabold block">الاسم والصفة الوظيفية:</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="مثال: د. صفاء أحمد الهاشمي"
-                          value={newStaffTitle}
-                          onChange={(e) => setNewStaffTitle(e.target.value)}
-                          className="w-full bg-white border border-slate-300 text-xs font-bold p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-slate-800 font-extrabold block">الفئة وسلطة الصلاحية:</label>
-                        <select
-                          value={newStaffCategory}
-                          onChange={(e) => setNewStaffCategory(e.target.value)}
-                          className="w-full bg-white border border-slate-300 text-xs font-bold p-2.5 rounded-lg text-slate-800 cursor-pointer outline-none focus:border-amber-500"
-                        >
-                          <option value="العمادة والتسجيل العام">العمادة والتسجيل العام</option>
-                          <option value="القسم الحسابي والمالي العام">القسم الحسابي والمالي العام</option>
-                          <option value="عميد كلية جديد">عميد كلية جديد (مشاهد ومصادقة)</option>
-                          <option value="معاون إداري">معاون إداري</option>
-                        </select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-slate-800 font-extrabold block">الكلية الأكاديمية المرتبطة:</label>
-                        <select
-                          value={newStaffDept}
-                          onChange={(e) => setNewStaffDept(e.target.value)}
-                          className="w-full bg-white border border-slate-300 text-xs font-bold p-2.5 rounded-lg text-slate-800 cursor-pointer outline-none focus:border-amber-500"
-                        >
-                          <option value="">لا توجد كلية محددة (دخول إداري عام)</option>
-                          {departments.map(d => (
-                            <option key={d.id} value={d.id}>{d.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-xs text-slate-800 font-extrabold block">الرمز السري الخاص بالدخول (رقمي):</label>
-                        <input
-                          type="text"
-                          maxLength={6}
-                          required
-                          placeholder="مثال: 5566"
-                          value={newStaffCode}
-                          onChange={(e) => setNewStaffCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full bg-white border border-slate-300 text-xs font-mono font-black text-center p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
-                        />
-                      </div>
-                      <div className="md:col-span-1 flex items-end">
-                        <button
-                          type="submit"
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs p-3 rounded-xl transition-all shadow-md shadow-emerald-600/10 flex items-center justify-center gap-2 cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>تسجيل الكادر وتفعيل الرمز فوراً</span>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-
-                  {/* ب) دليل الكوادر النشطين مع إمكانية حذف الموظف */}
-                  <div className="space-y-3">
-                    <h4 className="font-extrabold text-xs text-slate-800">📋 دليل كوادر الجامعة النشطين حالياً وإمكانية سحب صلاحياتهم:</h4>
-                    <div className="overflow-x-auto rounded-xl border border-slate-150 shadow-xs text-right">
-                      <table className="w-full text-right text-xs">
-                        <thead>
-                          <tr className="bg-slate-50 text-slate-800 border-b border-slate-150 font-bold">
-                            <th className="p-3.5">الاسم والصفة الوظيفية للموظف</th>
-                            <th className="p-3.5">تصنيف الصلاحيات العامة</th>
-                            <th className="p-3.5">رمز المرور الحالي للتسجيل</th>
-                            <th className="p-3.5">الدائرة/الكلية الأكاديمية للجامعة</th>
-                            <th className="p-3.5 text-center">الإجراء والتحكم</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
-                          {rolesList.map((cfg) => {
-                            const currentCode = roleCodes[cfg.role] || cfg.defaultCode;
-                            return (
-                              <tr key={cfg.role} className="hover:bg-slate-50/50 transition-colors">
-                                <td className="p-3.5 font-bold text-slate-800">{cfg.title}</td>
-                                <td className="p-3.5">
-                                  <span className="bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md font-bold text-[10px]">
-                                    {cfg.categoryName}
-                                  </span>
-                                </td>
-                                <td className="p-3.5 font-mono font-black text-amber-600">
-                                  {cfg.role === 'admin' ? currentCode : '••••'}
-                                </td>
-                                <td className="p-3.5 text-slate-550 font-medium">
-                                  {cfg.departmentId 
-                                    ? (departments.find(d => d.id === cfg.departmentId)?.name || cfg.departmentId)
-                                    : 'كل الكليات (دخول مركزي)'}
-                                </td>
-                                <td className="p-3.5 text-center">
-                                  {cfg.role === 'admin' ? (
-                                    <span className="text-slate-700 text-[10px] font-bold">حساب نظام أساسي محمي</span>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDeleteStaff(cfg.role)}
-                                      className="p-1.5 px-3 bg-red-50 hover:bg-red-100 text-red-650 hover:text-red-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 mx-auto active:scale-95"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                      <span>فصل الكادر وحذف الصلاحية</span>
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* 🏢 وحدة التحكم المفعلة لإضافة وحذف أقسام الجامعة الأكاديمية (الكليات) */}
-                  <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 mt-6">
-                    <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-                      <Building className="w-5 h-5 text-amber-600 animate-pulse animate-bounce" />
-                      <div>
-                        <h4 className="font-extrabold text-sm text-slate-800">🏢 إدارة الأقسام الأكاديمية وكليات الجامعة (إضافة وحذف فوري)</h4>
-                        <p className="text-slate-700 text-[10px]">بصفتك مدير النظام، يمكنك إضافة كليات/أقسام جديدة بخصائص متفردة، أو تصفية وحذف الأقسام والمحطات نهائياً</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                      
-                      {/* نموذج الإضافة */}
-                      <form onSubmit={handleSaveCollegeAndStation} className="lg:col-span-5 bg-white p-4 rounded-xl border border-slate-200 space-y-4">
-                        <span className="font-black text-xs text-slate-700 block border-b pb-2 mb-2">✨ إضافة كرت كلية/قسم جديد ومحطته السيرفرية</span>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                          <div className="space-y-1">
-                            <label className="font-bold text-slate-700 block">اسم الكلية / القسم الجديد:</label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="مثال: هندسة المعدات الطبية"
-                              value={newCollegeName}
-                              onChange={(e) => setNewCollegeName(e.target.value)}
-                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 outline-none focus:border-amber-500"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="font-bold text-slate-700 block">عنوان حاسبوها IP VLAN الرقمي:</label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="مثال: 192.168.20.10"
-                              value={newCollegeIp}
-                              onChange={(e) => setNewCollegeIp(e.target.value)}
-                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono outline-none focus:border-amber-500"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="font-bold text-slate-700 block">القسط السنوي للدراسة الصباحية (د.ع):</label>
-                            <input
-                              type="number"
-                              required
-                              value={newCollegeMorningFee}
-                              onChange={(e) => setNewCollegeMorningFee(Number(e.target.value))}
-                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono outline-none focus:border-amber-500"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="font-bold text-slate-700 block">القسط السنوي للدراسة المسائية (د.ع):</label>
-                            <input
-                              type="number"
-                              required
-                              value={newCollegeEveningFee}
-                              onChange={(e) => setNewCollegeEveningFee(Number(e.target.value))}
-                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono outline-none focus:border-amber-500"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="font-bold text-slate-700 block">عدد سنوات الدراسة بالقسم:</label>
-                            <input
-                              type="number"
-                              required
-                              min="1"
-                              max="6"
-                              value={newCollegeYears}
-                              onChange={(e) => setNewCollegeYears(Number(e.target.value))}
-                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono outline-none focus:border-amber-500"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="font-bold text-slate-700 block">المقاعد الدراسية المتاحة كحد أقصى:</label>
-                            <input
-                              type="number"
-                              required
-                              value={newCollegeSeats}
-                              onChange={(e) => setNewCollegeSeats(Number(e.target.value))}
-                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono outline-none focus:border-amber-500"
-                            />
-                          </div>
-
-                          <div className="space-y-1 sm:col-span-2">
-                            <label className="font-bold text-slate-700 block">رمز دخول الكلية السري (Passcode):</label>
-                            <input
-                              type="text"
-                              maxLength={6}
-                              placeholder="مثال: 4430 (يتم توليده تلقائياً في حال تركه فارغاً)"
-                              value={newCollegeCode}
-                              onChange={(e) => setNewCollegeCode(e.target.value.replace(/\D/g, ''))}
-                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono text-center font-bold outline-none focus:border-amber-500"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="pt-2">
-                          <button
-                            type="submit"
-                            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs p-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-amber-600/10 flex items-center justify-center gap-1.5 active:scale-95"
-                          >
-                            <Plus className="w-4 h-4" />
-                            <span>{editingDeptId ? 'تحديث وحفظ بيانات القسم الأكاديمي الحالي' : 'إنشاء وتفعيل القسم الأكاديمي والـ IP فوراً'}</span>
-                          </button>
-                        </div>
-                      </form>
-
-                      {/* جدول الأقسام الحالية والحذف الفوري */}
-                      <div className="lg:col-span-7 bg-white p-4 rounded-xl border border-slate-200 space-y-3">
-                        <span className="font-black text-xs text-slate-700 block border-b pb-2">📋 كشف الأقسام الأكاديمية والكليات الفعالة حالياً</span>
-                        <div className="overflow-x-auto max-h-[300px] overflow-y-auto rounded-lg border border-slate-150 text-right">
-                          <table className="w-full text-right text-xs">
-                            <thead>
-                              <tr className="bg-slate-50 text-slate-800 border-b border-slate-150 font-bold sticky top-0">
-                                <th className="p-2.5 text-right">اسم الكلية / القسم</th>
-                                <th className="p-2.5 text-right font-mono">محطة الـ IP VLAN</th>
-                                <th className="p-2.5 text-right font-mono">سنوات التخرج</th>
-                                <th className="p-2.5 text-right">القسط الصباحي</th>
-                                <th className="p-2.5 text-center">حذف القسم بالكامل</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                              {departments.map((dept) => {
-                                const collegeIp = collegeIps[dept.id] || '192.168.1.100';
-                                return (
-                                  <tr key={dept.id} className="hover:bg-slate-50/50">
-                                    <td className="p-2.5 text-right font-bold text-slate-800">{dept.name}</td>
-                                    <td className="p-2.5 text-right font-mono font-bold text-indigo-700">{collegeIp}</td>
-                                    <td className="p-2.5 text-right font-mono text-slate-700">{dept.durationYears} سنوات</td>
-                                    <td className="p-2.5 text-right font-mono text-emerald-650 font-bold">{(dept.annualFeeMorning || 0).toLocaleString()} د.ع</td>
-                                    <td className="p-2.5 text-center">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDeleteCollegeEntirely(dept.id)}
-                                        className="p-1 px-2.5 bg-red-50 hover:bg-red-100 text-red-650 hover:text-red-700 rounded-md text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1 mx-auto active:scale-95 border border-red-200"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                        <span>مسح القسم</span>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
+              {/* 1. 🎓 عمادات الكليات */}
               {adminSubTab === 'deans' && (
                 <div className="space-y-6 animate-fade-in text-right">
-                  
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
                     {/* أ) فورم تكليف عميد جديد */}
@@ -2259,18 +2315,18 @@ export default function App() {
                         </button>
                       </div>
                     </form>
-
                   </div>
 
-                  {/* ب) شبكة حاسبات الكوادر والكليات */}
+                  {/* كشف الكليات والعمادات */}
                   <div className="space-y-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-2 gap-2">
                       <h4 className="font-extrabold text-xs text-slate-800 flex items-center gap-2">
-                        <span>🖥️ السيرفر والشبكة التفاعلية لحسابات الكليات ومحطاتها الرقمية الفعالة (IPs & Passcodes)</span>
-                        <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-black animate-pulse">غرفة المراقبة والتحكم المباشر للتسجيل</span>
+                        <span>🏛️ شبكة عمادات الكليات المعتمدة ومحطاتها الرقمية</span>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full font-black border border-emerald-200">
+                          {departments.length} كلية فعالة
+                        </span>
                       </h4>
-
-                      <span className="text-xs text-slate-700 font-bold font-mono">الشبكة: SECURE VLAN-COLLEGE_CENTRAL_GATEWAY</span>
+                      <span className="text-xs text-slate-500 font-bold font-mono">الشبكة: SECURE VLAN-COLLEGE_CENTRAL_GATEWAY</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -2279,8 +2335,6 @@ export default function App() {
                         const deanRole = `head_${dept.id}`;
                         const dean = rolesList.find(r => r.departmentId === dept.id);
                         const code = roleCodes[deanRole] || (dean ? dean.defaultCode : '');
-                        
-                        // الطلاب المقبولين في هذه الكلية تحديداً
                         const deptStudents = students.filter(s => s.departmentId === dept.id);
 
                         return (
@@ -2293,8 +2347,6 @@ export default function App() {
                             }`}
                           >
                             <div className="space-y-3">
-                              
-                              {/* ترويسة الحاسب */}
                               <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-2">
                                   <div className={`p-2 rounded-xl text-lg font-bold ${dean ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-500'}`}>
@@ -2302,7 +2354,7 @@ export default function App() {
                                   </div>
                                   <div>
                                     <h5 className="font-extrabold text-xs text-slate-800">{dept.name}</h5>
-                                    <span className="text-[9px] text-slate-700 font-bold block mt-0.5">VLAN Station IP</span>
+                                    <span className="text-[9px] text-slate-500 font-bold block mt-0.5">VLAN Station IP</span>
                                   </div>
                                 </div>
                                 <span className="font-mono text-[9px] bg-slate-900 text-emerald-400 border border-slate-850 px-2 py-0.5 rounded-lg font-black tracking-wider">
@@ -2312,56 +2364,32 @@ export default function App() {
 
                               <div className="p-3 bg-white border border-slate-150 rounded-2xl space-y-2 text-[11px] font-sans shadow-3xs">
                                 <div className="flex justify-between">
-                                  <span className="text-slate-550 font-bold text-[10px]">العميد المسؤول:</span>
-                                  <span className={`font-black ${dean ? 'text-slate-800' : 'text-red-550 border-b border-dashed border-red-200'}`}>
+                                  <span className="text-slate-500 font-bold text-[10px]">العميد المسؤول:</span>
+                                  <span className={`font-black ${dean ? 'text-slate-800' : 'text-red-500 border-b border-dashed border-red-200'}`}>
                                     {dean ? dept.headOfDepartment : '⚠️ شاغر - لم يُعين'}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-slate-550 font-bold text-[10px]">رمز الدخول (Passcode):</span>
+                                  <span className="text-slate-500 font-bold text-[10px]">رمز الدخول (Passcode):</span>
                                   <span className="font-mono text-amber-600 font-black bg-slate-100 px-1.5 py-0.5 rounded">
                                     {code || 'معلّق'}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-slate-550 font-bold text-[10px]">حاسبة السيرفر:</span>
-                                  <span className="flex items-center gap-1">
-                                    <span className={`w-1.5 h-1.5 rounded-full ${dean ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                                    <span className={`text-[10px] font-bold ${dean ? 'text-emerald-700' : 'text-red-500'}`}>
-                                      {dean ? 'متصل وآمن 🟢' : 'غير نشط 🔴'}
-                                    </span>
+                                  <span className="text-slate-500 font-bold text-[10px]">القسط الصباحي / المسائي:</span>
+                                  <span className="font-mono text-slate-700 font-bold text-[10px]">
+                                    {(dept.annualFeeMorning || 0).toLocaleString()} / {(dept.annualFeeEvening || 0).toLocaleString()} د.ع
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-slate-500 font-bold text-[10px]">المقاعد المسجلة:</span>
+                                  <span className="font-mono text-indigo-700 font-bold">
+                                    {deptStudents.length} / {dept.availableSeats || 100}
                                   </span>
                                 </div>
                               </div>
-
-                              {/* قائمة أسماء المقبولين في هذه الكلية تحديداً */}
-                              <div className="space-y-1.5 font-sans">
-                                <div className="flex justify-between items-center text-[10px] text-slate-700 font-bold">
-                                  <span>📥 قيد الأسماء المقبولة محلياً:</span>
-                                  <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-black">
-                                    {deptStudents.length} طالب
-                                  </span>
-                                </div>
-
-                                {deptStudents.length === 0 ? (
-                                  <div className="p-2 border border-dashed border-slate-200 bg-white text-center text-[9px] text-slate-700 rounded-lg">
-                                    لا يوجد طلاب مقبولين في هذه الكلية حالياً
-                                  </div>
-                                ) : (
-                                  <div className="bg-white border border-slate-150 rounded-xl max-h-[100px] overflow-y-auto divide-y divide-slate-100 text-[10px] font-medium p-1">
-                                    {deptStudents.map(student => (
-                                      <div key={student.id} className="p-1 px-2 flex justify-between items-center hover:bg-slate-50">
-                                        <span className="text-slate-800 font-bold truncate max-w-[120px]">{student.name}</span>
-                                        <span className="font-mono text-[9px] text-slate-700">{student.id}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
                             </div>
 
-                            {/* أزرار الإجراء والتحكم للحذف والتوليد الفوري */}
                             <div className="pt-2 border-t border-slate-100 flex gap-1.5">
                               {dean ? (
                                 <button
@@ -2370,7 +2398,7 @@ export default function App() {
                                   className="flex-1 p-1.5 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                                  <span>فصل وسحب الصلاحية</span>
+                                  <span>فصل العميد</span>
                                 </button>
                               ) : (
                                 <button
@@ -2378,13 +2406,13 @@ export default function App() {
                                   onClick={() => {
                                     setFormDeanDept(dept.id);
                                     setFormDeanName('');
-                                    setFormDeanCode(String(Math.floor(1000 + Math.random() * 9000))); // توليد كود تلقائي عشوائي
+                                    setFormDeanCode(String(Math.floor(1000 + Math.random() * 9000)));
                                     window.scrollTo({ top: 350, behavior: 'smooth' });
                                   }}
                                   className="flex-1 p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
                                 >
                                   <Plus className="w-3.5 h-3.5 shrink-0" />
-                                  <span>تكليف عميد فوراً وكود سريع</span>
+                                  <span>تكليف عميد</span>
                                 </button>
                               )}
                               <button
@@ -2400,7 +2428,7 @@ export default function App() {
                                   window.scrollTo({ top: 350, behavior: "smooth" });
                                 }}
                                 className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg text-[11px] transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
-                                title="تعديل تفاصيل الكلية ورسومها تماماً"
+                                title="تعديل تفاصيل الكلية"
                               >
                                 📝
                               </button>
@@ -2408,150 +2436,518 @@ export default function App() {
                                 type="button"
                                 onClick={() => handleDeleteCollegeEntirely(dept.id)}
                                 className="p-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-[11px] transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
-                                title="مسح الكلية ومحطتها تماماً من السيرفر"
+                                title="مسح الكلية بالكامل"
                               >
                                 <Trash2 className="w-3.5 h-3.5 text-red-550" />
                               </button>
                             </div>
-
                           </div>
                         );
                       })}
                     </div>
                   </div>
-
                 </div>
               )}
 
-              {adminSubTab === 'email_alerts' && (
+              {/* 2. 👨‍🏫 رؤساء الأقسام العلمية */}
+              {adminSubTab === 'dept_heads' && (
                 <div className="space-y-6 animate-fade-in text-right">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* لوحة التحكم بالإرسال التلقائي للبريد والـ Push Notifications */}
-                    <div className="lg:col-span-6 bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 space-y-4 shadow-lg flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <h4 className="font-extrabold text-xs text-amber-400 flex items-center gap-2 font-sans">
-                          <Mail className="w-5 h-5 text-amber-500 shrink-0 animate-pulse" />
-                          <span>بث تنبيهات البريد الإلكتروني وإشعارات الحوسبة 📨</span>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* فورم إضافة / تعديل قسم علمي ورئيس القسم */}
+                    <form 
+                      onSubmit={handleSaveAcademicSubDept}
+                      className="lg:col-span-5 bg-white text-slate-900 p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm"
+                    >
+                      <div className="space-y-2 border-b border-slate-100 pb-3">
+                        <h4 className="font-black text-sm text-blue-700 flex items-center gap-2">
+                          <Building className="w-5 h-5 text-blue-600 shrink-0" />
+                          <span>{editingSubDeptId ? '📝 تعديل القسم العلمي ورئيس القسم' : '➕ تسجيل قسم علمي ورئيس قسم جديد'}</span>
                         </h4>
-                        <p className="text-slate-300 text-[10px] leading-relaxed font-sans">
-                          فحص شامل لقاعدة البيانات الأمنية لجميع الطلاب المسجلين بالجامعة ومقارنتها بالوقت الحالي لإشعارهم ببريد فوري وتنبيههم لتجديد الوثائق منتهية الصلاحية.
+                        <p className="text-slate-600 text-xs leading-relaxed font-medium">
+                          إضافة الأقسام العلمية التخصصية وربطها بالكلية المعنية وتعيين رئيس القسم ورمز الدخول الخاص به.
                         </p>
                       </div>
 
-                      <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 font-sans">
-                        <div className="flex justify-between items-center text-[10px]">
-                          <span className="text-slate-700">حالة الخدمة بالسيرفر:</span>
-                          <span className="text-emerald-400 font-bold flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                            <span>متصل وآمن 🟢</span>
-                          </span>
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <label className="text-xs font-black text-slate-800 block">اسم القسم العلمي التخصصي:</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="مثال: قسم جراحة الفم والأسنان"
+                            value={subDeptName}
+                            onChange={(e) => setSubDeptName(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold"
+                          />
                         </div>
-                        <div className="flex justify-between items-center text-[10px] border-t border-slate-900 pt-2">
-                          <span className="text-slate-700">تاريخ الفحص الأمني التلقائي الفعال:</span>
-                          <span className="font-mono font-bold text-amber-400">{SYSTEM_CURRENT_DATE}</span>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-black text-slate-800 block">الكلية الأكاديمية التابع لها:</label>
+                          <select
+                            required
+                            value={subDeptCollegeId}
+                            onChange={(e) => setSubDeptCollegeId(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold cursor-pointer"
+                          >
+                            <option value="">-- اختر الكلية التابع لها --</option>
+                            {departments.map(d => (
+                              <option key={d.id} value={d.id}>{d.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-black text-slate-800 block">اسم رئيس القسم العلمي (الدكتور):</label>
+                          <input
+                            type="text"
+                            placeholder="مثال: د. رائد فؤاد الحكيم"
+                            value={subDeptHeadName}
+                            onChange={(e) => setSubDeptHeadName(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-xs font-black text-slate-800 block">عنوان IP المحطة:</label>
+                            <input
+                              type="text"
+                              placeholder="192.168.10.21"
+                              value={subDeptIp}
+                              onChange={(e) => setSubDeptIp(e.target.value)}
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 font-mono text-center rounded-xl text-blue-700 font-bold outline-none focus:bg-white focus:border-blue-500"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-black text-slate-800 block">رمز الدخول (Passcode):</label>
+                            <input
+                              type="text"
+                              maxLength={6}
+                              placeholder="4501"
+                              value={subDeptCode}
+                              onChange={(e) => setSubDeptCode(e.target.value.replace(/\D/g, ''))}
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 font-mono text-center rounded-xl text-amber-600 font-black outline-none focus:bg-white focus:border-blue-500"
+                            />
+                          </div>
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => triggerAutoEmailAlerts(false)}
-                        className="w-full bg-amber-600 hover:bg-amber-700 active:scale-95 text-slate-950 font-black text-xs py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer font-sans"
-                      >
-                        <Mail className="w-4 h-4 shrink-0" />
-                        <span>إرسال وتحديث تنبيهات بريد الوثائق 📧</span>
-                      </button>
-                    </div>
-
-                    {/* لوحة تجديد وبث إشعارات المتصفح المباشرة (System Push Notifications) */}
-                    <div className="lg:col-span-6 bg-slate-900 border border-slate-800 text-white p-5 rounded-3xl space-y-4 shadow-lg flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <h4 className="font-extrabold text-xs text-indigo-400 flex items-center gap-2 font-sans">
-                          <Bell className="w-5 h-5 text-indigo-500 shrink-0 animate-bounce" />
-                          <span>تنبيهات المتصفح وإشعارات الـ UI الفورية (Push Alerts) 🔔</span>
-                        </h4>
-                        <p className="text-slate-350 text-[10px] leading-relaxed font-sans">
-                          أطلق تنبيهاً فورياً للمتصفح يعلمك بكامل أسماء وتفاصيل الطلاب الذين لديهم وثائق منتهية الصلاحية أو حرجة للتحقق منها وتحديث ملفات الطلاب قبل الحظر الفني.
-                        </p>
-                      </div>
-
-                      <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2 font-sans">
-                        <div className="flex justify-between items-center text-[10px]">
-                          <span className="text-slate-700">تفويض إشعار المتصفح المحقق:</span>
-                          <span className={`font-bold font-mono px-2 py-0.5 rounded ${
-                            notificationPermission === 'granted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-500'
-                          }`}>
-                            {notificationPermission === 'granted' ? 'مسموح به (Granted) 🟢' : 'معطل أو محظور (Default/Denied) 🔴'}
-                          </span>
-                        </div>
-                        {notificationPermission !== 'granted' && (
+                      <div className="flex gap-2 pt-2">
+                        {editingSubDeptId && (
                           <button
                             type="button"
-                            onClick={requestNotificationPermission}
-                            className="w-full text-center mt-2 text-[10px] bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 py-1 rounded-lg border border-indigo-500/20 font-bold transition-all cursor-pointer font-sans"
+                            onClick={() => {
+                              setEditingSubDeptId(null);
+                              setSubDeptName('');
+                              setSubDeptCollegeId('');
+                              setSubDeptHeadName('');
+                              setSubDeptIp('');
+                              setSubDeptCode('');
+                            }}
+                            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-all cursor-pointer"
                           >
-                            طلب تصريح الإشعارات من المتصفح 📡
+                            إلغاء ✕
                           </button>
                         )}
+                        <button
+                          type="submit"
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-blue-600/10 flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>{editingSubDeptId ? 'حفظ التعديلات' : 'تسجيل القسم العلمي فوراً'}</span>
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* كشف الأقسام العلمية المسجلة */}
+                    <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+                      <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <h4 className="font-extrabold text-sm text-slate-800 flex items-center gap-2">
+                          <span>📋 كشف الأقسام العلمية التخصصية ورؤسائها</span>
+                          <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold text-xs border border-blue-200">
+                            {academicSubDepts.length} قسم علمي
+                          </span>
+                        </h4>
                       </div>
 
-                      <div className="flex gap-2.5 font-sans">
-                        <button
-                          type="button"
-                          onClick={triggerTestNotification}
-                          className="flex-1 bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer border border-slate-700"
-                        >
-                          🧪 تشغيل فحص وهمي للاختبار
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => triggerDocumentExpiryPushNotifications(false)}
-                          className="flex-1 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-xs py-2.5 rounded-xl transition-all shadow-md cursor-pointer"
-                        >
-                          📣 فحص وبث إشعارات الطلاب 📣
-                        </button>
+                      <div className="overflow-x-auto rounded-2xl border border-slate-150 text-right">
+                        <table className="w-full text-right text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 text-slate-800 border-b border-slate-150 font-bold">
+                              <th className="p-3 text-right">القسم العلمي</th>
+                              <th className="p-3 text-right">الكلية التابع لها</th>
+                              <th className="p-3 text-right">رئيس القسم (الدكتور)</th>
+                              <th className="p-3 text-center font-mono">الرمز السري</th>
+                              <th className="p-3 text-center">التحكم</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {academicSubDepts.length === 0 ? (
+                              <tr>
+                                <td colSpan={5} className="p-6 text-center text-slate-400 font-bold">
+                                  لا توجد أقسام علمية مسجلة حالياً
+                                </td>
+                              </tr>
+                            ) : (
+                              academicSubDepts.map((sub) => {
+                                const college = departments.find(d => d.id === sub.collegeId);
+                                const roleKey = sub.role || `head_sub_${sub.id}`;
+                                const code = roleCodes[roleKey] || sub.defaultCode || '4500';
+                                return (
+                                  <tr key={sub.id} className="hover:bg-slate-50/60 transition-colors">
+                                    <td className="p-3 font-bold text-slate-900">{sub.name}</td>
+                                    <td className="p-3 text-blue-700 font-bold">{college?.name || sub.collegeName || 'عام'}</td>
+                                    <td className="p-3 text-slate-700 font-medium">{sub.headName || 'شاغر'}</td>
+                                    <td className="p-3 text-center font-mono font-black text-amber-600 bg-amber-50/50">
+                                      {code}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <div className="flex items-center justify-center gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setEditingSubDeptId(sub.id);
+                                            setSubDeptName(sub.name);
+                                            setSubDeptCollegeId(sub.collegeId);
+                                            setSubDeptHeadName(sub.headName || '');
+                                            setSubDeptIp(sub.ip || '');
+                                            setSubDeptCode(code);
+                                          }}
+                                          className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                          title="تعديل"
+                                        >
+                                          📝
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteAcademicSubDept(sub.id)}
+                                          className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                          title="حذف"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
 
-                  {/* تقرير سجل إرسال البريد الأمني وحوسبة السجلات */}
-                  <div className="space-y-3">
-                    <h4 className="font-extrabold text-xs text-slate-800 flex items-center gap-2 font-sans">
-                      <span>📜 السجل الموثق ومحاكاة رسائل البريد الإلكتروني المحوسبة (Email Logs)</span>
-                      <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-black">غرفة الأرشيف المركزي</span>
-                    </h4>
+              {/* 3. 🏢 الأقسام الإدارية والخدمية (غير التدريسية) */}
+              {adminSubTab === 'admin_depts' && (
+                <div className="space-y-6 animate-fade-in text-right">
+                  
+                  {/* تنبيه وشرح طبيعة الأقسام الإدارية */}
+                  <div className="p-4 bg-purple-50 border border-purple-200 rounded-2xl flex items-center gap-3">
+                    <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl text-lg shrink-0">
+                      ℹ️
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-xs text-purple-900">الأقسام والمديريات الإدارية والخدمية (غير التدريسية)</h4>
+                      <p className="text-[11px] text-purple-700 font-medium mt-0.5">
+                        هذه التشكيلات الإدارية لا تحتاج إلى طلاب أو أقساط دراسية. تعمل كمراكز للخدمات، الشؤون الإدارية، القانونية، الإعلام، الصيانة، المختبرات، والمتابعة.
+                      </p>
+                    </div>
+                  </div>
 
-                    {emailLogs.length === 0 ? (
-                      <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-center text-slate-700 rounded-3xl text-xs space-y-2 font-sans">
-                        <Mail className="w-8 h-8 text-slate-300 mx-auto animate-pulse" />
-                        <p className="font-bold">لم يتم تسجيل أي إرسال أو بث بريدي تلقائي في هذه الجلسة</p>
-                        <p className="text-[10px] text-slate-700">انقر فوق زر "إرسال وتحديث تنبيهات البريد" لبدء الحوسبة التلقائية</p>
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* فورم إضافة / تعديل قسم إداري */}
+                    <form 
+                      onSubmit={handleSaveAdminDept}
+                      className="lg:col-span-5 bg-white text-slate-900 p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm"
+                    >
+                      <div className="space-y-2 border-b border-slate-100 pb-3">
+                        <h4 className="font-black text-sm text-purple-700 flex items-center gap-2">
+                          <Building className="w-5 h-5 text-purple-600 shrink-0" />
+                          <span>{editingAdminDeptId ? '📝 تعديل بيانات القسم الإداري' : '➕ إضافة قسم / مديرية إدارية جديدة'}</span>
+                        </h4>
+                        <p className="text-slate-600 text-xs leading-relaxed font-medium">
+                          أدخل اسم القسم الإداري، المسؤول عنه، ونوع النشاط لإنشاء حساب وتوليد رمز دخول فوري.
+                        </p>
                       </div>
-                    ) : (
-                      <div className="bg-white border border-slate-150 rounded-2xl overflow-hidden shadow-xs divide-y divide-slate-100 max-h-[400px] overflow-y-auto font-sans">
-                        {emailLogs.map((log) => (
-                          <div key={log.id} className="p-4 hover:bg-slate-50/50 transition-colors space-y-2">
-                            <div className="flex flex-col md:flex-row justify-between md:items-center text-xs gap-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="bg-slate-900 text-emerald-400 px-2 py-0.5 rounded-md font-mono text-[9px] font-black border border-slate-850">
-                                  {log.studentId}
-                                </span>
-                                <span className="font-extrabold text-slate-800">{log.studentName}</span>
-                                <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-sm text-[10px] font-bold">
-                                  {log.docName}
-                                </span>
-                              </div>
-                              <span className="font-mono text-[10px] text-slate-700 font-bold">{log.timestamp}</span>
-                            </div>
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-800 text-xs font-mono font-medium leading-relaxed">
-                              {log.content}
-                            </div>
+
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <label className="text-xs font-black text-slate-800 block">اسم القسم أو المديرية الإدارية:</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="مثال: قسم الموارد البشرية والذاتية"
+                            value={adminDeptName}
+                            onChange={(e) => setAdminDeptName(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 font-bold"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-black text-slate-800 block">اسم المسؤول / مدير القسم:</label>
+                          <input
+                            type="text"
+                            placeholder="مثال: أ. حسام كريم العبيدي"
+                            value={adminDeptManager}
+                            onChange={(e) => setAdminDeptManager(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 font-bold"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-black text-slate-800 block">تصنيف النشاط والمهام:</label>
+                          <select
+                            value={adminDeptCategory}
+                            onChange={(e) => setAdminDeptCategory(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 font-bold cursor-pointer"
+                          >
+                            <option value="شؤون إدارية وتوظيف">شؤون إدارية وتوظيف</option>
+                            <option value="استشارات وتحقيق قانوني">استشارات وتحقيق قانوني</option>
+                            <option value="علاقات وإعلام جامعي">علاقات وإعلام جامعي</option>
+                            <option value="خدمات وتشغيل هندسي">خدمات وتشغيل هندسي وصيانة</option>
+                            <option value="مختبرات وتجهيز تقني">مختبرات وورش وتجهيز تقني</option>
+                            <option value="تدقيق مالي وإداري">تدقيق ورقابة مالية وإدارية</option>
+                            <option value="أنظمة وشبكات">أنظمة حاسوب وتكنولوجيا المعلومات</option>
+                            <option value="شؤون إدارية وخدمات">شؤون إدارية وخدمات عامة</option>
+                          </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-xs font-black text-slate-800 block">عنوان IP المحطة:</label>
+                            <input
+                              type="text"
+                              placeholder="192.168.1.30"
+                              value={adminDeptIp}
+                              onChange={(e) => setAdminDeptIp(e.target.value)}
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 font-mono text-center rounded-xl text-purple-700 font-bold outline-none focus:bg-white focus:border-purple-500"
+                            />
                           </div>
-                        ))}
+                          <div className="space-y-1">
+                            <label className="text-xs font-black text-slate-800 block">رمز الدخول (Passcode):</label>
+                            <input
+                              type="text"
+                              maxLength={6}
+                              placeholder="3310"
+                              value={adminDeptCode}
+                              onChange={(e) => setAdminDeptCode(e.target.value.replace(/\D/g, ''))}
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 font-mono text-center rounded-xl text-amber-600 font-black outline-none focus:bg-white focus:border-purple-500"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    )}
+
+                      <div className="flex gap-2 pt-2">
+                        {editingAdminDeptId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingAdminDeptId(null);
+                              setAdminDeptName('');
+                              setAdminDeptManager('');
+                              setAdminDeptIp('');
+                              setAdminDeptCode('');
+                            }}
+                            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-all cursor-pointer"
+                          >
+                            إلغاء ✕
+                          </button>
+                        )}
+                        <button
+                          type="submit"
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-purple-600/10 flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>{editingAdminDeptId ? 'حفظ التعديلات' : 'تسجيل القسم الإداري'}</span>
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* كشف الأقسام الإدارية والخدمية */}
+                    <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+                      <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <h4 className="font-extrabold text-sm text-slate-800 flex items-center gap-2">
+                          <span>🏢 دليل الأقسام والمديريات الإدارية والخدمية</span>
+                          <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-bold text-xs border border-purple-200">
+                            {adminDepts.length} تشكيل إداري
+                          </span>
+                        </h4>
+                      </div>
+
+                      <div className="overflow-x-auto rounded-2xl border border-slate-150 text-right">
+                        <table className="w-full text-right text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 text-slate-800 border-b border-slate-150 font-bold">
+                              <th className="p-3 text-right">القسم الإداري</th>
+                              <th className="p-3 text-right">المسؤول / المدير</th>
+                              <th className="p-3 text-right">النشاط والتصنيف</th>
+                              <th className="p-3 text-center font-mono">الرمز السري</th>
+                              <th className="p-3 text-center">التحكم</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {adminDepts.length === 0 ? (
+                              <tr>
+                                <td colSpan={5} className="p-6 text-center text-slate-400 font-bold">
+                                  لا توجد أقسام إدارية مسجلة حالياً
+                                </td>
+                              </tr>
+                            ) : (
+                              adminDepts.map((ad) => {
+                                const roleKey = ad.role || `admin_dept_${ad.id}`;
+                                const code = roleCodes[roleKey] || ad.defaultCode || '3300';
+                                return (
+                                  <tr key={ad.id} className="hover:bg-slate-50/60 transition-colors">
+                                    <td className="p-3 font-bold text-slate-900">{ad.name}</td>
+                                    <td className="p-3 text-slate-700 font-medium">{ad.manager || 'المسؤول الإداري'}</td>
+                                    <td className="p-3">
+                                      <span className="bg-purple-50 text-purple-700 text-[10px] px-2 py-0.5 rounded-md font-bold">
+                                        {ad.category || 'شؤون إدارية'}
+                                      </span>
+                                    </td>
+                                    <td className="p-3 text-center font-mono font-black text-amber-600 bg-amber-50/50">
+                                      {code}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <div className="flex items-center justify-center gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setEditingAdminDeptId(ad.id);
+                                            setAdminDeptName(ad.name);
+                                            setAdminDeptManager(ad.manager || '');
+                                            setAdminDeptCategory(ad.category || 'شؤون إدارية وخدمات');
+                                            setAdminDeptIp(ad.ip || '');
+                                            setAdminDeptCode(code);
+                                          }}
+                                          className="p-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                          title="تعديل"
+                                        >
+                                          📝
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteAdminDept(ad.id)}
+                                          className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                          title="حذف"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
+
+              {/* 4. ⚙️ رموز الدخول وتجربة الصلاحيات */}
+              {adminSubTab === 'passcodes' && (
+                <div className="space-y-6 animate-fade-in">
+                  {/* 1. تبديل وتجربة الأدوار */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/65 space-y-3">
+                    <h4 className="font-extrabold text-xs text-slate-800">🔄 الإجراء التقني: تبديل الموظف الفعال في الجلسة المباشرة</h4>
+                    <p className="text-xs text-slate-700 leading-relaxed">اختر أي موظف أو عميد كلية لتتقمص هويته وتستعرض فوراً الموقف الجذري وعمادته وصلاحياته المالية والإدارية المحددة:</p>
+                    
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {rolesList.map((cfg) => (
+                        <button
+                          key={cfg.role}
+                          onClick={() => {
+                            setCurrentRole(cfg.role);
+                          }}
+                          className={`text-xs px-3 py-2 rounded-xl border font-bold transition-all cursor-pointer ${
+                            currentRole === cfg.role 
+                              ? 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/10' 
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-105'
+                          }`}
+                        >
+                          {cfg.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. تعديل الرموز السرية */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <div>
+                        <h4 className="font-extrabold text-xs text-slate-800">🔑 تعديل وتخصيص رموز الدخول لجميع الكوادر والعمادات والأقسام</h4>
+                        <p className="text-xs text-slate-700">قم بتغيير كلمات المرور للكوادر الإدارية والأكاديمية. التحديث يتم فوراً في المتصفح ويحفظ سحابياً ومحلياً:</p>
+                      </div>
+                      <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+                        مزامنة فورية ودائمة ⚡
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {rolesList.map((cfg) => {
+                        const currentCode = roleCodes[cfg.role] !== undefined ? roleCodes[cfg.role] : cfg.defaultCode;
+                        return (
+                          <div key={cfg.role} className="p-4 bg-white border border-slate-150 rounded-xl space-y-3 shadow-xs hover:border-amber-400/60 transition-all">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-xs text-slate-800">{cfg.title}</span>
+                              <span className="text-[10px] text-slate-700 font-bold bg-slate-105 px-2 py-0.5 rounded-sm">{cfg.categoryName}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                maxLength={6}
+                                value={currentCode || ''}
+                                className="flex-grow bg-slate-50 border border-slate-150 font-mono font-bold text-center text-sm p-2 rounded-lg text-slate-800 focus:border-amber-500 outline-none"
+                                placeholder="مثال: 1234"
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, '');
+                                  const updatedCodes = { ...roleCodes, [cfg.role]: val };
+                                  syncRoleCodes(updatedCodes);
+                                  const updatedRoles = rolesList.map(r => r.role === cfg.role ? { ...r, defaultCode: val } : r);
+                                  syncRolesList(updatedRoles);
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const val = roleCodes[cfg.role] || cfg.defaultCode;
+                                  const updatedCodes = { ...roleCodes, [cfg.role]: val };
+                                  syncRoleCodes(updatedCodes);
+                                  const updatedRoles = rolesList.map(r => r.role === cfg.role ? { ...r, defaultCode: val } : r);
+                                  syncRolesList(updatedRoles);
+                                  addAuditLog('passcode_update', 'تعديل رمز الدخول', `تم تحديث الرمز السري لـ [${cfg.title}] إلى (${val}) وحفظه بالسيرفر`);
+                                  setInAppToasts(prev => [
+                                    {
+                                      id: `toast-${Date.now()}`,
+                                      title: 'تحديث الرمز السري',
+                                      message: `✓ تم حفظ وتثبيت الرمز السري (${val}) بنجاح لـ: ${cfg.title}.`,
+                                      type: 'success',
+                                      timestamp: new Date().toLocaleTimeString('ar-IQ')
+                                    },
+                                    ...prev
+                                  ]);
+                                  alert(`✓ تم حفظ وتثبيت الرمز السري بنجاح لـ: ${cfg.title} (${val})`);
+                                }}
+                                className="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer shadow-sm shadow-amber-600/10"
+                              >
+                                تحديث وحفظ
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
 
               {adminSubTab === 'receipt_settings' && (
                 <div className="space-y-6 animate-fade-in text-right">

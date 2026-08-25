@@ -135,3 +135,27 @@ export interface InternalMessage {
   attachmentName?: string; // اسم المرفق
   attachmentData?: string; // محتوى المرفق أو الصورة كمحاكاة ثنائية
 }
+
+// 🏢 هيكلية الأقسام الإدارية والخدمية (غير التدريسية - بدون طلبة أو أقساط)
+export interface AdminDepartment {
+  id: string;
+  name: string; // اسم القسم / الشعبة الإدارية
+  manager: string; // اسم المدير / المسؤول
+  category: string; // نوع النشاط والتصنيف
+  ip: string; // عنوان محطة الـ IP VLAN
+  role: string; // معرف الدور
+  defaultCode: string; // رمز الدخول السري
+}
+
+// 👨‍🏫 هيكلية رؤساء الأقسام العلمية والأكاديمية
+export interface AcademicSubDepartment {
+  id: string;
+  name: string; // اسم القسم الأكاديمي التخصصي
+  collegeId: string; // معرف الكلية الأم
+  collegeName?: string;
+  headName: string; // رئيس القسم العلمي
+  ip: string;
+  role: string;
+  defaultCode: string;
+}
+
