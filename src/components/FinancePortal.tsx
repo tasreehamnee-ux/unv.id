@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Student, Payment, Department, PaymentCategory, PaymentMethod } from '../types';
 import { calculateStudentFees, SYSTEM_CURRENT_DATE } from '../data/mockData';
-import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg } from './KutLogo';
+import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg, KutHeaderConfig } from './KutLogo';
 
 interface FinancePortalProps {
   students: Student[];
@@ -34,19 +34,21 @@ interface FinancePortalProps {
   universityName?: string;
   subText?: string;
   noteText?: string;
+  headerConfig?: KutHeaderConfig;
 }
 
 export default function FinancePortal({ 
   students, 
   payments, 
   departments, 
-  onAddPayment,
-  selectedStudentId,
-  onSelectStudent,
-  setActiveTab,
-  universityName = 'الجامعة الأهلية العراقية',
-  subText = 'شعبة الإيرادات والحسابات العامة',
-  noteText = 'ملاحظة: يرجى الاحتفاظ بهذا الوصل كونه مستنداً رسمياً للمراجعة والبريد الموحد للطلاب المبتدئين في كليتنا.'
+  onAddPayment, 
+  selectedStudentId, 
+  onSelectStudent, 
+  setActiveTab, 
+  universityName = 'الجامعة الأهلية العراقية', 
+  subText = 'شعبة الإيرادات والحسابات العامة', 
+  noteText = 'ملاحظة: يرجى الاحتفاظ بهذا الوصل كونه مستنداً رسمياً للمراجعة والبريد الموحد للطلاب المبتدئين في كليتنا.',
+  headerConfig
 }: FinancePortalProps) {
   
   // حالات الفلترة والتحصيل المالي
@@ -456,10 +458,11 @@ export default function FinancePortal({
             
             {/* هيد الترويسة الأكاديمية الرسمية لجامعة الكوت */}
             <OfficialKutHeader 
-              subTitleAr="كلية الكوت الجامعة" 
-              subTitleEn="Kut University College" 
-              officeAr="مكتب العميد / القسم المالي" 
-              officeEn="Dean Office / Finance Department" 
+              {...headerConfig}
+              collegeAr={headerConfig?.collegeAr || "كلية الكوت الجامعة"}
+              collegeEn={headerConfig?.collegeEn || "Kut University College"}
+              officeAr={headerConfig?.officeAr || "مكتب العميد / القسم المالي"} 
+              officeEn={headerConfig?.officeEn || "Dean Office / Finance Department"} 
             />
             
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">

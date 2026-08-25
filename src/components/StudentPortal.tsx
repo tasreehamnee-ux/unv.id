@@ -185,18 +185,20 @@ interface StudentPortalProps {
   universityName?: string;
   subText?: string;
   noteText?: string;
+  headerConfig?: KutHeaderConfig;
 }
 
 export default function StudentPortal({ 
   students, 
   departments, 
   payments, 
-  selectedStudentId,
-  onSelectStudent,
-  setActiveTab,
-  universityName = 'الجامعة الأهلية العراقية',
-  subText = 'شعبة الإيرادات والحسابات العامة',
-  noteText = 'ملاحظة: يرجى الاحتفاظ بهذا الوصل كونه مستنداً رسمياً للمراجعة والبريد الموحد للطلاب المبتدئين في كليتنا.'
+  selectedStudentId, 
+  onSelectStudent, 
+  setActiveTab, 
+  universityName = 'الجامعة الأهلية العراقية', 
+  subText = 'شعبة الإيرادات والحسابات العامة', 
+  noteText = 'ملاحظة: يرجى الاحتفاظ بهذا الوصل كونه مستنداً رسمياً للمراجعة والبريد الموحد للطلاب المبتدئين في كليتنا.',
+  headerConfig
 }: StudentPortalProps) {
   
   const [activeReceipt, setActiveReceipt] = useState<Payment | null>(null);
@@ -500,7 +502,13 @@ export default function StudentPortal({
                       </head>
                       <body>
                         <div class="cert-card">
-                          ${getOfficialPrintHeaderHtml("كلية الكوت الجامعة", "Kut University College", "مكتب العميد / شعبة التسجيل والقبول", "Dean Office / Registration")}
+                          ${getOfficialPrintHeaderHtml(
+                            headerConfig?.collegeAr || "كلية الكوت الجامعة", 
+                            headerConfig?.collegeEn || "Kut University College", 
+                            headerConfig?.officeAr || "مكتب العميد / شعبة التسجيل والقبول", 
+                            headerConfig?.officeEn || "Dean Office / Registration",
+                            headerConfig
+                          )}
                           <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; margin-bottom: 20px;">
                             <div class="badge" style="background: #d1fae5; color: #065f46; font-weight: 800; font-size: 12px; padding: 5px 12px; border-radius: 9999px;">صحة صدور معتمدة وموثقة إلكترونياً ✔</div>
                             <div class="code-label" style="font-size: 12px; color: #334155; font-family: monospace; font-weight: bold;">رمز القيد الموحد: <strong style="color: #065f46;">${valCode}</strong></div>
@@ -741,10 +749,11 @@ export default function StudentPortal({
             
             {/* هيد الترويسة الأكاديمية الرسمية لجامعة الكوت */}
             <OfficialKutHeader 
-              subTitleAr="كلية الكوت الجامعة" 
-              subTitleEn="Kut University College" 
-              officeAr="مكتب العميد / القسم المالي" 
-              officeEn="Dean Office / Finance Department" 
+              {...headerConfig}
+              collegeAr={headerConfig?.collegeAr || "كلية الكوت الجامعة"}
+              collegeEn={headerConfig?.collegeEn || "Kut University College"}
+              officeAr={headerConfig?.officeAr || "مكتب العميد / القسم المالي"} 
+              officeEn={headerConfig?.officeEn || "Dean Office / Finance Department"} 
             />
             
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">

@@ -25,7 +25,7 @@ import {
 import { OfficialLetter, LetterCategory } from '../types';
 import { SYSTEM_CURRENT_DATE, getLetterExpiryStatus } from '../data/mockData';
 import { generateBarcodeSvg, generateQrCodeDataUrl } from './StudentPortal';
-import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg } from './KutLogo';
+import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg, KutHeaderConfig } from './KutLogo';
 
 // 📊 مولد الباركود المخصص لصحّة صدور الوثائق لجامعة الكوت
 const BarcodePattern = ({ code }: { code: string }) => {
@@ -91,16 +91,18 @@ interface LettersArchiveProps {
   setActiveTab: (tab: string) => void;
   universityName?: string;
   universityEmail?: string;
+  headerConfig?: KutHeaderConfig;
 }
 
 export default function LettersArchive({ 
   letters, 
-  onAddLetter,
-  onDeleteLetter,
-  onClearAllLetters,
-  setActiveTab,
-  universityName = 'جامعة الكوت الأهلية',
-  universityEmail = 'info@alkut.edu.iq'
+  onAddLetter, 
+  onDeleteLetter, 
+  onClearAllLetters, 
+  setActiveTab, 
+  universityName = 'جامعة الكوت الأهلية', 
+  universityEmail = 'info@alkut.edu.iq',
+  headerConfig
 }: LettersArchiveProps) {
   
   // حالات الفلترة والبحث للأرشيف المركزي
@@ -665,10 +667,11 @@ export default function LettersArchive({
                         
                         {/* ترويسة جامعة الكوت الرسمية */}
                         <OfficialKutHeader 
-                          subTitleAr="كلية الكوت الجامعة" 
-                          subTitleEn="Kut University College" 
-                          officeAr="مكتب العميد / صحة الصدور والشهادات" 
-                          officeEn="Dean Office / Authentication" 
+                          {...headerConfig}
+                          collegeAr={headerConfig?.collegeAr || "كلية الكوت الجامعة"}
+                          collegeEn={headerConfig?.collegeEn || "Kut University College"}
+                          officeAr={headerConfig?.officeAr || "مكتب العميد / صحة الصدور والشهادات"} 
+                          officeEn={headerConfig?.officeEn || "Dean Office / Authentication"} 
                         />
 
                         {/* الخلفية المائية الخفيفة */}
@@ -871,7 +874,13 @@ export default function LettersArchive({
                                   </head>
                                   <body>
                                     <div class="cert-card">
-                                      ${getOfficialPrintHeaderHtml("كلية الكوت الجامعة", "Kut University College", "مكتب العميد / صحة الصدور والشهادات", "Dean Office / Authentication")}
+                                      ${getOfficialPrintHeaderHtml(
+                                        headerConfig?.collegeAr || "كلية الكوت الجامعة", 
+                                        headerConfig?.collegeEn || "Kut University College", 
+                                        headerConfig?.officeAr || "مكتب العميد / صحة الصدور والشهادات", 
+                                        headerConfig?.officeEn || "Dean Office / Authentication",
+                                        headerConfig
+                                      )}
                                       
                                       <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; margin-bottom: 20px;">
                                         <div class="badge" style="background: #d1fae5; color: #065f46; font-weight: 800; font-size: 12px; padding: 5px 12px; border-radius: 9999px;">وثيقة معتمدة ومصادق عليها رسمياً ✔</div>

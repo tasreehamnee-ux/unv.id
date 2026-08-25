@@ -59,7 +59,7 @@ import LabsPortal from './components/LabsPortal';
 import InternalComms from './components/InternalComms';
 import PythonCodeViewer from './components/PythonCodeViewer';
 import AuditLog from './components/AuditLog';
-import { KutLogoSvg } from './components/KutLogo';
+import { KutLogoSvg, OfficialKutHeader, KutHeaderConfig } from './components/KutLogo';
 
 export default function App() {
   
@@ -424,9 +424,9 @@ export default function App() {
 
   const [adminSubTab, setAdminSubTab] = useState<'deans' | 'dept_heads' | 'admin_depts' | 'passcodes' | 'employees' | 'receipt_settings' | 'network_settings'>('deans');
 
-  // 1.11 إعدادات اسم الجامعة والبيانات المطبوعة على الوصل المالي للقبول (يدوي من مدير النظام)
+  // 1.11 إعدادات اسم الجامعة والبيانات المطبوعة على الوصل المالي والوثائق
   const [receiptUniversityName, setReceiptUniversityName] = useState<string>(() => {
-    return localStorage.getItem('AL_AHLIYA_RECEIPT_UNI_NAME') || 'جامعة الكوت الأهلية';
+    return localStorage.getItem('AL_AHLIYA_RECEIPT_UNI_NAME') || 'كلية الكوت الجامعة';
   });
 
   const [receiptUniversityEmail, setReceiptUniversityEmail] = useState<string>(() => {
@@ -434,20 +434,75 @@ export default function App() {
   });
 
   const [receiptSubText, setReceiptSubText] = useState<string>(() => {
-    return localStorage.getItem('AL_AHLIYA_RECEIPT_SUB_TEXT') || 'شعبة الإيرادات والحسابات العامة';
+    return localStorage.getItem('AL_AHLIYA_RECEIPT_SUB_TEXT') || 'مكتب العميد';
   });
 
   const [receiptNoteText, setReceiptNoteText] = useState<string>(() => {
-    return localStorage.getItem('AL_AHLIYA_RECEIPT_NOTE_TEXT') || 'ملاحظة: يرجى الاحتفاظ بهذا الوصل كونه مستنداً رسمياً للمراجعة والبريد الموحد للطلاب المبتدئين في كليتنا.';
+    return localStorage.getItem('AL_AHLIYA_RECEIPT_NOTE_TEXT') || 'ملاحظة: يرجى الاحتفاظ بهذه الوثيقة / الوصل كونه مستنداً رسمياً للمراجعة والتحقق الإلكتروني بالباركود.';
   });
 
+  // إعدادات وتخصيص ترويسة الباركود والوثائق والشعار من قبل الأدمن
+  const [headerCountryAr, setHeaderCountryAr] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_COUNTRY_AR') || 'جمهورية العراق';
+  });
+  const [headerCollegeAr, setHeaderCollegeAr] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_COLLEGE_AR') || 'كلية الكوت الجامعة';
+  });
+  const [headerOfficeAr, setHeaderOfficeAr] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_OFFICE_AR') || 'مكتب العميد';
+  });
+  const [headerBismiText, setHeaderBismiText] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_BISMI_TEXT') || 'بسمه تعالى';
+  });
+  const [headerShowBismi, setHeaderShowBismi] = useState<boolean>(() => {
+    const saved = localStorage.getItem('KUT_HEADER_SHOW_BISMI');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [headerCountryEn, setHeaderCountryEn] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_COUNTRY_EN') || 'Republic of Iraq';
+  });
+  const [headerCollegeEn, setHeaderCollegeEn] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_COLLEGE_EN') || 'Kut University College';
+  });
+  const [headerOfficeEn, setHeaderOfficeEn] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_OFFICE_EN') || 'Dean Office';
+  });
+  const [headerCustomLogoUrl, setHeaderCustomLogoUrl] = useState<string>(() => {
+    return localStorage.getItem('KUT_HEADER_CUSTOM_LOGO') || '';
+  });
+
+  const headerConfig: KutHeaderConfig = {
+    countryAr: headerCountryAr,
+    collegeAr: headerCollegeAr,
+    officeAr: headerOfficeAr,
+    bismiText: headerBismiText,
+    showBismi: headerShowBismi,
+    countryEn: headerCountryEn,
+    collegeEn: headerCollegeEn,
+    officeEn: headerOfficeEn,
+    customLogoUrl: headerCustomLogoUrl
+  };
+
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "settings", "receipt"), (docSnap) => {
+    const unsub = onSnapshot(doc(db, "settings", "officialHeader"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        if (data.name) setReceiptUniversityName(data.name);
+        if (data.countryAr) setHeaderCountryAr(data.countryAr);
+        if (data.collegeAr) {
+          setHeaderCollegeAr(data.collegeAr);
+          setReceiptUniversityName(data.collegeAr);
+        }
+        if (data.officeAr) {
+          setHeaderOfficeAr(data.officeAr);
+          setReceiptSubText(data.officeAr);
+        }
+        if (data.bismiText) setHeaderBismiText(data.bismiText);
+        if (typeof data.showBismi === 'boolean') setHeaderShowBismi(data.showBismi);
+        if (data.countryEn) setHeaderCountryEn(data.countryEn);
+        if (data.collegeEn) setHeaderCollegeEn(data.collegeEn);
+        if (data.officeEn) setHeaderOfficeEn(data.officeEn);
+        if (typeof data.customLogoUrl === 'string') setHeaderCustomLogoUrl(data.customLogoUrl);
         if (data.email) setReceiptUniversityEmail(data.email);
-        if (data.subText) setReceiptSubText(data.subText);
         if (data.note) setReceiptNoteText(data.note);
       }
     });
@@ -455,11 +510,20 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('AL_AHLIYA_RECEIPT_UNI_NAME', receiptUniversityName);
+    localStorage.setItem('KUT_HEADER_COUNTRY_AR', headerCountryAr);
+    localStorage.setItem('KUT_HEADER_COLLEGE_AR', headerCollegeAr);
+    localStorage.setItem('KUT_HEADER_OFFICE_AR', headerOfficeAr);
+    localStorage.setItem('KUT_HEADER_BISMI_TEXT', headerBismiText);
+    localStorage.setItem('KUT_HEADER_SHOW_BISMI', String(headerShowBismi));
+    localStorage.setItem('KUT_HEADER_COUNTRY_EN', headerCountryEn);
+    localStorage.setItem('KUT_HEADER_COLLEGE_EN', headerCollegeEn);
+    localStorage.setItem('KUT_HEADER_OFFICE_EN', headerOfficeEn);
+    localStorage.setItem('KUT_HEADER_CUSTOM_LOGO', headerCustomLogoUrl);
+    localStorage.setItem('AL_AHLIYA_RECEIPT_UNI_NAME', headerCollegeAr);
     localStorage.setItem('AL_AHLIYA_RECEIPT_UNI_EMAIL', receiptUniversityEmail);
-    localStorage.setItem('AL_AHLIYA_RECEIPT_SUB_TEXT', receiptSubText);
+    localStorage.setItem('AL_AHLIYA_RECEIPT_SUB_TEXT', headerOfficeAr);
     localStorage.setItem('AL_AHLIYA_RECEIPT_NOTE_TEXT', receiptNoteText);
-  }, [receiptUniversityName, receiptUniversityEmail, receiptSubText, receiptNoteText]);
+  }, [headerCountryAr, headerCollegeAr, headerOfficeAr, headerBismiText, headerShowBismi, headerCountryEn, headerCollegeEn, headerOfficeEn, headerCustomLogoUrl, receiptUniversityEmail, receiptNoteText]);
 
   // Sync Students and Departments from Firebase
   useEffect(() => {
@@ -1989,9 +2053,10 @@ export default function App() {
             selectedStudentId={selectedStudentId}
             onSelectStudent={setSelectedStudentId}
             setActiveTab={setActiveTab}
-            universityName={receiptUniversityName}
-            subText={receiptSubText}
+            universityName={headerCollegeAr}
+            subText={headerOfficeAr}
             noteText={receiptNoteText}
+            headerConfig={headerConfig}
           />
         );
       case 'finance':
@@ -2004,9 +2069,10 @@ export default function App() {
             selectedStudentId={selectedStudentId}
             onSelectStudent={setSelectedStudentId}
             setActiveTab={setActiveTab}
-            universityName={receiptUniversityName}
-            subText={receiptSubText}
+            universityName={headerCollegeAr}
+            subText={headerOfficeAr}
             noteText={receiptNoteText}
+            headerConfig={headerConfig}
           />
         );
       case 'letters':
@@ -2017,8 +2083,9 @@ export default function App() {
             onDeleteLetter={handleDeleteLetter}
             onClearAllLetters={handleClearAllLetters}
             setActiveTab={setActiveTab}
-            universityName={receiptUniversityName}
+            universityName={headerCollegeAr}
             universityEmail={receiptUniversityEmail}
+            headerConfig={headerConfig}
           />
         );
       case 'labs_portal':
@@ -2133,13 +2200,13 @@ export default function App() {
 
                 <button
                   onClick={() => setAdminSubTab('receipt_settings')}
-                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-4 py-2.5 text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                     adminSubTab === 'receipt_settings'
                       ? 'border-amber-600 text-amber-600 bg-amber-50/50 rounded-t-xl'
                       : 'border-transparent text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  🧾 إعدادات الوصل المالي واختيار اسم الجامعة ⚙️
+                  <span>🏛️ تخصيص ترويسة الباركود واللوغو والوثائق ⚙️</span>
                 </button>
 
                 <button
@@ -3002,97 +3069,332 @@ export default function App() {
 
               {adminSubTab === 'receipt_settings' && (
                 <div className="space-y-6 animate-fade-in text-right">
-                  <div className="bg-white p-6 rounded-2xl border border-slate-150 shadow-xs space-y-5">
-                    <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+                  <div className="bg-white p-6 rounded-2xl border border-slate-150 shadow-xs space-y-6">
+                    <div className="border-b border-slate-100 pb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                       <div>
-                        <h4 className="font-extrabold text-sm md:text-base text-slate-800 flex items-center gap-2">
-                          <CreditCard className="w-5 h-5 text-amber-600" />
-                          <span>تخريج وتخصيص البيانات المطبوعة واسم الجامعة على الوصل المالي للطلاب ⚙️</span>
+                        <h4 className="font-black text-base text-slate-850 flex items-center gap-2">
+                          <span className="text-xl">🏛️</span>
+                          <span>لوحة التحكم وتخصيص ترويسة الباركود والوثائق الرسمية والشعار</span>
                         </h4>
-                        <p className="text-slate-700 text-xs mt-0.5">
-                          تغيير إعدادات ترويسة وملاحظات الوصولات والمدفوعات لتنعكس فوراً عند طباعة السند المالي.
+                        <p className="text-slate-700 text-xs mt-1">
+                          تحكم كامل في الترويسة الرسمية (العربية والإنجليزية)، نص البسملة، وشعار الجامعة في منتصف وثائق صحة الصدور ووصولات القبض.
                         </p>
                       </div>
-                      <span className="text-[10px] bg-slate-900 text-amber-400 font-bold px-2 py-1 rounded">مدير النظام</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] bg-amber-500/10 text-amber-700 border border-amber-500/20 font-bold px-3 py-1 rounded-lg">
+                          🛡️ إدارة سيادية للأدمن
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                      {/* اسم الجامعة المبطن */}
-                      <div className="space-y-1.5 label-input-group">
-                        <label className="font-extrabold text-slate-700 block text-xs">أدخل اسم الجامعة / الكلية (يدوي):</label>
-                        <input
-                          type="text"
-                          value={receiptUniversityName}
-                          onChange={(e) => setReceiptUniversityName(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 focus:bg-white p-3 rounded-xl text-slate-850 font-bold text-xs text-right outline-hidden transition-all focus:ring-1 focus:ring-amber-500"
-                          placeholder="مثال: جامعة الكوت الأهلية، كلية هندسة التميز..."
+                    {/* 👁️ قسم المعاينة الحية والتفاعلية للترويسة الرسمية */}
+                    <div className="bg-slate-900/5 p-4 md:p-5 rounded-2xl border border-slate-200 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-slate-800 text-xs flex items-center gap-1.5">
+                          <span>👁️</span>
+                          <span>معاينة حية ومباشرة للترويسة الرسمية (Live Interactive Preview):</span>
+                        </span>
+                        <span className="text-[10px] text-emerald-700 bg-emerald-100/70 font-bold px-2 py-0.5 rounded-md">
+                          تحديث فوري أثناء الكتابة ✔
+                        </span>
+                      </div>
+                      
+                      <div className="max-w-3xl mx-auto shadow-md rounded-2xl overflow-hidden">
+                        <OfficialKutHeader 
+                          {...headerConfig}
                         />
                       </div>
+                      
+                      <p className="text-center text-[10px] text-slate-500 font-sans">
+                        هذه الترويسة تظهر أعلى وثائق صحة الصدور والباركود، قسائم السداد المالي، وسجلات التحقق المعتمدة.
+                      </p>
+                    </div>
 
-                      {/* البريد الإلكتروني المخصص */}
-                      <div className="space-y-1.5 label-input-group">
-                        <label className="font-extrabold text-slate-700 block text-xs">البريد الإلكتروني المعتمد للجامعة (يدوي):</label>
+                    {/* حقول الإدخال والتحكم التفصيلية */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                      
+                      {/* العمود 1: بيانات الجهة اليمنى (باللغة العربية) */}
+                      <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-3.5">
+                        <div className="border-b border-slate-200 pb-2">
+                          <span className="font-bold text-slate-800 text-xs flex items-center gap-1">
+                            <span>🇮🇶</span>
+                            <span>الجهة اليمنى (باللغة العربية)</span>
+                          </span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="font-bold text-slate-700 block text-[11px]">اسم الدولة (عربي):</label>
+                          <input
+                            type="text"
+                            value={headerCountryAr}
+                            onChange={(e) => setHeaderCountryAr(e.target.value)}
+                            className="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-850 font-bold text-xs text-right outline-hidden focus:ring-2 focus:ring-amber-500/50"
+                            placeholder="مثال: جمهورية العراق"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="font-bold text-slate-700 block text-[11px]">اسم الجامعة / الكلية (عربي):</label>
+                          <input
+                            type="text"
+                            value={headerCollegeAr}
+                            onChange={(e) => {
+                              setHeaderCollegeAr(e.target.value);
+                              setReceiptUniversityName(e.target.value);
+                            }}
+                            className="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-850 font-bold text-xs text-right outline-hidden focus:ring-2 focus:ring-amber-500/50"
+                            placeholder="مثال: كلية الكوت الجامعة"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="font-bold text-slate-700 block text-[11px]">اسم القسم / المكتب (عربي):</label>
+                          <input
+                            type="text"
+                            value={headerOfficeAr}
+                            onChange={(e) => {
+                              setHeaderOfficeAr(e.target.value);
+                              setReceiptSubText(e.target.value);
+                            }}
+                            className="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-850 font-bold text-xs text-right outline-hidden focus:ring-2 focus:ring-amber-500/50"
+                            placeholder="مثال: مكتب العميد"
+                          />
+                        </div>
+                      </div>
+
+                      {/* العمود 2: إعدادات المنتصف (اللوغو والبسملة) */}
+                      <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-3.5">
+                        <div className="border-b border-slate-200 pb-2">
+                          <span className="font-bold text-slate-800 text-xs flex items-center gap-1">
+                            <span>✨</span>
+                            <span>المنتصف (الشعار الرسمي والبسملة)</span>
+                          </span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="font-bold text-slate-700 text-[11px]">نص البسملة العلوي:</label>
+                            <label className="flex items-center gap-1 text-[10px] text-slate-600 font-bold cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                checked={headerShowBismi} 
+                                onChange={(e) => setHeaderShowBismi(e.target.checked)}
+                                className="rounded text-amber-600 focus:ring-amber-500"
+                              />
+                              <span>إظهار</span>
+                            </label>
+                          </div>
+                          <input
+                            type="text"
+                            value={headerBismiText}
+                            onChange={(e) => setHeaderBismiText(e.target.value)}
+                            disabled={!headerShowBismi}
+                            className="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-850 font-bold text-xs text-center outline-hidden focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50"
+                            placeholder="مثال: بسمه تعالى"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 pt-1">
+                          <label className="font-bold text-slate-700 block text-[11px]">لوغو / شعار الجامعة:</label>
+                          <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200">
+                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-300 overflow-hidden">
+                              {headerCustomLogoUrl ? (
+                                <img src={headerCustomLogoUrl} alt="Logo" className="w-full h-full object-contain" />
+                              ) : (
+                                <KutLogoSvg size={36} />
+                              )}
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                              <span className="text-[10px] font-bold text-slate-800 block truncate">
+                                {headerCustomLogoUrl ? 'شعار مخصص مفعّل' : 'شعار جامعة الكوت المدمج الرسمي'}
+                              </span>
+                              <span className="text-[9px] text-slate-500 block">SVG فائق الدقة والألوان</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 mt-2">
+                            <label className="text-[10px] font-bold text-slate-600 block">رابط صورة مخصصة (أو اترك فارغاً للشعار الرسمي):</label>
+                            <input
+                              type="text"
+                              value={headerCustomLogoUrl}
+                              onChange={(e) => setHeaderCustomLogoUrl(e.target.value)}
+                              className="w-full bg-white border border-slate-200 p-2 rounded-lg text-slate-800 text-[11px] font-mono text-left outline-hidden focus:ring-1 focus:ring-amber-500"
+                              placeholder="https://.../logo.png"
+                            />
+                          </div>
+
+                          {/* رفع صورة من الجهاز */}
+                          <div>
+                            <label className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold py-1.5 px-3 rounded-lg border border-slate-300 cursor-pointer flex items-center justify-center gap-1 transition-all">
+                              <span>📁 رفع صورة لوغو من الحاسوب</span>
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onload = (event) => {
+                                      if (event.target?.result) {
+                                        setHeaderCustomLogoUrl(event.target.result as string);
+                                      }
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+                            {headerCustomLogoUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setHeaderCustomLogoUrl('')}
+                                className="text-[10px] text-red-600 hover:underline block mt-1 text-center w-full font-bold cursor-pointer"
+                              >
+                                ✕ استعادة شعار جامعة الكوت الأصلي
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* العمود 3: بيانات الجهة اليسرى (باللغة الإنجليزية) */}
+                      <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-3.5" style={{ direction: 'ltr' }}>
+                        <div className="border-b border-slate-200 pb-2 text-left">
+                          <span className="font-bold text-slate-800 text-xs flex items-center gap-1">
+                            <span>🌐</span>
+                            <span>Left Side (English Details)</span>
+                          </span>
+                        </div>
+
+                        <div className="space-y-1 text-left">
+                          <label className="font-bold text-slate-700 block text-[11px]">Country (English):</label>
+                          <input
+                            type="text"
+                            value={headerCountryEn}
+                            onChange={(e) => setHeaderCountryEn(e.target.value)}
+                            className="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-850 font-bold text-xs text-left outline-hidden focus:ring-2 focus:ring-amber-500/50"
+                            placeholder="e.g. Republic of Iraq"
+                          />
+                        </div>
+
+                        <div className="space-y-1 text-left">
+                          <label className="font-bold text-slate-700 block text-[11px]">University / College (English):</label>
+                          <input
+                            type="text"
+                            value={headerCollegeEn}
+                            onChange={(e) => setHeaderCollegeEn(e.target.value)}
+                            className="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-850 font-bold text-xs text-left outline-hidden focus:ring-2 focus:ring-amber-500/50"
+                            placeholder="e.g. Kut University College"
+                          />
+                        </div>
+
+                        <div className="space-y-1 text-left">
+                          <label className="font-bold text-slate-700 block text-[11px]">Office / Department (English):</label>
+                          <input
+                            type="text"
+                            value={headerOfficeEn}
+                            onChange={(e) => setHeaderOfficeEn(e.target.value)}
+                            className="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-850 font-bold text-xs text-left outline-hidden focus:ring-2 focus:ring-amber-500/50"
+                            placeholder="e.g. Dean Office"
+                          />
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* بيانات إضافية: البريد والملاحظة التنظيمية */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                      <div className="space-y-1.5">
+                        <label className="font-extrabold text-slate-700 block text-xs">البريد الإلكتروني المعتمد للجامعة والوثائق:</label>
                         <input
                           type="email"
                           value={receiptUniversityEmail}
                           onChange={(e) => setReceiptUniversityEmail(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 focus:bg-white p-3 rounded-xl text-slate-850 font-mono font-bold text-xs text-right outline-hidden transition-all focus:ring-1 focus:ring-amber-500/80"
-                          placeholder="مثال: info@alkut.edu.iq"
+                          className="w-full bg-slate-50 border border-slate-200 focus:bg-white p-3 rounded-xl text-slate-850 font-mono font-bold text-xs text-right outline-hidden transition-all focus:ring-1 focus:ring-amber-500"
+                          placeholder="info@alkut.edu.iq"
                         />
                       </div>
 
-                      {/* القسم/الترويسة الفرعية */}
-                      <div className="space-y-1.5 label-input-group">
-                        <label className="font-extrabold text-slate-700 block text-xs">شعبة الحسابات / الترويسة الفرعية (يدوية):</label>
+                      <div className="space-y-1.5">
+                        <label className="font-extrabold text-slate-700 block text-xs">ملاحظة تنظيمية وشروط مطبوعة أسفل الوثيقة والسند:</label>
                         <input
                           type="text"
-                          value={receiptSubText}
-                          onChange={(e) => setReceiptSubText(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 focus:bg-white p-3 rounded-xl text-slate-850 font-bold text-xs text-right outline-hidden transition-all focus:ring-1 focus:ring-amber-500"
-                          placeholder="مثال: شعبة الإيرادات والقبول المالي، الإدارة الحسابية..."
+                          value={receiptNoteText}
+                          onChange={(e) => setReceiptNoteText(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 focus:bg-white p-3 rounded-xl text-slate-850 font-medium text-xs text-right outline-hidden transition-all focus:ring-1 focus:ring-amber-500"
+                          placeholder="ملاحظة: يرجى الاحتفاظ بهذه الوثيقة..."
                         />
                       </div>
                     </div>
 
-                    {/* الملاحظة الرسمية أسفل الوصل */}
-                    <div className="space-y-1.5">
-                      <label className="font-extrabold text-slate-700 block text-xs">ملاحظة تنظيمية أو شروط مطبوعة على الوصل المالي:</label>
-                      <textarea
-                        rows={3}
-                        value={receiptNoteText}
-                        onChange={(e) => setReceiptNoteText(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 focus:bg-white p-3 rounded-xl text-slate-850 font-medium text-xs text-right outline-hidden leading-relaxed transition-all focus:ring-1 focus:ring-amber-500"
-                        placeholder="مثال: يرجى الاحتفاظ بهذا الوصل كونه مستنداً صهيراً للتحصيل المالي..."
-                      />
-                    </div>
-
-                    {/* قسم المعاينة الحية */}
-                    <div className="bg-slate-50 border border-slate-150 p-4 rounded-2xl space-y-2">
-                      <span className="font-bold text-slate-800 text-xs text-right block">👁️ معاينة فورية للترويسة الحقيقية للوصل (Receipt Header Preview):</span>
-                      <div className="bg-white p-4 border border-slate-200 rounded-xl text-center space-y-2 select-none shadow-3xs max-w-lg mx-auto">
-                        <div className="border-b border-dashed border-slate-200 pb-2 text-center">
-                          <div className="text-slate-800 font-extrabold text-sm flex items-center justify-center gap-1.5">
-                            <Building className="w-4 h-4 text-amber-600" />
-                            <span>{receiptUniversityName} - {receiptSubText}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-700 block mt-0.5">وصل قبض وقبض أجور دراسية رسمي رقم: 105934</span>
-                        </div>
-                        <p className="text-[10px] text-slate-700 leading-normal bg-slate-50/50 p-2 rounded-lg border border-slate-100">{receiptNoteText}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-1">
+                    {/* أزرار الإجراءات والحفظ والمزامنة */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-150">
                       <button
                         type="button"
                         onClick={() => {
-                          alert('💾 تم حفظ الترويسة والبيانات الرسمية الجديدة للوصل المالي بنجاح! سيتم تطبيقها فوراً في بوابات الطلاب والمالية.');
+                          setHeaderCountryAr('جمهورية العراق');
+                          setHeaderCollegeAr('كلية الكوت الجامعة');
+                          setHeaderOfficeAr('مكتب العميد');
+                          setHeaderBismiText('بسمه تعالى');
+                          setHeaderShowBismi(true);
+                          setHeaderCountryEn('Republic of Iraq');
+                          setHeaderCollegeEn('Kut University College');
+                          setHeaderOfficeEn('Dean Office');
+                          setHeaderCustomLogoUrl('');
+                          setReceiptUniversityName('كلية الكوت الجامعة');
+                          setReceiptSubText('مكتب العميد');
+                          setReceiptUniversityEmail('info@alkut.edu.iq');
+                          alert('🔄 تمت استعادة الترويسة الافتراضية لجامعة الكوت بنجاح.');
                         }}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm shadow-emerald-600/10 active:scale-95"
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 px-5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 border border-slate-300"
+                      >
+                        <RotateCcw className="w-4 h-4 text-slate-600" />
+                        <span>استعادة الترويسة الافتراضية لجامعة الكوت</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const newHeaderData = {
+                              countryAr: headerCountryAr,
+                              collegeAr: headerCollegeAr,
+                              officeAr: headerOfficeAr,
+                              bismiText: headerBismiText,
+                              showBismi: headerShowBismi,
+                              countryEn: headerCountryEn,
+                              collegeEn: headerCollegeEn,
+                              officeEn: headerOfficeEn,
+                              customLogoUrl: headerCustomLogoUrl,
+                              email: receiptUniversityEmail,
+                              note: receiptNoteText,
+                              updatedAt: new Date().toISOString()
+                            };
+
+                            // حفظ في Firebase
+                            await setDoc(doc(db, "settings", "officialHeader"), newHeaderData);
+                            await setDoc(doc(db, "settings", "receipt"), {
+                              name: headerCollegeAr,
+                              subText: headerOfficeAr,
+                              email: receiptUniversityEmail,
+                              note: receiptNoteText
+                            });
+
+                            addAuditLog('header_update', 'تحديث الترويسة واللوغو', `تم تحديث الترويسة الرسمية واللوغو بنجاح لتشمل: ${headerCollegeAr} / ${headerOfficeAr}`);
+                            alert('💾 تم حفظ وتعميم الترويسة الرسمية واللوغو بنجاح! تم التحديث فورياً في جميع بوابات الطلاب والأرشيف والمالية.');
+                          } catch (err) {
+                            console.error("Save header error:", err);
+                            alert('💾 تم حفظ الترويسة محلياً بنجاح!');
+                          }
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-7 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-md shadow-emerald-600/20 active:scale-95"
                       >
                         <CheckCircle className="w-4 h-4 text-emerald-200" />
-                        <span>حفظ وإصدار الترويسة الجديدة 💾</span>
+                        <span>حفظ وتعميم الترويسة الرسمية والشعار لجميع البوابات 💾</span>
                       </button>
                     </div>
+
                   </div>
                 </div>
               )}

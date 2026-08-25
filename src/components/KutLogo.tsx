@@ -59,7 +59,6 @@ export const KutLogoSvg = ({ size = 90, className = "" }: { size?: number; class
     {/* أيقونة الكتاب المفتوح مع الآية الكريمة */}
     <g transform="translate(0, -10)">
       {/* صفحات الكتاب باللون التركوازي/السماوي */}
-      {/* الجناح الأيمن للكتاب */}
       <path 
         d="M 200 178 C 235 155 270 145 305 162 L 285 105 C 255 90 225 102 200 120 Z" 
         fill="#007d91" 
@@ -73,7 +72,6 @@ export const KutLogoSvg = ({ size = 90, className = "" }: { size?: number; class
         fill="#008ba3" 
       />
 
-      {/* الجناح الأيسر للكتاب */}
       <path 
         d="M 200 178 C 165 155 130 145 95 162 L 115 105 C 145 90 175 102 200 120 Z" 
         fill="#007d91" 
@@ -110,7 +108,6 @@ export const KutLogoSvg = ({ size = 90, className = "" }: { size?: number; class
       <line x1="52" y1="195" x2="348" y2="195" stroke="#004e5a" strokeWidth="2" />
       <line x1="52" y1="243" x2="348" y2="243" stroke="#ffffff" strokeWidth="2" />
       
-      {/* نص جامعة الكوت بالعنابي الغامق البارز */}
       <text 
         x="200" 
         y="230" 
@@ -130,15 +127,10 @@ export const KutLogoSvg = ({ size = 90, className = "" }: { size?: number; class
       <path d="M 54 245 Q 200 248 346 245 L 332 320 Q 200 355 68 320 Z" fill="url(#bridgeGrad)" />
       
       {/* أقواس سدة الكوت باللون الأبيض */}
-      {/* قوس 1 */}
       <path d="M 85 320 L 85 278 Q 102 260 120 278 L 120 325 Z" fill="#ffffff" />
-      {/* قوس 2 */}
       <path d="M 138 328 L 138 274 Q 160 252 182 274 L 182 334 Z" fill="#ffffff" />
-      {/* قوس 3 - المنتصف */}
       <path d="M 200 338 L 200 272 Q 218 252 236 274 L 236 338 Z" fill="#ffffff" />
-      {/* قوس 4 */}
       <path d="M 254 332 L 254 274 Q 276 254 298 274 L 298 326 Z" fill="#ffffff" />
-      {/* قوس 5 */}
       <path d="M 314 322 L 314 278 Q 326 262 338 278 L 338 316 Z" fill="#ffffff" />
 
       {/* خطوط مياه النهر تحت السدة */}
@@ -199,22 +191,49 @@ export const KUT_LOGO_SVG_RAW = `
 </svg>
 `;
 
+export interface KutHeaderConfig {
+  countryAr?: string;
+  collegeAr?: string;
+  officeAr?: string;
+  bismiText?: string;
+  showBismi?: boolean;
+  countryEn?: string;
+  collegeEn?: string;
+  officeEn?: string;
+  customLogoUrl?: string;
+}
+
 /**
- * مكون الترويسة الرسمية لجامعة الكوت (بالخلفية البترولية الزرقاء والمطابقة لترويسة مكتب العميد الرسمية)
+ * مكون الترويسة الرسمية لجامعة الكوت القابل للتخصيص الكامل من لوحة تحكم الأدمن
  */
 export const OfficialKutHeader = ({ 
+  countryAr = "جمهورية العراق",
   subTitleAr = "كلية الكوت الجامعة",
-  subTitleEn = "Kut University College",
+  collegeAr,
   officeAr = "مكتب العميد",
+  bismiText = "بسمه تعالى",
+  showBismi = true,
+  countryEn = "Republic of Iraq",
+  subTitleEn = "Kut University College",
+  collegeEn,
   officeEn = "Dean Office",
-  showBismi = true
+  customLogoUrl = ""
 }: {
+  countryAr?: string;
   subTitleAr?: string;
-  subTitleEn?: string;
+  collegeAr?: string;
   officeAr?: string;
-  officeEn?: string;
+  bismiText?: string;
   showBismi?: boolean;
+  countryEn?: string;
+  subTitleEn?: string;
+  collegeEn?: string;
+  officeEn?: string;
+  customLogoUrl?: string;
 }) => {
+  const displayCollegeAr = collegeAr || subTitleAr;
+  const displayCollegeEn = collegeEn || subTitleEn;
+
   return (
     <div className="w-full bg-gradient-to-r from-[#073c44] via-[#0c5963] to-[#073c44] text-white rounded-2xl p-4 md:p-5 shadow-lg border-b-4 border-amber-500/80 select-none overflow-hidden relative">
       {/* الزخرفة الهندسية الشفافة في الخلفية */}
@@ -223,27 +242,31 @@ export const OfficialKutHeader = ({
       <div className="relative z-10 flex items-center justify-between gap-2 md:gap-4">
         {/* الجزء الأيمن - باللغة العربية */}
         <div className="text-right flex-1 space-y-0.5">
-          <h3 className="font-extrabold text-xs md:text-sm text-slate-100 tracking-wide">جمهورية العراق</h3>
-          <h2 className="font-black text-sm md:text-base text-amber-300 tracking-tight">{subTitleAr}</h2>
+          <h3 className="font-extrabold text-xs md:text-sm text-slate-100 tracking-wide">{countryAr}</h3>
+          <h2 className="font-black text-sm md:text-base text-amber-300 tracking-tight">{displayCollegeAr}</h2>
           <span className="font-bold text-[11px] md:text-xs text-emerald-200 block">{officeAr}</span>
         </div>
 
-        {/* المنتصف - البسملة والشعار الرسمي في دائرة مذهبة وفضية */}
+        {/* المنتصف - البسملة والشعار في دائرة مذهبة وفضية */}
         <div className="flex flex-col items-center justify-center shrink-0 px-2 space-y-1">
           {showBismi && (
             <span className="text-[11px] md:text-xs font-bold text-amber-200/90 font-serif tracking-widest">
-              بسمه تعالى
+              {bismiText || "بسمه تعالى"}
             </span>
           )}
-          <div className="p-1 bg-white/95 rounded-full shadow-md border-2 border-amber-400/80 flex items-center justify-center">
-            <KutLogoSvg size={68} className="drop-shadow-xs" />
+          <div className="p-1 bg-white/95 rounded-full shadow-md border-2 border-amber-400/80 flex items-center justify-center overflow-hidden">
+            {customLogoUrl ? (
+              <img src={customLogoUrl} alt="Logo" className="w-[68px] h-[68px] object-contain rounded-full" />
+            ) : (
+              <KutLogoSvg size={68} className="drop-shadow-xs" />
+            )}
           </div>
         </div>
 
         {/* الجزء الأيسر - باللغة الإنجليزية */}
         <div className="text-left flex-1 space-y-0.5" style={{ direction: 'ltr' }}>
-          <h3 className="font-extrabold text-xs md:text-sm text-slate-100 tracking-wide">Republic of Iraq</h3>
-          <h2 className="font-black text-sm md:text-base text-amber-300 tracking-tight">{subTitleEn}</h2>
+          <h3 className="font-extrabold text-xs md:text-sm text-slate-100 tracking-wide">{countryEn}</h3>
+          <h2 className="font-black text-sm md:text-base text-amber-300 tracking-tight">{displayCollegeEn}</h2>
           <span className="font-bold text-[11px] md:text-xs text-emerald-200 block">{officeEn}</span>
         </div>
       </div>
@@ -254,31 +277,51 @@ export const OfficialKutHeader = ({
 /**
  * دالة توليد كود HTML للترويسة الرسمية المدمجة في نوافذ الطباعة (Print Windows)
  */
-export const getOfficialPrintHeaderHtml = (subAr = "كلية الكوت الجامعة", subEn = "Kut University College", officeAr = "مكتب العميد", officeEn = "Dean Office") => {
+export const getOfficialPrintHeaderHtml = (
+  collegeAr = "كلية الكوت الجامعة", 
+  collegeEn = "Kut University College", 
+  officeAr = "مكتب العميد", 
+  officeEn = "Dean Office",
+  config?: KutHeaderConfig
+) => {
+  const countryAr = config?.countryAr || "جمهورية العراق";
+  const displayCollegeAr = config?.collegeAr || collegeAr;
+  const displayOfficeAr = config?.officeAr || officeAr;
+  const bismiText = config?.bismiText || "بسمه تعالى";
+  const showBismi = config?.showBismi !== false;
+  const countryEn = config?.countryEn || "Republic of Iraq";
+  const displayCollegeEn = config?.collegeEn || collegeEn;
+  const displayOfficeEn = config?.officeEn || officeEn;
+  const customLogo = config?.customLogoUrl;
+
+  const logoHtml = customLogo 
+    ? `<img src="${customLogo}" width="80" height="80" style="object-fit: contain; border-radius: 50%; display: block;" alt="Logo" />`
+    : KUT_LOGO_SVG_RAW;
+
   return `
     <div style="background: linear-gradient(135deg, #073c44 0%, #0c5963 50%, #073c44 100%); color: #ffffff; padding: 18px 24px; border-radius: 16px; margin-bottom: 24px; border-bottom: 4px solid #f59e0b; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
       <table style="width: 100%; border-collapse: collapse; border: none;">
         <tr>
           <!-- اليمين بالعربي -->
           <td style="width: 38%; text-align: right; vertical-align: middle; border: none; padding: 0;">
-            <div style="font-size: 13px; font-weight: 800; color: #f1f5f9; margin-bottom: 3px;">جمهورية العراق</div>
-            <div style="font-size: 16px; font-weight: 900; color: #fcd34d; margin-bottom: 3px; letter-spacing: -0.3px;">${subAr}</div>
-            <div style="font-size: 13px; font-weight: 700; color: #a7f3d0;">${officeAr}</div>
+            <div style="font-size: 13px; font-weight: 800; color: #f1f5f9; margin-bottom: 3px;">${countryAr}</div>
+            <div style="font-size: 16px; font-weight: 900; color: #fcd34d; margin-bottom: 3px; letter-spacing: -0.3px;">${displayCollegeAr}</div>
+            <div style="font-size: 13px; font-weight: 700; color: #a7f3d0;">${displayOfficeAr}</div>
           </td>
 
           <!-- المنتصف: البسملة والشعار -->
           <td style="width: 24%; text-align: center; vertical-align: middle; border: none; padding: 0 10px;">
-            <div style="font-size: 12px; font-weight: bold; color: #fef08a; margin-bottom: 6px; letter-spacing: 2px;">بسمه تعالى</div>
-            <div style="display: inline-block; background: #ffffff; padding: 4px; border-radius: 50%; border: 2px solid #f59e0b; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-              ${KUT_LOGO_SVG_RAW}
+            ${showBismi ? `<div style="font-size: 12px; font-weight: bold; color: #fef08a; margin-bottom: 6px; letter-spacing: 2px;">${bismiText}</div>` : ''}
+            <div style="display: inline-block; background: #ffffff; padding: 4px; border-radius: 50%; border: 2px solid #f59e0b; box-shadow: 0 2px 6px rgba(0,0,0,0.2); overflow: hidden;">
+              ${logoHtml}
             </div>
           </td>
 
           <!-- اليسار بالإنجليزي -->
           <td style="width: 38%; text-align: left; vertical-align: middle; direction: ltr; border: none; padding: 0;">
-            <div style="font-size: 13px; font-weight: 800; color: #f1f5f9; margin-bottom: 3px;">Republic of Iraq</div>
-            <div style="font-size: 16px; font-weight: 900; color: #fcd34d; margin-bottom: 3px; letter-spacing: -0.3px;">${subEn}</div>
-            <div style="font-size: 13px; font-weight: 700; color: #a7f3d0;">${officeEn}</div>
+            <div style="font-size: 13px; font-weight: 800; color: #f1f5f9; margin-bottom: 3px;">${countryEn}</div>
+            <div style="font-size: 16px; font-weight: 900; color: #fcd34d; margin-bottom: 3px; letter-spacing: -0.3px;">${displayCollegeEn}</div>
+            <div style="font-size: 13px; font-weight: 700; color: #a7f3d0;">${displayOfficeEn}</div>
           </td>
         </tr>
       </table>
