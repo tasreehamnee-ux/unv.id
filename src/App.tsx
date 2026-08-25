@@ -32,7 +32,8 @@ import {
   Volume2,
   Database,
   Globe,
-  Activity
+  Activity,
+  Code2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -3208,7 +3209,7 @@ export default function App() {
                 07832343995
               </a>
             </div>
-            <p className="text-[10px] text-slate-700 mt-1">المطوّر كرم السهلاني - شعبة البرمجيات التقنية المباشرة</p>
+            <p className="text-[11px] text-amber-300 font-bold mt-1">عمل وتصميم المبرمجين: م. حسنين علي ذويب — م.م. رنا علي ذويب</p>
           </div>
 
           {/* قائمة الميزات المغلقة للتأكيد في النظام */}
@@ -3388,7 +3389,23 @@ export default function App() {
             <span>نظام محمي متوافق مع الأمن المركزي 🔒</span>
           </div>
 
-
+          {/* حقوق العمل والتصميم للمبرمجين */}
+          <div className="border-t border-slate-800/80 pt-4 mt-2 text-center space-y-2 select-none">
+            <div className="flex items-center justify-center gap-1.5 text-amber-400 font-bold text-xs">
+              <Code2 className="w-4 h-4" />
+              <span>عمل وتصميم المبرمجين</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-bold text-slate-200">
+              <span className="bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 text-amber-300 shadow-xs">
+                م. حسنين علي ذويب
+              </span>
+              <span className="text-slate-600 font-normal">•</span>
+              <span className="bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 text-amber-300 shadow-xs">
+                م.م. رنا علي ذويب
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-500 font-sans">بوابة جامعة الكوت — جميع الحقوق البرمجية محفوظة © 2026</p>
+          </div>
 
         </div>
 
@@ -3550,6 +3567,19 @@ export default function App() {
           >
             🔐 تسجيل الخروج الآمن
           </button>
+
+          {/* حقوق العمل والتصميم للمبرمجين في القائمة الجانبية */}
+          <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 text-center space-y-1.5">
+            <div className="text-[11px] font-bold text-amber-400 flex items-center justify-center gap-1.5">
+              <Code2 className="w-3.5 h-3.5" />
+              <span>عمل وتصميم المبرمجين</span>
+            </div>
+            <div className="text-[10px] font-bold text-slate-200 space-y-0.5">
+              <div className="text-amber-300">م. حسنين علي ذويب</div>
+              <div className="text-amber-300">م.م. رنا علي ذويب</div>
+            </div>
+            <div className="text-[9px] text-slate-500">جامعة الكوت © 2026</div>
+          </div>
         </div>
 
       </aside>
@@ -3664,6 +3694,16 @@ export default function App() {
                 >
                   🔐 تسجيل الخروج الآمن
                 </button>
+
+                {/* حقوق العمل والتصميم للمبرمجين في قائمة الموبايل */}
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center space-y-1 text-xs">
+                  <span className="text-amber-400 font-bold block text-[11px]">عمل وتصميم المبرمجين:</span>
+                  <div className="text-amber-300 font-bold flex justify-center items-center gap-2 text-[10px]">
+                    <span>م. حسنين علي ذويب</span>
+                    <span className="text-slate-600">•</span>
+                    <span>م.م. رنا علي ذويب</span>
+                  </div>
+                </div>
               </div>
 
             </motion.div>
@@ -3705,6 +3745,23 @@ export default function App() {
         )}
 
         {renderActiveComponent()}
+
+        {/* فوتر الصفحة العام والحقوق البرمجية */}
+        <footer className="mt-12 pt-6 border-t border-slate-250 text-center text-xs text-slate-500 space-y-2 select-none">
+          <div className="flex flex-wrap items-center justify-center gap-2 font-bold text-slate-700">
+            <span className="text-amber-600">عمل وتصميم المبرمجين:</span>
+            <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-200/80 shadow-2xs text-slate-800">
+              م. حسنين علي ذويب
+            </span>
+            <span className="text-slate-400">•</span>
+            <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-200/80 shadow-2xs text-slate-800">
+              م.م. رنا علي ذويب
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-400 font-sans">
+            بوابة جامعة الكوت — نظام أتمتة المعلومات والبيانات الموحد © 2026
+          </p>
+        </footer>
       </main>
 
       {/* 4. تراكب الإشعارات الفورية المنبثقة ذو القناتين (إشعارات المتصفح والإنترفيس) */}
