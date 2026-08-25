@@ -348,31 +348,33 @@ export default function Dashboard({
           </div>
         </motion.div>
 
-        {/* أرشفة الكتب الرسمية */}
-        <motion.div 
-          variants={itemVariants}
-          onClick={() => setActiveTab('letters')}
-          className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
-        >
-          <div className="flex justify-between items-start">
-            <span className="text-slate-700 text-sm font-medium">الأرشيف المركزي والكتب</span>
-            <div className="p-3 bg-indigo-50 text-indigo-700 rounded-xl group-hover:scale-110 transition-transform">
-              <FileText className="w-5 h-5" />
+        {/* أرشفة الكتب الرسمية (مقتصرة على مدير النظام ورئاسة الجامعة) */}
+        {(currentRole === 'admin' || currentRole === 'presidency') && (
+          <motion.div 
+            variants={itemVariants}
+            onClick={() => setActiveTab('letters')}
+            className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
+          >
+            <div className="flex justify-between items-start">
+              <span className="text-slate-700 text-sm font-medium">الأرشيف المركزي والكتب</span>
+              <div className="p-3 bg-indigo-50 text-indigo-700 rounded-xl group-hover:scale-110 transition-transform">
+                <FileText className="w-5 h-5" />
+              </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-extrabold text-slate-900 font-mono">{letters.length}</h3>
-            <div className="flex items-center gap-2 mt-2 text-xs">
-              <span className="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm font-medium">أمر وزارة وأقسام</span>
-              {expiredLettersCount > 0 && (
-                <span className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded-sm font-bold flex items-center gap-1">
-                  <ShieldAlert className="w-3 h-3 text-red-600" />
-                  {expiredLettersCount} منتهية
-                </span>
-              )}
+            <div className="mt-4">
+              <h3 className="text-3xl font-extrabold text-slate-900 font-mono">{letters.length}</h3>
+              <div className="flex items-center gap-2 mt-2 text-xs">
+                <span className="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm font-medium">أمر وزارة وأقسام</span>
+                {expiredLettersCount > 0 && (
+                  <span className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded-sm font-bold flex items-center gap-1">
+                    <ShieldAlert className="w-3 h-3 text-red-600" />
+                    {expiredLettersCount} منتهية
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* المراسلات الداخلية والمهام */}
         <motion.div 

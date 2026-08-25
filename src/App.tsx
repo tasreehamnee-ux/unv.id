@@ -74,6 +74,7 @@ export default function App() {
     }
     return [
       { role: 'admin', title: 'مدير النظام الأول', categoryName: 'الإدارة الأمنية العامة', defaultCode: '9999' },
+      { role: 'presidency', title: 'رئاسة الجامعة (مكتب رئيس الجامعة)', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7777' },
       { role: 'registration_director', title: 'مدير التسجيل والقبول', categoryName: 'العمادة والتسجيل العام', defaultCode: '1111' },
       { role: 'finance_director', title: 'مدير المالية والحسابات', categoryName: 'القسم الحسابي والمالي العام', defaultCode: '2222' },
       { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' },
@@ -105,6 +106,7 @@ export default function App() {
     }
     return {
       admin: '9999',
+      presidency: '7777',
       registration_director: '1111',
       finance_director: '2222',
       labs_director: '3333',
@@ -2024,11 +2026,16 @@ export default function App() {
 
   const allowedTabs = (() => {
     if (!currentRole) return [];
+    // 🛡️ مدير النظام الأول ورئاسة الجامعة فقط هم من يمتلكون صلاحية الوصول لأرشيف الكتب والقرارات
     if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
-    if (currentRole === 'registration_director') return ['students', 'portal', 'letters', 'comms'];
+    if (currentRole === 'presidency') return ['students', 'portal', 'finance', 'letters', 'comms', 'audit_log'];
+    // 🎓 شؤون وتسجيل الطلبة (محجوب عنها أرشيف الكتب تماماً بناءً على التوجيه الإداري)
+    if (currentRole === 'registration_director') return ['students', 'portal', 'comms'];
+    // 💰 المالية والحسابات
     if (currentRole === 'finance_director') return ['finance', 'portal', 'comms'];
-    if (currentRole === 'labs_director') return ['portal', 'letters', 'comms'];
-    // عمداء الكليات (رئاسة القسم العلمي) - مشاهدة فقط لقسمهم (لا حسابات ولا أرشيف كتب ولا أكواد إدارية سيادية)
+    // 🧪 المختبرات المركزية
+    if (currentRole === 'labs_director') return ['portal', 'comms'];
+    // 🏛️ عمداء الكليات (رئاسة القسم العلمي)
     if (currentRole.startsWith('head_')) return ['students', 'portal', 'comms'];
     return ['students', 'portal', 'comms'];
   })();
@@ -2096,6 +2103,17 @@ export default function App() {
           />
         );
       case 'letters':
+        // 🔒 حظر أمني مشدد: الأرشيف مصرح فقط لمدير النظام الأول ورئاسة الجامعة
+        if (currentRole !== 'admin' && currentRole !== 'presidency') {
+          return (
+            <div className="p-8 text-center bg-white rounded-2xl border border-red-200 shadow-sm space-y-3">
+              <ShieldAlert className="w-12 h-12 text-red-500 mx-auto animate-bounce" />
+              <h3 className="text-base font-extrabold text-slate-800">صلاحية محظورة أمنياً ⚠️</h3>
+              <p className="text-xs text-slate-600 font-bold">أرشيف الكتب والقرارات الرسمية مصرح حصراً لـ [مدير النظام الأول] و [رئاسة الجامعة].</p>
+              <p className="text-[11px] text-slate-400">لا تملك شعبة شؤون وتسجيل الطلبة أو الأقسام الأخرى صلاحية الاطلاع على هذه الخزانة.</p>
+            </div>
+          );
+        }
         return (
           <LettersArchive 
             letters={letters}
