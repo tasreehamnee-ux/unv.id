@@ -352,14 +352,15 @@ export default function InternalComms({
           id: `let-auto-${Date.now()}`,
           letterNumber: `KUT/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
           title: mailSubject,
-          issuer: rolesMap[currentUserRole] || currentUserRole,
-          recipient: mailRecipient === 'all_departments' ? 'كافة عمادات الكليات والأقسام العلمية' : (rolesMap[mailRecipient] || mailRecipient),
-          issueDate: new Date().toISOString().split('T')[0],
+          source: rolesMap[currentUserRole] || currentUserRole,
+          destination: mailRecipient === 'all_departments' ? 'كافة عمادات الكليات والأقسام العلمية' : (rolesMap[mailRecipient] || mailRecipient),
+          dateIssued: new Date().toISOString().split('T')[0],
           expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           status: 'active',
           category: 'decision',
-          description: mailContent,
-          attachmentUrl: downloadUrl || undefined
+          summary: mailContent,
+          archivedBy: rolesMap[currentUserRole] || currentUserRole,
+          attachedFileName: downloadUrl || undefined
         };
         onAddLetter(autoLetter);
       }

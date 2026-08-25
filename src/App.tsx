@@ -30,7 +30,9 @@ import {
   UserPlus,
   Bell,
   Volume2,
-  Database
+  Database,
+  Globe,
+  Activity
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -41,7 +43,7 @@ import {
   mockStudents, 
   mockPayments, 
   mockLetters, 
-  mockMessages,
+  mockMessages, 
   SYSTEM_CURRENT_DATE,
   COLLEGE_IPS
 } from './data/mockData';
@@ -64,13 +66,15 @@ export default function App() {
     const saved = localStorage.getItem('AL_AHLIYA_ROLES_LIST');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) {}
     }
     return [
       { role: 'admin', title: 'مدير النظام الأول', categoryName: 'الإدارة الأمنية العامة', defaultCode: '9999' },
       { role: 'registration_director', title: 'مدير التسجيل والقبول', categoryName: 'العمادة والتسجيل العام', defaultCode: '1111' },
       { role: 'finance_director', title: 'مدير المالية والحسابات', categoryName: 'القسم الحسابي والمالي العام', defaultCode: '2222' },
+      { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' },
       { role: 'head_dentistry', title: 'عميد كلية طب الأسنان (أ.د. عادل قاسم الشمري)', categoryName: 'عميد كلية', defaultCode: '4401', departmentId: 'dentistry' },
       { role: 'head_pharmacy', title: 'عميد كلية الصيدلة (أ.م.د. لمى هاشم الياسري)', categoryName: 'عميد كلية', defaultCode: '4402', departmentId: 'pharmacy' },
       { role: 'head_health-med-tech', title: 'عميد كلية التقنيات الصحية والطبية (أ. د. عبد الحسن مهدي الخفاجي)', categoryName: 'عميد كلية', defaultCode: '4403', departmentId: 'health-med-tech' },
@@ -86,41 +90,22 @@ export default function App() {
     ];
   });
 
-  // مزامنة الكوادر ديناميكيا مع Firebase
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "settings", "rolesList"), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.list) {
-          setRolesList(data.list);
-        }
-      }
-    });
-    return () => unsub();
-  }, []);
-
-  // مزامنة الكوادر ديناميكيا
-  useEffect(() => {
-    // Ensure labs_director is present for backwards compatibility with saved localStorage
-    const hasLabs = rolesList.some(r => r.role === 'labs_director');
-    if (!hasLabs) {
-      setRolesList(prev => [...prev, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }]);
-    } else {
-      localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(rolesList));
-    }
-  }, [rolesList]);
-
   const [roleCodes, setRoleCodes] = useState<{ [key: string]: string }>(() => {
     const saved = localStorage.getItem('AL_AHLIYA_ROLE_CODES');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          if (!parsed.labs_director) parsed.labs_director = '3333';
+          return parsed;
+        }
       } catch (e) {}
     }
     return {
       admin: '9999',
       registration_director: '1111',
       finance_director: '2222',
+      labs_director: '3333',
       'head_dentistry': '4401',
       'head_pharmacy': '4402',
       'head_health-med-tech': '4403',
@@ -136,16 +121,81 @@ export default function App() {
     };
   });
 
+  // دوال الحفظ والمزامنة السحابية والمحلية الموحدة
+  const syncRoleCodes = (codes: { [key: string]: string }) => {
+    setRoleCodes(codes);
+    try {
+      localStorage.setItem('AL_AHLIYA_ROLE_CODES', JSON.stringify(codes));
+      setDoc(doc(db, "settings", "roleCodes"), codes).catch((err) => {
+        console.warn("roleCodes cloud sync notice:", err);
+      });
+    } catch (e) {
+      console.warn("syncRoleCodes local write notice:", e);
+    }
+  };
+
+  const syncRolesList = (roles: { role: string; title: string; categoryName: string; defaultCode: string; departmentId?: string; isCustom?: boolean }[]) => {
+    setRolesList(roles);
+    try {
+      localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(roles));
+      setDoc(doc(db, "settings", "rolesList"), { list: roles }).catch((err) => {
+        console.warn("rolesList cloud sync notice:", err);
+      });
+    } catch (e) {
+      console.warn("syncRolesList local write notice:", e);
+    }
+  };
+
+  // مزامنة الكوادر ديناميكيا مع Firebase
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "rolesList"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.list && Array.isArray(data.list) && data.list.length > 0) {
+          let list = data.list;
+          if (!list.some((r: any) => r.role === 'labs_director')) {
+            list = [...list, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }];
+          }
+          setRolesList(list);
+          localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(list));
+        }
+      }
+    }, (err) => console.warn("rolesList sync notice:", err));
+    return () => unsub();
+  }, []);
+
   // مزامنة الرموز السرية مع Firebase
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "roleCodes"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setRoleCodes(data as { [key: string]: string });
+        if (data && typeof data === 'object') {
+          setRoleCodes(prev => {
+            const merged = { ...prev, ...data };
+            if (!merged.labs_director) {
+              merged.labs_director = prev.labs_director || '3333';
+            }
+            localStorage.setItem('AL_AHLIYA_ROLE_CODES', JSON.stringify(merged));
+            return merged;
+          });
+        }
       }
-    });
+    }, (err) => console.warn("roleCodes sync notice:", err));
     return () => unsub();
   }, []);
+
+  // مزامنة الكوادر للتأكد من وجود دور المختبرات المركزية ورمزه السري
+  useEffect(() => {
+    const hasLabs = rolesList.some(r => r.role === 'labs_director');
+    if (!hasLabs) {
+      const updated = [...rolesList, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }];
+      syncRolesList(updated);
+    }
+    if (roleCodes['labs_director'] === undefined) {
+      const updatedCodes = { ...roleCodes, labs_director: '3333' };
+      syncRoleCodes(updatedCodes);
+    }
+  }, [rolesList]);
 
   const [currentRole, setCurrentRole] = useState<string | null>(() => {
     const saved = localStorage.getItem('AL_AHLIYA_CURRENT_ROLE');
@@ -357,6 +407,7 @@ export default function App() {
   const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
   const [newCollegeName, setNewCollegeName] = useState('');
   const [newCollegeIp, setNewCollegeIp] = useState('');
+  const [newCollegeCode, setNewCollegeCode] = useState('');
   const [newCollegeMorningFee, setNewCollegeMorningFee] = useState<number>(4000000);
   const [newCollegeEveningFee, setNewCollegeEveningFee] = useState<number>(5000000);
   const [newCollegeYears, setNewCollegeYears] = useState<number>(4);
@@ -457,6 +508,58 @@ export default function App() {
       console.warn("syncStudents local write notice:", e);
     }
   };
+
+  // مزامنة الكوادر ديناميكياً مع الأقسام لضمان ظهور كافة الكليات والأقسام برمز دخول دائم في القوائم
+  useEffect(() => {
+    if (!departments || departments.length === 0) return;
+
+    let rolesChanged = false;
+    let codesChanged = false;
+    let updatedRoles = [...rolesList];
+    let updatedCodes = { ...roleCodes };
+
+    departments.forEach((dept, index) => {
+      const deanRole = `head_${dept.id}`;
+      const existingIndex = updatedRoles.findIndex(r => r.role === deanRole || r.departmentId === dept.id);
+      const deanName = dept.headOfDepartment && dept.headOfDepartment !== 'شاغر' 
+        ? dept.headOfDepartment 
+        : 'شاغر';
+      const expectedTitle = `عميد ${dept.name} (${deanName})`;
+
+      if (existingIndex === -1) {
+        const defaultCode = updatedCodes[deanRole] || `44${String(index + 1).padStart(2, '0')}`;
+        updatedRoles.push({
+          role: deanRole,
+          title: expectedTitle,
+          categoryName: 'عميد كلية',
+          defaultCode: defaultCode,
+          departmentId: dept.id,
+          isCustom: true
+        });
+        if (!updatedCodes[deanRole]) {
+          updatedCodes[deanRole] = defaultCode;
+          codesChanged = true;
+        }
+        rolesChanged = true;
+      } else {
+        if (updatedRoles[existingIndex].title !== expectedTitle || updatedRoles[existingIndex].departmentId !== dept.id) {
+          updatedRoles[existingIndex] = {
+            ...updatedRoles[existingIndex],
+            title: expectedTitle,
+            departmentId: dept.id
+          };
+          rolesChanged = true;
+        }
+      }
+    });
+
+    if (rolesChanged) {
+      syncRolesList(updatedRoles);
+    }
+    if (codesChanged) {
+      syncRoleCodes(updatedCodes);
+    }
+  }, [departments]);
 
   // 1.10 حالات وإعدادات خدمة الإشعارات المنبثقة للتنبيه بسلامة وثائق الطلاب المستهدفة
   const [alertsEnabled, setAlertsEnabled] = useState<boolean>(() => {
@@ -725,16 +828,10 @@ export default function App() {
     };
 
     const updatedRoles = [...rolesList, newStaff];
-    setRolesList(updatedRoles);
-    localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(updatedRoles));
-    setDoc(doc(db, "settings", "rolesList"), { list: updatedRoles }).catch(console.error);
+    syncRolesList(updatedRoles);
 
-    setRoleCodes(prev => {
-      const updatedCodes = { ...prev, [cleanRole]: newStaffCode };
-      localStorage.setItem('AL_AHLIYA_ROLE_CODES', JSON.stringify(updatedCodes));
-      setDoc(doc(db, "settings", "roleCodes"), updatedCodes).catch(console.error);
-      return updatedCodes;
-    });
+    const updatedCodes = { ...roleCodes, [cleanRole]: newStaffCode };
+    syncRoleCodes(updatedCodes);
 
     // إعادة تصفير النموذج
     setNewStaffTitle('');
@@ -768,7 +865,13 @@ export default function App() {
     if (!staff) return;
 
     if (window.confirm(`هل أنت متأكد من حذف الموظف "${staff.title}" وسحب صلاحياته تماماً؟`)) {
-      setRolesList(prev => prev.filter(r => r.role !== roleToDelete));
+      const updatedRoles = rolesList.filter(r => r.role !== roleToDelete);
+      syncRolesList(updatedRoles);
+
+      const updatedCodes = { ...roleCodes };
+      delete updatedCodes[roleToDelete];
+      syncRoleCodes(updatedCodes);
+
       addAuditLog('staff_delete', 'حذف وتصفية موظف', `تم عزل وفصل وحذف الموظف [${staff.title}] وسحب كود مصادقة الدخول الخاص به`);
       // تصفير الجلسة في حال كان الموظف المحذوف هو النشط حالياً
       if (currentRole === roleToDelete) {
@@ -824,20 +927,24 @@ export default function App() {
       updatedRoles.push(newDeanConfig);
     }
 
-    setRolesList(updatedRoles);
-    setRoleCodes(prev => ({ ...prev, [deanRole]: cleanCode }));
+    syncRolesList(updatedRoles);
+
+    const updatedCodes = { ...roleCodes, [deanRole]: cleanCode };
+    syncRoleCodes(updatedCodes);
 
     // تحديث لاسم العميد المعتمد في departments
-    setDepartments(prev =>
-      prev.map(d => d.id === formDeanDept ? { ...d, headOfDepartment: cleanName } : d)
+    const updatedDepts = departments.map(d =>
+      d.id === formDeanDept ? { ...d, headOfDepartment: cleanName } : d
     );
+    setDepartments(updatedDepts);
+    syncDepartments(updatedDepts);
 
     // تصفير مدخلات الفورم
     setFormDeanName('');
     setFormDeanDept('');
     setFormDeanCode('');
     addAuditLog('dean_assign', 'تكليف عميد الكلية', `تم تكليف الأستاذ [${cleanName}] على رأس عمادة كلية وقسم [${matchedDept.name}] بكود سري محدث ومحطة IP خاصة ومفعلة`);
-    alert(`🎉 تم تكليف العميد "${cleanName}" بنجاح للكلية "${matchedDept.name}".\n📡 تم تفعيل كود ولوج الكلية الموحد (${cleanCode}) وحاسبتها الفردية IP: ${COLLEGE_IPS[formDeanDept] || '192.168.1.100'}`);
+    alert(`🎉 تم تكليف العميد "${cleanName}" بنجاح للكلية "${matchedDept.name}".\n📡 تم تفعيل كود ولوج الكلية الموحد (${cleanCode}) وحاسبتها الفردية IP: ${collegeIps[formDeanDept] || '192.168.1.100'}`);
   };
 
   // دالة حذف عميد كلية وإعادة وضعه في الحالة الشاغرة
@@ -850,19 +957,24 @@ export default function App() {
     if (!matchedDept) return;
 
     if (window.confirm(`هل أنت متأكد من سحب صلاحيات وفصل عميد "${matchedDept.name}" نهائياً من النظام؟\nسيؤدي هذا إلى تصفير الرمز السري وتعليق الدخول لحاسبة الكلية.`)) {
-      setRolesList(prev => prev.filter(r => r.departmentId !== deptId));
-      
       const deanRole = `head_${deptId}`;
-      setRoleCodes(prev => {
-        const copy = { ...prev };
-        delete copy[deanRole];
-        return copy;
+      const updatedRoles = rolesList.map(r => {
+        if (r.departmentId === deptId || r.role === deanRole) {
+          return {
+            ...r,
+            title: `عميد ${matchedDept.name} (شاغر)`
+          };
+        }
+        return r;
       });
+      syncRolesList(updatedRoles);
 
       // تصفير الاسم
-      setDepartments(prev => 
-        prev.map(d => d.id === deptId ? { ...d, headOfDepartment: 'شاغر' } : d)
+      const updatedDepts = departments.map(d => 
+        d.id === deptId ? { ...d, headOfDepartment: 'شاغر' } : d
       );
+      setDepartments(updatedDepts);
+      syncDepartments(updatedDepts);
 
       addAuditLog('dean_remove', 'إقالة عميد الكلية', `تمت تصفية وإقالة عميد كلية [${matchedDept.name}] وإلغاء صلاحية ولوجه وحاسبته الرقمية وإبقاء المنصب شاغراً`);
       
@@ -871,7 +983,7 @@ export default function App() {
         setCurrentRole('admin');
       }
 
-      alert(`✓ تم بنجاح فصل عميد "${matchedDept.name}" وسحب الرمز السري الخاص به.`);
+      alert(`✓ تم بنجاح فصل عميد "${matchedDept.name}" وتصفير المنصب إلى شاغر.`);
     }
   };
 
@@ -890,17 +1002,13 @@ export default function App() {
       syncDepartments(updatedDepts);
       
       // إزالة الصلاحية
-      const updatedRoles = rolesList.filter(r => r.departmentId !== deptId);
-      setRolesList(updatedRoles);
-      localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(updatedRoles));
-
       const deanRole = `head_${deptId}`;
-      setRoleCodes(prev => {
-        const copy = { ...prev };
-        delete copy[deanRole];
-        localStorage.setItem('AL_AHLIYA_ROLE_CODES', JSON.stringify(copy));
-        return copy;
-      });
+      const updatedRoles = rolesList.filter(r => r.departmentId !== deptId && r.role !== deanRole);
+      syncRolesList(updatedRoles);
+
+      const updatedCodes = { ...roleCodes };
+      delete updatedCodes[deanRole];
+      syncRoleCodes(updatedCodes);
 
       // إزالة الـ IP
       setCollegeIps(prev => {
@@ -951,6 +1059,7 @@ export default function App() {
 
     const cleanName = newCollegeName.trim();
     const cleanIp = newCollegeIp.trim();
+    const assignedCode = newCollegeCode.trim().replace(/\D/g, '') || `44${Math.floor(10 + Math.random() * 90)}`;
 
     if (editingDeptId) {
       // تعديل واستبدال الكلية الحالية
@@ -970,6 +1079,28 @@ export default function App() {
       setDepartments(updated);
       syncDepartments(updated);
 
+      const deanRole = `head_${editingDeptId}`;
+      const updatedRoles = rolesList.map(r => {
+        if (r.departmentId === editingDeptId || r.role === deanRole) {
+          const currentDept = departments.find(d => d.id === editingDeptId);
+          const deanName = currentDept?.headOfDepartment && currentDept.headOfDepartment !== 'شاغر' 
+            ? currentDept.headOfDepartment 
+            : 'شاغر';
+          return {
+            ...r,
+            title: `عميد ${cleanName} (${deanName})`,
+            defaultCode: newCollegeCode.trim() ? assignedCode : r.defaultCode
+          };
+        }
+        return r;
+      });
+      syncRolesList(updatedRoles);
+
+      if (newCollegeCode.trim()) {
+        const updatedCodes = { ...roleCodes, [deanRole]: assignedCode };
+        syncRoleCodes(updatedCodes);
+      }
+
       setCollegeIps(prev => {
         const copy = { ...prev, [editingDeptId]: cleanIp };
         localStorage.setItem('AL_AHLIYA_COLLEGE_IPS', JSON.stringify(copy));
@@ -981,6 +1112,7 @@ export default function App() {
     } else {
       // إضافة كلية جديدة بالكامل
       const newId = `dept-${Date.now()}`;
+      const deanRole = `head_${newId}`;
       
       const newDept: Department = {
         id: newId,
@@ -998,20 +1130,36 @@ export default function App() {
       setDepartments(updated);
       syncDepartments(updated);
 
+      // إضافة الدور في قائمة الأدوار فوراً
+      const newDeanRoleItem = {
+        role: deanRole,
+        title: `عميد ${cleanName} (شاغر)`,
+        categoryName: 'عميد كلية',
+        defaultCode: assignedCode,
+        departmentId: newId,
+        isCustom: true
+      };
+      const updatedRoles = [...rolesList, newDeanRoleItem];
+      syncRolesList(updatedRoles);
+
+      // تعيين وحفظ رمز الدخول
+      const updatedCodes = { ...roleCodes, [deanRole]: assignedCode };
+      syncRoleCodes(updatedCodes);
+
       setCollegeIps(prev => {
         const copy = { ...prev, [newId]: cleanIp };
         localStorage.setItem('AL_AHLIYA_COLLEGE_IPS', JSON.stringify(copy));
         return copy;
       });
 
-      addAuditLog('college_add', 'إضافة كلية جديدة', `تم تسجيل وإضافة كلية/قسم جديد [${cleanName}] بمحطة رقمية [${cleanIp}]`);
+      addAuditLog('college_add', 'إضافة كلية جديدة', `تم تسجيل وإضافة كلية/قسم جديد [${cleanName}] برمز دخول (${assignedCode}) ومحطة رقمية [${cleanIp}]`);
     }
 
     setInAppToasts(prev => [
       {
         id: `toast-${Date.now()}`,
         title: editingDeptId ? 'تعديل الكلية' : 'إضافة كلية جديدة',
-        message: `✓ تم بنجاح ${editingDeptId ? 'تعديل' : 'إضافة'} كلية "${cleanName}" ومحطتها الرقمية (${cleanIp}) في النظام.`,
+        message: `✓ تم بنجاح ${editingDeptId ? 'تعديل' : 'إضافة'} كلية "${cleanName}" برمز دخول (${assignedCode}) ومحطتها الرقمية (${cleanIp}) في النظام.`,
         type: 'success',
         timestamp: new Date().toLocaleTimeString('ar-IQ')
       },
@@ -1021,6 +1169,7 @@ export default function App() {
     // إعادة ضبط الحقول
     setNewCollegeName('');
     setNewCollegeIp('');
+    setNewCollegeCode('');
     setNewCollegeMorningFee(4000000);
     setNewCollegeEveningFee(5000000);
     setNewCollegeYears(4);
@@ -1501,39 +1650,69 @@ export default function App() {
 
                   {/* 2. تعديل الرموز السرية */}
                   <div className="space-y-4">
-                    <h4 className="font-extrabold text-xs text-slate-800">🔑 تعديل وتخصيص رموز الدخول للموظفين وعمداء الكليات</h4>
-                    <p className="text-xs text-slate-700">قم بتغيير كلمات المرور (الرموز السرية الدخول السداسية/الرباعية) للكوادر الإدارية. التحديث يتم فوراً في المتصفح ويحفظ تلقائياً:</p>
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <div>
+                        <h4 className="font-extrabold text-xs text-slate-800">🔑 تعديل وتخصيص رموز الدخول للموظفين وعمداء الكليات</h4>
+                        <p className="text-xs text-slate-700">قم بتغيير كلمات المرور (الرموز السرية الدخول السداسية/الرباعية) للكوادر الإدارية. التحديث يتم فوراً في المتصفح ويحفظ سحابياً ومحلياً:</p>
+                      </div>
+                      <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+                        مزامنة فورية ودائمة ⚡
+                      </span>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {rolesList.map((cfg) => (
-                        <div key={cfg.role} className="p-4 bg-white border border-slate-150 rounded-xl space-y-3 shadow-xs">
-                          <div className="flex justify-between items-center">
-                            <span className="font-bold text-xs text-slate-800">{cfg.title}</span>
-                            <span className="text-[10px] text-slate-700 font-bold bg-slate-105 px-2 py-0.5 rounded-sm">{cfg.categoryName}</span>
+                      {rolesList.map((cfg) => {
+                        const currentCode = roleCodes[cfg.role] !== undefined ? roleCodes[cfg.role] : cfg.defaultCode;
+                        return (
+                          <div key={cfg.role} className="p-4 bg-white border border-slate-150 rounded-xl space-y-3 shadow-xs hover:border-amber-400/60 transition-all">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-xs text-slate-800">{cfg.title}</span>
+                              <span className="text-[10px] text-slate-700 font-bold bg-slate-105 px-2 py-0.5 rounded-sm">{cfg.categoryName}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                maxLength={6}
+                                value={currentCode || ''}
+                                className="flex-grow bg-slate-50 border border-slate-150 font-mono font-bold text-center text-sm p-2 rounded-lg text-slate-800 focus:border-amber-500 outline-none"
+                                placeholder="مثال: 1234"
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, ''); // أرقام فقط
+                                  const updatedCodes = { ...roleCodes, [cfg.role]: val };
+                                  syncRoleCodes(updatedCodes);
+                                  const updatedRoles = rolesList.map(r => r.role === cfg.role ? { ...r, defaultCode: val } : r);
+                                  syncRolesList(updatedRoles);
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const val = roleCodes[cfg.role] || cfg.defaultCode;
+                                  const updatedCodes = { ...roleCodes, [cfg.role]: val };
+                                  syncRoleCodes(updatedCodes);
+                                  const updatedRoles = rolesList.map(r => r.role === cfg.role ? { ...r, defaultCode: val } : r);
+                                  syncRolesList(updatedRoles);
+                                  addAuditLog('passcode_update', 'تعديل رمز الدخول', `تم تحديث الرمز السري لـ [${cfg.title}] إلى (${val}) وحفظه بالسيرفر`);
+                                  setInAppToasts(prev => [
+                                    {
+                                      id: `toast-${Date.now()}`,
+                                      title: 'تحديث الرمز السري',
+                                      message: `✓ تم حفظ وتثبيت الرمز السري (${val}) بنجاح لـ: ${cfg.title}.`,
+                                      type: 'success',
+                                      timestamp: new Date().toLocaleTimeString('ar-IQ')
+                                    },
+                                    ...prev
+                                  ]);
+                                  alert(`✓ تم حفظ وتثبيت الرمز السري بنجاح لـ: ${cfg.title} (${val})`);
+                                }}
+                                className="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer shadow-sm shadow-amber-600/10"
+                              >
+                                تحديث وحفظ
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              maxLength={6}
-                              value={roleCodes[cfg.role] || ''}
-                              className="flex-grow bg-slate-50 border border-slate-150 font-mono font-bold text-center text-sm p-2 rounded-lg text-slate-800 focus:border-amber-500 outline-none"
-                              placeholder="مثال: 1234"
-                              onChange={(e) => {
-                                const val = e.target.value.replace(/\D/g, ''); // أرقام فقط
-                                setRoleCodes(prev => ({ ...prev, [cfg.role]: val }));
-                              }}
-                            />
-                            <button
-                              onClick={() => {
-                                alert(` تم تحديث الرمز السري بنجاح لـ: ${cfg.title}`);
-                              }}
-                              className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer"
-                            >
-                              تحديث وبث
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -1751,6 +1930,18 @@ export default function App() {
                               value={newCollegeSeats}
                               onChange={(e) => setNewCollegeSeats(Number(e.target.value))}
                               className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono outline-none focus:border-amber-500"
+                            />
+                          </div>
+
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="font-bold text-slate-700 block">رمز دخول الكلية السري (Passcode):</label>
+                            <input
+                              type="text"
+                              maxLength={6}
+                              placeholder="مثال: 4430 (يتم توليده تلقائياً في حال تركه فارغاً)"
+                              value={newCollegeCode}
+                              onChange={(e) => setNewCollegeCode(e.target.value.replace(/\D/g, ''))}
+                              className="w-full bg-slate-50 border border-slate-200 text-xs p-2.5 rounded-lg text-slate-800 font-mono text-center font-bold outline-none focus:border-amber-500"
                             />
                           </div>
                         </div>
@@ -1978,6 +2169,18 @@ export default function App() {
                               value={newCollegeSeats}
                               onChange={(e) => setNewCollegeSeats(Number(e.target.value))}
                               className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 text-center rounded-xl font-black outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5 sm:col-span-2">
+                            <label className="text-xs font-black text-slate-800 block">رمز دخول الكلية السري (Passcode):</label>
+                            <input
+                              type="text"
+                              maxLength={6}
+                              placeholder="مثال: 4430 (يتم توليده تلقائياً إن ترك فارغاً)"
+                              value={newCollegeCode}
+                              onChange={(e) => setNewCollegeCode(e.target.value.replace(/\D/g, ''))}
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 font-mono text-center rounded-xl text-blue-700 font-black outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-400"
                             />
                           </div>
                         </div>

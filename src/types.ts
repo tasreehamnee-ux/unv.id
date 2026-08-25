@@ -92,7 +92,8 @@ export type LetterCategory =
   | 'administrative_order' // أمر إداري
   | 'internal_circular' // تعميم داخلي
   | 'student_excuse' // عذر طالب
-  | 'graduation_order'; // أمر تخرج
+  | 'graduation_order' // أمر تخرج
+  | 'decision'; // قرار إداري
 
 export interface OfficialLetter {
   id: string; // LET-2026-XXXX
