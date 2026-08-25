@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Student, Payment, Department, PaymentCategory, PaymentMethod } from '../types';
 import { calculateStudentFees, SYSTEM_CURRENT_DATE } from '../data/mockData';
+import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg } from './KutLogo';
 
 interface FinancePortalProps {
   students: Student[];
@@ -453,14 +454,17 @@ export default function FinancePortal({
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white max-w-xl w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-200 animate-scale-in pdf-style-container p-6 space-y-5 text-right printable-receipt">
             
-            {/* هيد الترويسة الأكاديمية الرسمية */}
-            <div className="border-b-2 border-dashed border-slate-200 pb-4 text-center space-y-1">
-              <div className="text-slate-800 font-extrabold text-lg flex items-center justify-center gap-2">
-                <Building className="w-5 h-5 text-amber-700" />
-                <span>{universityName} - {subText}</span>
-              </div>
-              <p className="text-slate-700 text-xs">وصل قبض وقبض أجور دراسية رسمي رقم: <span className="font-mono font-bold text-slate-800">{selectedPrintReceipt.receiptNumber}</span></p>
-              <div className="text-[11px] text-slate-700 font-mono mt-1">تاريخ المعاملة: {selectedPrintReceipt.date}</div>
+            {/* هيد الترويسة الأكاديمية الرسمية لجامعة الكوت */}
+            <OfficialKutHeader 
+              subTitleAr="كلية الكوت الجامعة" 
+              subTitleEn="Kut University College" 
+              officeAr="مكتب العميد / القسم المالي" 
+              officeEn="Dean Office / Finance Department" 
+            />
+            
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+              <span className="text-slate-700 font-bold">وصل قبض وقبض أجور دراسية رسمي: <strong className="font-mono text-emerald-800 text-sm">#{selectedPrintReceipt.receiptNumber}</strong></span>
+              <span className="text-[11px] text-slate-500 font-mono">تاريخ الإيصال: {selectedPrintReceipt.date}</span>
             </div>
 
             {/* تفاصيل السند المالي المطبوع */}

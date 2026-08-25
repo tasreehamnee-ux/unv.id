@@ -25,6 +25,7 @@ import {
 import { OfficialLetter, LetterCategory } from '../types';
 import { SYSTEM_CURRENT_DATE, getLetterExpiryStatus } from '../data/mockData';
 import { generateBarcodeSvg, generateQrCodeDataUrl } from './StudentPortal';
+import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg } from './KutLogo';
 
 // 📊 مولد الباركود المخصص لصحّة صدور الوثائق لجامعة الكوت
 const BarcodePattern = ({ code }: { code: string }) => {
@@ -662,6 +663,14 @@ export default function LettersArchive({
                     {scannedCert ? (
                       <div className="space-y-4 bg-emerald-50/50 border-emerald-250 border p-5 rounded-2xl animate-fade-in text-right relative overflow-hidden">
                         
+                        {/* ترويسة جامعة الكوت الرسمية */}
+                        <OfficialKutHeader 
+                          subTitleAr="كلية الكوت الجامعة" 
+                          subTitleEn="Kut University College" 
+                          officeAr="مكتب العميد / صحة الصدور والشهادات" 
+                          officeEn="Dean Office / Authentication" 
+                        />
+
                         {/* الخلفية المائية الخفيفة */}
                         <div className="absolute -bottom-6 -left-6 opacity-[0.03] text-emerald-950 pointer-events-none select-none">
                           <Building className="w-40 h-40" />
@@ -862,16 +871,11 @@ export default function LettersArchive({
                                   </head>
                                   <body>
                                     <div class="cert-card">
-                                      <div class="header">
-                                        <div>
-                                          <h1 class="univ-title">${universityName}</h1>
-                                          <p class="univ-sub">بوابة التحقق وصحة الصدور الإلكترونية</p>
-                                          <p style="font-size: 11px; color: #64748b; margin-top: 2px;">البريد الرسمي: ${universityEmail}</p>
-                                        </div>
-                                        <div style="text-align: left;">
-                                          <div class="badge">وثيقة معتمدة ومصادق عليها</div>
-                                          <p class="code-label">رقم الكود: <strong>${scannedCert.certCode}</strong></p>
-                                        </div>
+                                      ${getOfficialPrintHeaderHtml("كلية الكوت الجامعة", "Kut University College", "مكتب العميد / صحة الصدور والشهادات", "Dean Office / Authentication")}
+                                      
+                                      <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; margin-bottom: 20px;">
+                                        <div class="badge" style="background: #d1fae5; color: #065f46; font-weight: 800; font-size: 12px; padding: 5px 12px; border-radius: 9999px;">وثيقة معتمدة ومصادق عليها رسمياً ✔</div>
+                                        <div class="code-label" style="font-size: 12px; color: #334155; font-family: monospace; font-weight: bold;">رقم الكود المعتمد: <strong style="color: #065f46;">${scannedCert.certCode}</strong></div>
                                       </div>
 
                                       <div class="cert-heading">بيان وتفاصيل صحة الصدور التوليدي</div>

@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
+import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg } from './KutLogo';
 import { 
   User, 
   MapPin, 
@@ -499,15 +500,10 @@ export default function StudentPortal({
                       </head>
                       <body>
                         <div class="cert-card">
-                          <div class="header">
-                            <div>
-                              <h1 class="univ-title">${universityName}</h1>
-                              <p class="univ-sub">${subText}</p>
-                            </div>
-                            <div style="text-align: left;">
-                              <div class="badge">صحة صدور معتمدة وإلكترونية</div>
-                              <p class="code-label">رمز الصدور: ${valCode}</p>
-                            </div>
+                          ${getOfficialPrintHeaderHtml("كلية الكوت الجامعة", "Kut University College", "مكتب العميد / شعبة التسجيل والقبول", "Dean Office / Registration")}
+                          <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; margin-bottom: 20px;">
+                            <div class="badge" style="background: #d1fae5; color: #065f46; font-weight: 800; font-size: 12px; padding: 5px 12px; border-radius: 9999px;">صحة صدور معتمدة وموثقة إلكترونياً ✔</div>
+                            <div class="code-label" style="font-size: 12px; color: #334155; font-family: monospace; font-weight: bold;">رمز القيد الموحد: <strong style="color: #065f46;">${valCode}</strong></div>
                           </div>
 
                           <div class="cert-heading">شهادة إثبات قيد وصحة صدور الطالب المشفرة</div>
@@ -743,14 +739,17 @@ export default function StudentPortal({
         <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
           <div className="bg-white max-w-xl w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-200 animate-scale-in pdf-style-container p-6 space-y-5 text-right printable-receipt">
             
-            {/* هيد الترويسة الأكاديمية */}
-            <div className="border-b-2 border-dashed border-slate-200 pb-4 text-center space-y-1">
-              <div className="text-slate-800 font-extrabold text-lg flex items-center justify-center gap-2">
-                <Building className="w-5 h-5 text-amber-700" />
-                <span>{universityName} - {subText}</span>
-              </div>
-              <p className="text-slate-700 text-xs">وصل قبض وقبض أجور دراسية رسمي رقم: <span className="font-mono font-bold text-slate-800">{activeReceipt.receiptNumber}</span></p>
-              <div className="text-[11px] text-slate-700 font-mono mt-1">تاريخ المعاملة: {activeReceipt.date}</div>
+            {/* هيد الترويسة الأكاديمية الرسمية لجامعة الكوت */}
+            <OfficialKutHeader 
+              subTitleAr="كلية الكوت الجامعة" 
+              subTitleEn="Kut University College" 
+              officeAr="مكتب العميد / القسم المالي" 
+              officeEn="Dean Office / Finance Department" 
+            />
+            
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+              <span className="text-slate-700 font-bold">وصل قبض وقبض أجور دراسية رسمي: <strong className="font-mono text-emerald-800 text-sm">#{activeReceipt.receiptNumber}</strong></span>
+              <span className="text-[11px] text-slate-500 font-mono">تاريخ الإيصال: {activeReceipt.date}</span>
             </div>
 
             {/* تفاصيل السند المالي المطبوع */}

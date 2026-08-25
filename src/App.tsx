@@ -59,6 +59,7 @@ import LabsPortal from './components/LabsPortal';
 import InternalComms from './components/InternalComms';
 import PythonCodeViewer from './components/PythonCodeViewer';
 import AuditLog from './components/AuditLog';
+import { KutLogoSvg } from './components/KutLogo';
 
 export default function App() {
   
@@ -3266,8 +3267,8 @@ export default function App() {
           
           {/* الشعار والولوج السري */}
           <div className="text-center space-y-3">
-            <div className="mx-auto w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl border border-amber-500/20 flex items-center justify-center shadow-inner">
-              <Building className="w-8 h-8" />
+            <div className="mx-auto w-20 h-20 bg-white/95 rounded-full p-1 border-2 border-amber-400 shadow-xl flex items-center justify-center">
+              <KutLogoSvg size={72} />
             </div>
             <div className="space-y-1">
               <h1 className="font-extrabold text-xl text-white tracking-normal">بوابة جامعة الكوت</h1>
@@ -3422,8 +3423,8 @@ export default function App() {
         {/* هيد الترويسة العليا وجزء تعريف الموظف الفعال */}
         <div className="space-y-5">
           <div className="flex items-center gap-3 border-b border-slate-800/80 pb-4">
-            <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20 shadow-inner">
-              <Building className="w-6 h-6" />
+            <div className="p-1 bg-white/95 rounded-full border border-amber-400/80 shadow-md flex items-center justify-center shrink-0">
+              <KutLogoSvg size={42} />
             </div>
             <div>
               <h1 className="font-extrabold text-sm xl:text-base text-white tracking-normal leading-normal">جامعة الكوت</h1>
@@ -3586,11 +3587,13 @@ export default function App() {
 
       {/* 2. الهيدر الفعال للهواتف (Mobile Header / Drawer) */}
       <header className="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between relative sticky top-0 z-40 select-none shadow-md" style={{ direction: 'rtl' }}>
-        <div className="flex items-center gap-2">
-          <Building className="w-6 h-6 text-amber-500" />
+        <div className="flex items-center gap-2.5">
+          <div className="p-0.5 bg-white/95 rounded-full border border-amber-400/80 shadow-sm flex items-center justify-center shrink-0">
+            <KutLogoSvg size={34} />
+          </div>
           <div>
             <h1 className="font-bold text-xs">بوابة جامعة الكوت</h1>
-            <span className="text-[9px] text-slate-700 block font-sans">نظام أتمتة المعلومات والبيانات</span>
+            <span className="text-[9px] text-slate-400 block font-sans">نظام أتمتة المعلومات والبيانات</span>
           </div>
         </div>
 
