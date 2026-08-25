@@ -2014,12 +2014,26 @@ export default function App() {
   const isPresidencyRole = (roleKey: string | null | undefined): boolean => {
     if (!roleKey) return false;
     const lower = roleKey.toLowerCase();
-    if (lower === 'presidency' || lower.includes('presidency') || lower.includes('reasa') || lower.includes('raees')) {
+    if (
+      lower === 'presidency' || 
+      lower.includes('presidency') || 
+      lower.includes('reasa') || 
+      lower.includes('raees') ||
+      lower.includes('رئاس') ||
+      lower.includes('رئيس')
+    ) {
       return true;
     }
     const roleObj = rolesList.find(r => r.role === roleKey);
     if (roleObj) {
       const text = `${roleObj.title || ''} ${roleObj.categoryName || ''} ${roleObj.departmentId || ''}`.toLowerCase();
+      if (text.includes('رئاسة') || text.includes('رئيس الجامعة') || text.includes('presidency') || text.includes('الرئاسة') || text.includes('رئاس')) {
+        return true;
+      }
+    }
+    const deptObj = departments.find(d => d.id === roleKey || `head_${d.id}` === roleKey);
+    if (deptObj) {
+      const text = `${deptObj.name || ''} ${deptObj.headOfDept || ''}`.toLowerCase();
       if (text.includes('رئاسة') || text.includes('رئيس الجامعة') || text.includes('presidency') || text.includes('الرئاسة')) {
         return true;
       }
@@ -2126,14 +2140,14 @@ export default function App() {
           />
         );
       case 'letters':
-        // 🔒 حظر أمني مشدد: الأرشيف مصرح فقط لمدير النظام الأول ورئاسة الجامعة
-        if (currentRole !== 'admin' && currentRole !== 'presidency') {
+        // 🔒 حظر أمني مشدد: الأرشيف مصرح فقط لمدير النظام الأول ولكافة أفرع ومكاتب رئاسة الجامعة
+        if (!isSuperAdminOrPresidency(currentRole)) {
           return (
             <div className="p-8 text-center bg-white rounded-2xl border border-red-200 shadow-sm space-y-3">
               <ShieldAlert className="w-12 h-12 text-red-500 mx-auto animate-bounce" />
               <h3 className="text-base font-extrabold text-slate-800">صلاحية محظورة أمنياً ⚠️</h3>
               <p className="text-xs text-slate-600 font-bold">أرشيف الكتب والقرارات الرسمية مصرح حصراً لـ [مدير النظام الأول] و [رئاسة الجامعة].</p>
-              <p className="text-[11px] text-slate-400">لا تملك شعبة شؤون وتسجيل الطلبة أو الأقسام الأخرى صلاحية الاطلاع على هذه الخزانة.</p>
+              <p className="text-[11px] text-slate-400">لا تملك شعبة شؤون وتسجيل الطلبة أو الأقسام العادية صلاحية الاطلاع على هذه الخزانة.</p>
             </div>
           );
         }
