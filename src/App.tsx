@@ -865,68 +865,62 @@ export default function App() {
   // دالة لحذف الكلية بالكامل مع حاسبتها التلقائية ومحطتها الأمنية من النظام
   const handleDeleteCollegeEntirely = (deptId: string) => {
     if (currentRole !== 'admin') {
-      setInAppToasts(prev => [
-        {
-          id: `toast-${Date.now()}`,
-          title: 'صلاحيات مفقودة',
-          message: '⚠️ خطأ: هذه الصلاحية حصرية لمدير النظام الفعال فقط!',
-          type: 'error',
-          timestamp: new Date().toLocaleTimeString('ar-IQ')
-        },
-        ...prev
-      ]);
+      alert('⚠️ خطأ: هذه الصلاحية حصرية لمدير النظام الفعال فقط!');
       return;
     }
     const matchedDept = departments.find(d => d.id === deptId);
     if (!matchedDept) return;
-    setDeptIdToDelete(deptId); // تشغيل التأكيد الداخلي التفاعلي بالإنترفيس لتجاوز مستمع الـ iframe
+    
+    if (window.confirm(`هل أنت متأكد من حذف وإلغاء قسم/كلية "${matchedDept.name}" نهائياً من النظام؟`)) {
+      const updatedDepts = departments.filter(d => d.id !== deptId);
+      setDepartments(updatedDepts);
+      syncDepartments(updatedDepts);
+      
+      // إزالة الصلاحية
+      const updatedRoles = rolesList.filter(r => r.departmentId !== deptId);
+      setRolesList(updatedRoles);
+      localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(updatedRoles));
+
+      const deanRole = `head_${deptId}`;
+      setRoleCodes(prev => {
+        const copy = { ...prev };
+        delete copy[deanRole];
+        localStorage.setItem('AL_AHLIYA_ROLE_CODES', JSON.stringify(copy));
+        return copy;
+      });
+
+      // إزالة الـ IP
+      setCollegeIps(prev => {
+        const copy = { ...prev };
+        delete copy[deptId];
+        localStorage.setItem('AL_AHLIYA_COLLEGE_IPS', JSON.stringify(copy));
+        return copy;
+      });
+
+      // تصفير الجلسة في حال كان العمود الفعال المفتوح هو المحذوف
+      if (currentRole === deanRole) {
+        setCurrentRole('admin');
+      }
+
+      addAuditLog('college_delete', 'حذف وإلغاء الكلية', `تم شطب وحذف وإلغاء كلية وقسم [${matchedDept.name}] بالكامل`);
+      
+      setInAppToasts(prev => [
+        {
+          id: `toast-${Date.now()}`,
+          title: 'مسح القسم',
+          message: `✓ تم بنجاح حذف وإلغاء كلية/قسم "${matchedDept.name}" من النظام بالكامل.`,
+          type: 'success',
+          timestamp: new Date().toLocaleTimeString('ar-IQ')
+        },
+        ...prev
+      ]);
+      setDeptIdToDelete(null);
+    }
   };
 
   // دالة الإلغاء الفوري والحذف النهائي بعد ضغط زر التأكيد
   const executeDeleteCollege = (deptId: string) => {
-    const matchedDept = departments.find(d => d.id === deptId);
-    if (!matchedDept) {
-      setDeptIdToDelete(null);
-      return;
-    }
-
-    setDepartments(prev => { const arr = prev.filter(d => d.id !== deptId); syncDepartments(arr); return arr; });
-    
-    // إزالة الصلاحية
-    setRolesList(prev => prev.filter(r => r.departmentId !== deptId));
-    const deanRole = `head_${deptId}`;
-    setRoleCodes(prev => {
-      const copy = { ...prev };
-      delete copy[deanRole];
-      return copy;
-    });
-
-    // إزالة الـ IP
-    setCollegeIps(prev => {
-      const copy = { ...prev };
-      delete copy[deptId];
-      return copy;
-    });
-
-    // تصفير الجلسة في حال العمل بها
-    if (currentRole === deanRole) {
-      setCurrentRole('admin');
-    }
-
-    addAuditLog('college_delete', 'حذف وإلغاء الكلية', `تم شطب وحذف وإلغاء كلية وقسم [${matchedDept.name}] بالكامل وتصفية سائر الرسوم والـ IP والمحطة المرتبطة بها نهائياً`);
-    
-    setInAppToasts(prev => [
-      {
-        id: `toast-${Date.now()}`,
-        title: 'مسح الكلية',
-        message: `✓ تم بنجاح حذف كلية "${matchedDept.name}" ومحطتها الحاسوبية وكافة تفاصيلها من النظام.`,
-        type: 'success',
-        timestamp: new Date().toLocaleTimeString('ar-IQ')
-      },
-      ...prev
-    ]);
-    
-    setDeptIdToDelete(null);
+    handleDeleteCollegeEntirely(deptId);
   };
 
   // دالة حفظ أو تعديل أو استبدال بيانات كلية وحاسبتها بشكل كامل
