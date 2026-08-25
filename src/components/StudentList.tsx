@@ -1100,10 +1100,15 @@ export default function StudentList({
                             <span>وصل</span>
                           </button>
                         )}
-                        <button 
-                          id="delete-btn"
-                          onClick={() => {
-                            if (window.confirm(`⚠️ تنبيه مهم جداً: هل أنت متأكد من شطب وقيد ملف الطالب التالي وكافة وصولاته الحسابية والمالية من السيرفر بشكل نهائي؟
+                        {currentRole === 'admin' && (
+                          <button 
+                            id="delete-btn"
+                            onClick={() => {
+                              if (currentRole !== 'admin') {
+                                alert('⚠️ إجراء مرفوض: خاصية حذف وشطب قيود الطلبة مصرحة حصراً لمدير النظام (الأدمن)!');
+                                return;
+                              }
+                              if (window.confirm(`⚠️ تنبيه مهم جداً: هل أنت متأكد من شطب وقيد ملف الطالب التالي وكافة وصولاته الحسابية والمالية من السيرفر بشكل نهائي؟
 
 تفاصيل الطالب المرخص والمطالب بمراجعته:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1116,15 +1121,16 @@ export default function StudentList({
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 اضغط (موافق) لإتمام الإلغاء وشطب البيانات، أو اضغط (إلغاء) للتراجع.`)) {
-                              onDeleteStudent(student.id);
-                            }
-                          }}
-                          className="bg-red-55/10 hover:bg-red-600 hover:text-white text-red-600 border border-red-200 transition-all font-bold text-[10px] px-2 py-1 rounded-md flex items-center gap-1 cursor-pointer"
-                          title="حذف الطالب وإلغاء القبول"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          <span>حذف</span>
-                        </button>
+                                onDeleteStudent(student.id);
+                              }
+                            }}
+                            className="bg-red-55/10 hover:bg-red-600 hover:text-white text-red-600 border border-red-200 transition-all font-bold text-[10px] px-2 py-1 rounded-md flex items-center gap-1 cursor-pointer"
+                            title="حذف الطالب وإلغاء القبول (خاص بالأدمن)"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            <span>حذف</span>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

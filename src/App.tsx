@@ -1790,8 +1790,12 @@ export default function App() {
     addAuditLog('student_add', 'تسجيل وقبول طالب جديد', `تم تسجيل وقبول الطالب [${newStudent.name}] بكود [${newStudent.id}] بكلية [${deptObj?.name || newStudent.departmentId}] وشعبة [${newStudent.shift === 'morning' ? 'صباحي' : 'مسائي'}]`);
   };
 
-  // حذف طالب
+  // حذف طالب (حصراً للأدمن)
   const handleDeleteStudent = (id: string) => {
+    if (currentRole !== 'admin') {
+      alert('⚠️ إجراء مرفوض: خاصية حذف وشطب قيود الطلبة مصرحة حصراً لمدير النظام (الأدمن)!');
+      return;
+    }
     const targetStudent = students.find(s => s.id === id);
     addAuditLog('student_delete', 'إلغاء وشطب قيد طالب مالي', `تم كلياً شطب وإلغاء قيد الطالب [${targetStudent?.name}] الكود الجاري [${id}] مع مسح كافة الوصولات المبرمة لتصفية السلسة الحسابية في النظام الموحد`);
     setStudents(prev => { const arr = prev.filter(s => s.id !== id); syncStudents(arr); return arr; });
@@ -1846,8 +1850,12 @@ export default function App() {
     } catch (e) {}
   };
 
-  // حذف كتاب أو وثيقة فردية من الأرشيف
+  // حذف كتاب أو وثيقة فردية من الأرشيف (حصراً للأدمن)
   const handleDeleteLetter = (id: string) => {
+    if (currentRole !== 'admin') {
+      alert('⚠️ إجراء مرفوض: خاصية حذف الكتب والوثائق الرسمية مصرحة حصراً لمدير النظام (الأدمن)!');
+      return;
+    }
     setLetters(prev => {
       const updated = prev.filter(l => l.id !== id);
       try {
@@ -1868,8 +1876,12 @@ export default function App() {
     ]);
   };
 
-  // تفريغ ومسح كافة الكتب المؤرشفة من قاعدة البيانات
+  // تفريغ ومسح كافة الكتب المؤرشفة من قاعدة البيانات (حصراً للأدمن)
   const handleClearAllLetters = () => {
+    if (currentRole !== 'admin') {
+      alert('⚠️ إجراء مرفوض: خاصية تفريغ وحذف أرشيف الكتب مصرحة حصراً لمدير النظام (الأدمن)!');
+      return;
+    }
     if (window.confirm('⚠️ تحذير: هل أنت متأكد من رغبتك في تفريغ وحذف كافة الكتب والوثائق من الأرشيف وقاعدة البيانات نهائياً؟')) {
       setLetters([]);
       try {
@@ -1903,8 +1915,12 @@ export default function App() {
     });
   };
 
-  // حذف رسالة فردية
+  // حذف رسالة فردية (حصراً للأدمن)
   const handleDeleteMessage = (id: string) => {
+    if (currentRole !== 'admin') {
+      alert('⚠️ إجراء مرفوض: خاصية حذف الرسائل مصرحة حصراً لمدير النظام (الأدمن)!');
+      return;
+    }
     setMessages(prev => {
       const updated = prev.filter(m => m.id !== id);
       try {
@@ -1925,8 +1941,12 @@ export default function App() {
     ]);
   };
 
-  // تفريغ ومسح كافة الرسائل
+  // تفريغ ومسح كافة الرسائل (حصراً للأدمن)
   const handleClearAllMessages = () => {
+    if (currentRole !== 'admin') {
+      alert('⚠️ إجراء مرفوض: خاصية تفريغ وحذف الرسائل والمراسلات مصرحة حصراً لمدير النظام (الأدمن)!');
+      return;
+    }
     if (window.confirm('⚠️ هل أنت متأكد من رغبتك في تفريغ وحذف كافة الرسائل والمراسلات الداخلية نهائياً؟')) {
       setMessages([]);
       try {
@@ -2086,6 +2106,7 @@ export default function App() {
             universityName={headerCollegeAr}
             universityEmail={receiptUniversityEmail}
             headerConfig={headerConfig}
+            currentRole={currentRole}
           />
         );
       case 'labs_portal':

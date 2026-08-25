@@ -723,16 +723,20 @@ export default function InternalComms({
                       }`}>
                         {msg.priority === 'high' ? 'عالي ذات أولوية' : 'عادي'}
                       </span>
-                      {onDeleteMessage && (
+                      {currentRole === 'admin' && onDeleteMessage && (
                         <button
                           type="button"
                           onClick={() => {
+                            if (currentRole !== 'admin') {
+                              alert('⚠️ إجراء مرفوض: خاصية حذف الرسائل والمراسلات مصرحة حصراً لمدير النظام (الأدمن)!');
+                              return;
+                            }
                             if (window.confirm('هل أنت متأكد من حذف هذه الرسالة؟')) {
                               onDeleteMessage(msg.id);
                             }
                           }}
                           className="text-slate-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-md transition-colors cursor-pointer"
-                          title="حذف هذه الرسالة نهائياً"
+                          title="حذف هذه الرسالة نهائياً (خاص بالأدمن)"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -92,6 +92,7 @@ interface LettersArchiveProps {
   universityName?: string;
   universityEmail?: string;
   headerConfig?: KutHeaderConfig;
+  currentRole?: string;
 }
 
 export default function LettersArchive({ 
@@ -102,7 +103,8 @@ export default function LettersArchive({
   setActiveTab, 
   universityName = 'جامعة الكوت الأهلية', 
   universityEmail = 'info@alkut.edu.iq',
-  headerConfig
+  headerConfig,
+  currentRole
 }: LettersArchiveProps) {
   
   // حالات الفلترة والبحث للأرشيف المركزي
@@ -277,12 +279,18 @@ export default function LettersArchive({
           <p className="text-slate-700 text-xs md:text-sm mt-1">تداول وأرشفة الأوامر الإدارية والوزارية وتثبيت فترات نفاذ القوانين</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {onClearAllLetters && letters.length > 0 && (
+          {currentRole === 'admin' && onClearAllLetters && letters.length > 0 && (
             <button
               type="button"
-              onClick={onClearAllLetters}
+              onClick={() => {
+                if (currentRole !== 'admin') {
+                  alert('⚠️ إجراء مرفوض: خاصية تفريغ وحذف أرشيف الكتب مصرحة حصراً لمدير النظام (الأدمن)!');
+                  return;
+                }
+                onClearAllLetters();
+              }}
               className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs md:text-sm px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs"
-              title="حذف وتفريغ كافة الكتب من قاعدة البيانات"
+              title="حذف وتفريغ كافة الكتب من قاعدة البيانات (خاص بالأدمن)"
             >
               <Trash2 className="w-4 h-4 text-red-600" />
               <span>تفريغ الأرشيف ({letters.length})</span>
@@ -525,16 +533,20 @@ export default function LettersArchive({
                        letItem.category === 'administrative_order' ? 'أمر إداري' :
                        letItem.category === 'internal_circular' ? 'تعميم أقسام' : 'معاملة رسمية'}
                     </span>
-                    {onDeleteLetter && (
+                    {currentRole === 'admin' && onDeleteLetter && (
                       <button
                         type="button"
                         onClick={() => {
+                          if (currentRole !== 'admin') {
+                            alert('⚠️ إجراء مرفوض: خاصية حذف الوثائق والكتب مصرحة حصراً لمدير النظام (الأدمن)!');
+                            return;
+                          }
                           if (window.confirm(`هل أنت متأكد من حذف الوثيقة: "${letItem.title}" من الأرشيف نهائياً؟`)) {
                             onDeleteLetter(letItem.id);
                           }
                         }}
                         className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                        title="حذف هذه الوثيقة من الأرشيف"
+                        title="حذف هذه الوثيقة من الأرشيف (خاص بالأدمن)"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
