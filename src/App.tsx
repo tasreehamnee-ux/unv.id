@@ -161,18 +161,36 @@ export default function App() {
 
   // 1. تعريف حالات المكون والتحميل من localStorage لتأمين الحفظ الدائم (Bulletproof Persistence)
   const [departments, setDepartments] = useState<Department[]>(() => {
-    const saved = localStorage.getItem('AL_AHLIYA_DEPARTMENTS');
-    return saved ? JSON.parse(saved) : mockDepartments;
+    try {
+      const saved = localStorage.getItem('AL_AHLIYA_DEPARTMENTS');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockDepartments;
   });
 
   const [students, setStudents] = useState<Student[]>(() => {
-    const saved = localStorage.getItem('AL_AHLIYA_STUDENTS');
-    return saved ? JSON.parse(saved) : mockStudents;
+    try {
+      const saved = localStorage.getItem('AL_AHLIYA_STUDENTS');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockStudents;
   });
 
   const [payments, setPayments] = useState<Payment[]>(() => {
-    const saved = localStorage.getItem('AL_AHLIYA_PAYMENTS');
-    return saved ? JSON.parse(saved) : mockPayments;
+    try {
+      const saved = localStorage.getItem('AL_AHLIYA_PAYMENTS');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockPayments;
   });
 
   const [letters, setLetters] = useState<OfficialLetter[]>([]);
@@ -394,21 +412,51 @@ export default function App() {
   // Sync Students and Departments from Firebase
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "appData", "students"), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().list) {
-        setStudents(docSnap.data().list);
-      }
+      try {
+        if (docSnap.exists() && Array.isArray(docSnap.data()?.list)) {
+          setStudents(docSnap.data().list);
+        }
+      } catch (e) {}
+    }, (err) => {
+      console.warn("Students listener notice:", err);
     });
     return () => unsub();
   }, []);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "appData", "departments"), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().list) {
-        setDepartments(docSnap.data().list);
-      }
+      try {
+        if (docSnap.exists() && Array.isArray(docSnap.data()?.list)) {
+          setDepartments(docSnap.data().list);
+        }
+      } catch (e) {}
+    }, (err) => {
+      console.warn("Departments listener notice:", err);
     });
     return () => unsub();
   }, []);
+
+  const syncDepartments = (list: Department[]) => {
+    try {
+      localStorage.setItem('AL_AHLIYA_DEPARTMENTS', JSON.stringify(list));
+      setDoc(doc(db, "appData", "departments"), { list }).catch((err) => {
+        console.warn("Departments cloud sync notice:", err);
+      });
+    } catch (e) {
+      console.warn("syncDepartments local write notice:", e);
+    }
+  };
+
+  const syncStudents = (list: Student[]) => {
+    try {
+      localStorage.setItem('AL_AHLIYA_STUDENTS', JSON.stringify(list));
+      setDoc(doc(db, "appData", "students"), { list }).catch((err) => {
+        console.warn("Students cloud sync notice:", err);
+      });
+    } catch (e) {
+      console.warn("syncStudents local write notice:", e);
+    }
+  };
 
   // 1.10 حالات وإعدادات خدمة الإشعارات المنبثقة للتنبيه بسلامة وثائق الطلاب المستهدفة
   const [alertsEnabled, setAlertsEnabled] = useState<boolean>(() => {
@@ -899,51 +947,69 @@ export default function App() {
 
     if (editingDeptId) {
       // تعديل واستبدال الكلية الحالية
-      setDepartments(prev => { const arr = prev.map(d => {
+      const updated = departments.map(d => {
         if (d.id === editingDeptId) {
           return {
             ...d,
             name: cleanName,
-            annualFeeMorning: newCollegeMorningFee,
-            annualFeeEvening: newCollegeEveningFee,
-            durationYears: newCollegeYears,
-            availableSeats: newCollegeSeats
+            annualFeeMorning: Number(newCollegeMorningFee) || 4000000,
+            annualFeeEvening: Number(newCollegeEveningFee) || 5000000,
+            durationYears: Number(newCollegeYears) || 4,
+            availableSeats: Number(newCollegeSeats) || 100
           };
         }
         return d;
-      }); syncDepartments(arr); return arr; });
+      });
+      setDepartments(updated);
+      syncDepartments(updated);
 
-      setCollegeIps(prev => ({
-        ...prev,
-        [editingDeptId]: cleanIp
-      }));
+      setCollegeIps(prev => {
+        const copy = { ...prev, [editingDeptId]: cleanIp };
+        localStorage.setItem('AL_AHLIYA_COLLEGE_IPS', JSON.stringify(copy));
+        return copy;
+      });
 
       setEditingDeptId(null);
-      alert(`🎉 تم تعديل واستبدال الكلية وحاسبتها الفردية بنجاح! IP المعدل: ${cleanIp}`);
+      addAuditLog('college_update', 'تعديل بيانات كلية', `تم تعديل بيانات كلية [${cleanName}] بنجاح`);
     } else {
-      // إضافة كلية جديدة بالكامل لمحاكاة النظام
-      const newId = cleanName.toLowerCase().replace(/[^a-z0-0]/g, 'col') || `col-${Date.now()}`;
+      // إضافة كلية جديدة بالكامل
+      const newId = `dept-${Date.now()}`;
       
       const newDept: Department = {
         id: newId,
         name: cleanName,
-        college: 'جامعة المستقبل الأهلية',
-        annualFeeMorning: newCollegeMorningFee,
-        annualFeeEvening: newCollegeEveningFee,
-        durationYears: newCollegeYears,
+        college: receiptUniversityName || 'جامعة الكوت الأهلية',
+        annualFeeMorning: Number(newCollegeMorningFee) || 4000000,
+        annualFeeEvening: Number(newCollegeEveningFee) || 5000000,
+        durationYears: Number(newCollegeYears) || 4,
         headOfDepartment: 'شاغر',
-        availableSeats: newCollegeSeats,
+        availableSeats: Number(newCollegeSeats) || 100,
         totalEnrolled: 0
       };
 
-      setDepartments(prev => { const arr = [...prev, newDept]; syncDepartments(arr); return arr; });
-      setCollegeIps(prev => ({
-        ...prev,
-        [newId]: cleanIp
-      }));
+      const updated = [...departments, newDept];
+      setDepartments(updated);
+      syncDepartments(updated);
 
-      alert(`🎉 تم تسجيل وإضافة الكلية المحدثة "${cleanName}" ومحطتها الرقمية بالكامل بنجاح.`);
+      setCollegeIps(prev => {
+        const copy = { ...prev, [newId]: cleanIp };
+        localStorage.setItem('AL_AHLIYA_COLLEGE_IPS', JSON.stringify(copy));
+        return copy;
+      });
+
+      addAuditLog('college_add', 'إضافة كلية جديدة', `تم تسجيل وإضافة كلية/قسم جديد [${cleanName}] بمحطة رقمية [${cleanIp}]`);
     }
+
+    setInAppToasts(prev => [
+      {
+        id: `toast-${Date.now()}`,
+        title: editingDeptId ? 'تعديل الكلية' : 'إضافة كلية جديدة',
+        message: `✓ تم بنجاح ${editingDeptId ? 'تعديل' : 'إضافة'} كلية "${cleanName}" ومحطتها الرقمية (${cleanIp}) في النظام.`,
+        type: 'success',
+        timestamp: new Date().toLocaleTimeString('ar-IQ')
+      },
+      ...prev
+    ]);
 
     // إعادة ضبط الحقول
     setNewCollegeName('');
@@ -1365,7 +1431,7 @@ export default function App() {
                       : 'border-transparent text-slate-550 hover:text-slate-800'
                   }`}
                 >
-                  🎓 عمادات وحسابات الـ 12 كلية ({rolesList.filter(r => r.categoryName === 'عميد كلية').length})
+                  🎓 عمادات وحسابات الكليات والأقسام ({departments.length})
                 </button>
                 <button
                   onClick={() => setAdminSubTab('email_alerts')}
@@ -1761,28 +1827,26 @@ export default function App() {
                     {/* أ) فورم تكليف عميد جديد */}
                     <form 
                       onSubmit={handleAddOrUpdateDean} 
-                      className="lg:col-span-6 bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 space-y-4 shadow-lg relative overflow-hidden flex flex-col justify-between"
+                      className="lg:col-span-6 bg-white text-slate-900 p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm relative overflow-hidden flex flex-col justify-between"
                     >
-                      <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
-                      
-                      <div className="space-y-2">
-                        <h4 className="font-black text-xs text-emerald-400 flex items-center gap-2">
-                          <Building className="w-4 h-4 text-emerald-500 shrink-0 animate-bounce" />
+                      <div className="space-y-2 border-b border-slate-100 pb-3">
+                        <h4 className="font-black text-sm text-emerald-700 flex items-center gap-2">
+                          <Building className="w-5 h-5 text-emerald-600 shrink-0" />
                           <span>تخويل وتعيين عميد الكلية والرموز السرية 🔑</span>
                         </h4>
-                        <p className="text-slate-300 text-[10px] leading-relaxed">
+                        <p className="text-slate-600 text-xs leading-relaxed font-medium">
                           اختر كلية معتمدة وعيّن عميدها الرباعي وكود دخولها الموحد لتفعيل حسابها وصلاحياتها الأمنية.
                         </p>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-slate-700 font-bold block">الكلية الأكاديمية المستهدفة:</label>
+                      <div className="space-y-3.5">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-black text-slate-800 block">الكلية الأكاديمية المستهدفة:</label>
                           <select
                             required
                             value={formDeanDept}
                             onChange={(e) => setFormDeanDept(e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 text-white text-xs p-2.5 rounded-xl cursor-pointer outline-none focus:border-emerald-500 font-bold col-span-12"
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl cursor-pointer outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-bold"
                           >
                             <option value="">-- اختر الكلية لتعيين عميدها --</option>
                             {departments.map(d => (
@@ -1791,20 +1855,20 @@ export default function App() {
                           </select>
                         </div>
 
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-slate-700 font-bold block">اسم عميد الكلية الرباعي واللقب:</label>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-black text-slate-800 block">اسم عميد الكلية الرباعي واللقب:</label>
                           <input
                             type="text"
                             required
                             placeholder="مثال: أ.د. ضياء عبد اللطيف السعدي"
                             value={formDeanName}
                             onChange={(e) => setFormDeanName(e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 text-xs p-2.5 rounded-xl text-white outline-none focus:border-emerald-500 placeholder-slate-700 font-semibold"
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 placeholder-slate-400 font-bold"
                           />
                         </div>
 
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-slate-700 font-bold block">رمز دخول الكلية السري (قفل أمني رقمي):</label>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-black text-slate-800 block">رمز دخول الكلية السري (قفل أمني رقمي):</label>
                           <input
                             type="text"
                             required
@@ -1812,15 +1876,15 @@ export default function App() {
                             placeholder="مثال: 4425"
                             value={formDeanCode}
                             onChange={(e) => setFormDeanCode(e.target.value.replace(/\D/g, ''))}
-                            className="w-full bg-slate-950 border border-slate-800 text-xs p-2.5 font-mono text-center rounded-xl text-emerald-400 font-black tracking-widest outline-none focus:border-emerald-500 placeholder-slate-700"
+                            className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 font-mono text-center rounded-xl text-emerald-700 font-black tracking-widest outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 placeholder-slate-400"
                           />
                         </div>
                       </div>
 
-                      <div className="flex justify-end pt-2">
+                      <div className="flex justify-end pt-3">
                         <button
                           type="submit"
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-emerald-600/10 flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <span>تنشيط الرمز السري وحاسبة الـ IP للكلية 📡</span>
                         </button>
@@ -1830,13 +1894,11 @@ export default function App() {
                     {/* ب) فورم إضافة/تعديل واستبدال الكلية وحاسبتها الفردية */}
                     <form 
                       onSubmit={handleSaveCollegeAndStation} 
-                      className="lg:col-span-6 bg-slate-900 border border-slate-800 text-white p-5 rounded-3xl space-y-4 shadow-lg relative overflow-hidden flex flex-col justify-between"
+                      className="lg:col-span-6 bg-white text-slate-900 p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm relative overflow-hidden flex flex-col justify-between"
                     >
-                      <div className="absolute top-0 left-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
-                      
-                      <div className="space-y-2">
-                        <h4 className="font-black text-xs text-amber-400 flex items-center gap-2">
-                          <Terminal className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div className="space-y-2 border-b border-slate-100 pb-3">
+                        <h4 className="font-black text-sm text-blue-700 flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-blue-600 shrink-0" />
                           <span>
                             {editingDeptId 
                               ? `📝 تعديل واستبدال بيانات كرت الكلية وحاسبتها الأمنية` 
@@ -1844,65 +1906,65 @@ export default function App() {
                             }
                           </span>
                         </h4>
-                        <p className="text-slate-350 text-[10px] leading-relaxed">
-                          أدخل اسم الكلية، وعنوان حاسبتها المخصصة لربطها فورياً بالسيرفر واستبدال بيانات الكلية الحالية وقيم أقساط الرسوم المحددة لها.
+                        <p className="text-slate-600 text-xs leading-relaxed font-medium">
+                          أدخل اسم الكلية، وعنوان حاسبتها المخصصة لربطها فورياً بالسيرفر وتحديد قيم أقساط الرسوم المحددة لها.
                         </p>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[10px] text-slate-700 font-bold block">اسم الكلية الأكاديمية:</label>
+                      <div className="space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-800 block">اسم الكلية الأكاديمية:</label>
                             <input
                               type="text"
                               required
                               placeholder="مثال: كلية الذكاء الاصطناعي"
                               value={newCollegeName}
                               onChange={(e) => setNewCollegeName(e.target.value)}
-                              className="w-full bg-slate-950 border border-slate-850 text-xs p-2.5 rounded-xl text-white outline-none focus:border-amber-500 font-bold placeholder-slate-700"
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold placeholder-slate-400"
                             />
                           </div>
 
-                          <div className="space-y-1">
-                            <label className="text-[10px] text-slate-700 font-bold block">عنوان حاسبوها IP VLAN:</label>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-800 block">عنوان حاسبوها IP VLAN:</label>
                             <input
                               type="text"
                               required
                               placeholder="مثال: 192.168.12.15"
                               value={newCollegeIp}
                               onChange={(e) => setNewCollegeIp(e.target.value)}
-                              className="w-full bg-slate-950 border border-slate-850 text-xs p-2.5 font-mono text-center rounded-xl text-amber-400 font-bold outline-none focus:border-amber-500 placeholder-slate-700"
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 font-mono text-center rounded-xl text-blue-700 font-black outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-400"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[10px] text-slate-700 font-bold block">قسط الدراسة الصباحية (د.ع):</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-800 block">قسط الدراسة الصباحية (د.ع):</label>
                             <input
                               type="number"
                               required
                               value={newCollegeMorningFee}
                               onChange={(e) => setNewCollegeMorningFee(Number(e.target.value))}
-                              className="w-full bg-slate-950 border border-slate-850 text-xs p-2.5 text-center font-bold rounded-xl text-slate-250 outline-none focus:border-amber-500"
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 text-center font-black rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                             />
                           </div>
                           
-                          <div className="space-y-1">
-                            <label className="text-[10px] text-slate-700 font-bold block">قسط الدراسة المسائية (د.ع):</label>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-800 block">قسط الدراسة المسائية (د.ع):</label>
                             <input
                               type="number"
                               required
                               value={newCollegeEveningFee}
                               onChange={(e) => setNewCollegeEveningFee(Number(e.target.value))}
-                              className="w-full bg-slate-950 border border-slate-850 text-xs p-2.5 text-center font-bold rounded-xl text-slate-250 outline-none focus:border-amber-500"
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 text-center font-black rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[10px] text-slate-700 font-bold block">عدد سنوات الدراسة في الكلية:</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-800 block">عدد سنوات الدراسة في الكلية:</label>
                             <input
                               type="number"
                               required
@@ -1910,24 +1972,24 @@ export default function App() {
                               max={6}
                               value={newCollegeYears}
                               onChange={(e) => setNewCollegeYears(Number(e.target.value))}
-                              className="w-full bg-slate-950 border border-slate-855 text-xs p-2.5 text-center rounded-xl font-bold"
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 text-center rounded-xl font-black outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                             />
                           </div>
 
-                          <div className="space-y-1">
-                            <label className="text-[10px] text-slate-700 font-bold block">الحد الأقصى للمقاعد:</label>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-800 block">الحد الأقصى للمقاعد:</label>
                             <input
                               type="number"
                               required
                               value={newCollegeSeats}
                               onChange={(e) => setNewCollegeSeats(Number(e.target.value))}
-                              className="w-full bg-slate-950 border border-slate-855 text-xs p-2.5 text-center rounded-xl font-bold"
+                              className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-xs p-3 text-center rounded-xl font-black outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                             />
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex gap-2 pt-2">
+                      <div className="flex gap-2.5 pt-3">
                         {editingDeptId && (
                           <button
                             type="button"
@@ -1940,15 +2002,15 @@ export default function App() {
                               setNewCollegeYears(4);
                               setNewCollegeSeats(100);
                             }}
-                            className="flex-1 bg-slate-800 hover:bg-slate-755 text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+                            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-all cursor-pointer"
                           >
                             إلغاء التعديل ✕
                           </button>
                         )}
                         <button
                           type="submit"
-                          className={`flex-1 text-white font-black text-xs py-2.5 rounded-xl transition-all shadow-md cursor-pointer ${
-                            editingDeptId ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'
+                          className={`flex-1 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md cursor-pointer ${
+                            editingDeptId ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/10' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/10'
                           }`}
                         >
                           {editingDeptId ? 'تطبيق وحفظ التعديلات والاستبدال 💾' : 'إنشاء وحفظ الكلية الجديدة بالشبكة ➕'}
@@ -1958,13 +2020,14 @@ export default function App() {
 
                   </div>
 
-                  {/* ب) شبكة حاسبات الكوادر الـ 12 كلية */}
+                  {/* ب) شبكة حاسبات الكوادر والكليات */}
                   <div className="space-y-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-2 gap-2">
                       <h4 className="font-extrabold text-xs text-slate-800 flex items-center gap-2">
                         <span>🖥️ السيرفر والشبكة التفاعلية لحسابات الكليات ومحطاتها الرقمية الفعالة (IPs & Passcodes)</span>
                         <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-black animate-pulse">غرفة المراقبة والتحكم المباشر للتسجيل</span>
                       </h4>
+
                       <span className="text-xs text-slate-700 font-bold font-mono">الشبكة: SECURE VLAN-COLLEGE_CENTRAL_GATEWAY</span>
                     </div>
 
@@ -2323,7 +2386,7 @@ export default function App() {
                             <Building className="w-4 h-4 text-amber-600" />
                             <span>{receiptUniversityName} - {receiptSubText}</span>
                           </div>
-                          <span className="text-[10px] text-slate-700 block mt-0.5">وصل قبض وقبض أجور دراسية رسمي رقم: #105934</span>
+                          <span className="text-[10px] text-slate-700 block mt-0.5">وصل قبض وقبض أجور دراسية رسمي رقم: 105934</span>
                         </div>
                         <p className="text-[10px] text-slate-700 leading-normal bg-slate-50/50 p-2 rounded-lg border border-slate-100">{receiptNoteText}</p>
                       </div>
