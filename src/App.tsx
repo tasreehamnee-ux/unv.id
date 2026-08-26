@@ -13,29 +13,33 @@ import {
   FolderLock, 
   MessageSquare, 
   Terminal, 
-  LayoutDashboard,
-  User,
-  GraduationCap,
-  Clock,
-  Menu,
-  X,
-  RotateCcw,
-  ShieldAlert,
-  PhoneCall,
-  Mail,
-  Plus,
-  Trash2,
-  Send,
-  CheckCircle,
-  UserPlus,
-  Bell,
-  Volume2,
-  Database,
-  Globe,
-  Activity,
-  Code2
+  LayoutDashboard, 
+  User, 
+  GraduationCap, 
+  Clock, 
+  Menu, 
+  X, 
+  RotateCcw, 
+  ShieldAlert, 
+  PhoneCall, 
+  Mail, 
+  Plus, 
+  Trash2, 
+  Send, 
+  CheckCircle, 
+  UserPlus, 
+  Bell, 
+  Volume2, 
+  Database, 
+  Globe, 
+  Activity, 
+  Code2,
+  Cloud,
+  CloudOff,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { firebaseService, SyncStatus } from './services/firebaseService';
 
 // استيراد الأنواع والبيانات الافتراضية والتابع المساعد
 import { Student, Payment, OfficialLetter, InternalMessage, Department, AdminDepartment, AcademicSubDepartment } from './types';
@@ -65,16 +69,63 @@ export default function App() {
   
   // 1.1 تعريف أدوار العمل ورموزها ومحدودياتها الكلية بالترميز العربي الوطني بصيغة حالة ديناميكية قابلة للتعديل والتحكم بالحذف والإضافة
   const [rolesList, setRolesList] = useState<{ role: string; title: string; categoryName: string; defaultCode: string; departmentId?: string; isCustom?: boolean }[]>(() => {
+    const PRESIDENCY_ROLES = [
+      { role: 'presidency', title: 'رئاسة الجامعة (مكتب رئيس الجامعة)', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7777', departmentId: 'presidency' },
+      { role: 'office_director', title: 'مدير مكتب رئيس الجامعة', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7778', departmentId: 'presidency' },
+    ];
+
     const saved = localStorage.getItem('AL_AHLIYA_ROLES_LIST');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // ترحيل تلقائي: نضمن وجود دور الرئاسة ومدير المكتب مباشرة بعد الأدمن
+          let updated = [...parsed];
+          let changed = false;
+
+          // تأكد أن presidency له departmentId صحيح
+          const presIdx = updated.findIndex(r => r.role === 'presidency');
+          if (presIdx === -1) {
+            const adminIdx = updated.findIndex(r => r.role === 'admin');
+            updated.splice(adminIdx + 1, 0, PRESIDENCY_ROLES[0]);
+            changed = true;
+          } else if (!updated[presIdx].departmentId) {
+            updated[presIdx] = { ...updated[presIdx], departmentId: 'presidency' };
+            changed = true;
+          }
+
+          // تأكد وجود office_director بعد presidency
+          const officeIdx = updated.findIndex(r => r.role === 'office_director');
+          if (officeIdx === -1) {
+            const presIdx2 = updated.findIndex(r => r.role === 'presidency');
+            updated.splice(presIdx2 + 1, 0, PRESIDENCY_ROLES[1]);
+            changed = true;
+          }
+
+          // ضمان الترتيب: admin → presidency → office_director → باقي الأدوار
+          const adminI = updated.findIndex(r => r.role === 'admin');
+          const presI = updated.findIndex(r => r.role === 'presidency');
+          const officeI = updated.findIndex(r => r.role === 'office_director');
+          if (adminI >= 0 && (presI !== adminI + 1 || officeI !== adminI + 2)) {
+            const adminRole = updated[adminI];
+            const presRole = updated[presI];
+            const officeRole = updated[officeI];
+            const rest = updated.filter((_, i) => i !== adminI && i !== presI && i !== officeI);
+            updated = [adminRole, presRole, officeRole, ...rest];
+            changed = true;
+          }
+
+          if (changed) {
+            localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(updated));
+          }
+          return updated;
+        }
       } catch (e) {}
     }
     return [
       { role: 'admin', title: 'مدير النظام الأول', categoryName: 'الإدارة الأمنية العامة', defaultCode: '9999' },
-      { role: 'presidency', title: 'رئاسة الجامعة (مكتب رئيس الجامعة)', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7777' },
+      { role: 'presidency', title: 'رئاسة الجامعة (مكتب رئيس الجامعة)', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7777', departmentId: 'presidency' },
+      { role: 'office_director', title: 'مدير مكتب رئيس الجامعة', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7778', departmentId: 'presidency' },
       { role: 'registration_director', title: 'مدير التسجيل والقبول', categoryName: 'العمادة والتسجيل العام', defaultCode: '1111' },
       { role: 'finance_director', title: 'مدير المالية والحسابات', categoryName: 'القسم الحسابي والمالي العام', defaultCode: '2222' },
       { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' },
@@ -149,17 +200,60 @@ export default function App() {
       console.warn("syncRolesList local write notice:", e);
     }
   };
-
-  // مزامنة الكوادر ديناميكيا مع Firebase
+  // مزامنة الكوادر ديناميكيا مع Firebase مع ضمان إدراج أدوار الرئاسة دائماً
   useEffect(() => {
+    const PRESIDENCY_DEFAULTS = [
+      { role: 'presidency', title: 'رئاسة الجامعة (مكتب رئيس الجامعة)', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7777', departmentId: 'presidency' },
+      { role: 'office_director', title: 'مدير مكتب رئيس الجامعة', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7778', departmentId: 'presidency' },
+    ];
+
+    const ensurePresidencyRoles = (list: any[]): any[] => {
+      let updated = [...list];
+      let changed = false;
+
+      const presIdx = updated.findIndex((r: any) => r.role === 'presidency');
+      if (presIdx === -1) {
+        const adminIdx = updated.findIndex((r: any) => r.role === 'admin');
+        updated.splice(adminIdx >= 0 ? adminIdx + 1 : 1, 0, PRESIDENCY_DEFAULTS[0]);
+        changed = true;
+      } else if (!updated[presIdx].departmentId) {
+        updated[presIdx] = { ...updated[presIdx], departmentId: 'presidency' };
+        changed = true;
+      }
+
+      const officeIdx = updated.findIndex((r: any) => r.role === 'office_director');
+      if (officeIdx === -1) {
+        const presIdx2 = updated.findIndex((r: any) => r.role === 'presidency');
+        updated.splice(presIdx2 + 1, 0, PRESIDENCY_DEFAULTS[1]);
+        changed = true;
+      }
+
+      if (!updated.some((r: any) => r.role === 'labs_director')) {
+        updated = [...updated, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }];
+        changed = true;
+      }
+
+      // ضمان أن الرئاسة ومدير المكتب يظهران مباشرة بعد مدير النظام الأول في الترتيب
+      const adminI = updated.findIndex((r: any) => r.role === 'admin');
+      const presI = updated.findIndex((r: any) => r.role === 'presidency');
+      const officeI = updated.findIndex((r: any) => r.role === 'office_director');
+      if (adminI >= 0 && (presI !== adminI + 1 || officeI !== adminI + 2)) {
+        const adminRole = updated[adminI];
+        const presRole = updated[presI];
+        const officeRole = updated[officeI];
+        const rest = updated.filter((_: any, i: number) => i !== adminI && i !== presI && i !== officeI);
+        updated = [adminRole, presRole, officeRole, ...rest];
+        changed = true;
+      }
+
+      return changed ? updated : list;
+    };
+
     const unsub = onSnapshot(doc(db, "settings", "rolesList"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.list && Array.isArray(data.list) && data.list.length > 0) {
-          let list = data.list;
-          if (!list.some((r: any) => r.role === 'labs_director')) {
-            list = [...list, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }];
-          }
+          const list = ensurePresidencyRoles(data.list);
           setRolesList(list);
           localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(list));
         }
@@ -191,8 +285,21 @@ export default function App() {
   // مزامنة الكوادر للتأكد من وجود دور المختبرات المركزية ورمزه السري
   useEffect(() => {
     const hasLabs = rolesList.some(r => r.role === 'labs_director');
-    if (!hasLabs) {
-      const updated = [...rolesList, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }];
+    const hasPresidency = rolesList.some(r => r.role === 'presidency');
+    const hasOffice = rolesList.some(r => r.role === 'office_director');
+    if (!hasLabs || !hasPresidency || !hasOffice) {
+      let updated = [...rolesList];
+      if (!hasPresidency) {
+        const adminIdx = updated.findIndex(r => r.role === 'admin');
+        updated.splice(adminIdx >= 0 ? adminIdx + 1 : 1, 0, { role: 'presidency', title: 'رئاسة الجامعة (مكتب رئيس الجامعة)', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7777', departmentId: 'presidency' });
+      }
+      if (!hasOffice) {
+        const presIdx = updated.findIndex(r => r.role === 'presidency');
+        updated.splice(presIdx + 1, 0, { role: 'office_director', title: 'مدير مكتب رئيس الجامعة', categoryName: 'الرئاسة والعمادة العليا', defaultCode: '7778', departmentId: 'presidency' });
+      }
+      if (!hasLabs) {
+        updated = [...updated, { role: 'labs_director', title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب', defaultCode: '3333' }];
+      }
       syncRolesList(updated);
     }
     if (roleCodes['labs_director'] === undefined) {
@@ -200,6 +307,35 @@ export default function App() {
       syncRoleCodes(updatedCodes);
     }
   }, [rolesList]);
+
+
+  // مراقبة حالة الاتصال السحابي والمزامنة الحية (Live Cloud Status)
+  const [cloudStatus, setCloudStatus] = useState<SyncStatus>('connected');
+  const [isSeedingCloud, setIsSeedingCloud] = useState(false);
+
+  useEffect(() => {
+    const unsub = firebaseService.subscribeStatus((status) => {
+      setCloudStatus(status);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleSeedCloud = async () => {
+    setIsSeedingCloud(true);
+    const res = await firebaseService.seedCloudIfEmpty();
+    setIsSeedingCloud(false);
+    setInAppToasts(prev => [
+      {
+        id: `toast-${Date.now()}`,
+        title: res.success ? 'المزامنة السحابية' : 'تنبيه الاتصال',
+        message: res.message,
+        type: res.success ? 'success' : 'warning',
+        timestamp: new Date().toLocaleTimeString('ar-IQ')
+      },
+      ...prev
+    ]);
+    alert(res.message);
+  };
 
   const [currentRole, setCurrentRole] = useState<string | null>(() => {
     const saved = localStorage.getItem('AL_AHLIYA_CURRENT_ROLE');
@@ -219,7 +355,23 @@ export default function App() {
       const saved = localStorage.getItem('AL_AHLIYA_DEPARTMENTS');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (!parsed.some((d: any) => d.id === 'presidency')) {
+            const presidencyDept: Department = {
+              id: 'presidency',
+              name: 'رئاسة الجامعة (مكتب رئيس الجامعة)',
+              college: 'جامعة الكوت الأهلية',
+              annualFeeMorning: 0,
+              annualFeeEvening: 0,
+              durationYears: 0,
+              headOfDepartment: 'أ.د. طالب الموسوي (رئيس الجامعة)',
+              availableSeats: 0,
+              totalEnrolled: 0
+            };
+            return [presidencyDept, ...parsed];
+          }
+          return parsed;
+        }
       }
     } catch (e) {}
     return mockDepartments;
@@ -705,6 +857,7 @@ export default function App() {
     // 1. مزامنة عمداء الكليات الأكاديمية
     if (departments && departments.length > 0) {
       departments.forEach((dept, index) => {
+        if (dept.id === 'presidency') return; // رئاسة الجامعة مثبتة كدور سيادي منفصل
         const deanRole = `head_${dept.id}`;
         const existingIndex = updatedRoles.findIndex(r => r.role === deanRole || r.departmentId === dept.id);
         const deanName = dept.headOfDepartment && dept.headOfDepartment !== 'شاغر' 
@@ -1678,19 +1831,57 @@ export default function App() {
     }
   };
 
-  // مصفوفات تصفية السجلات حسب صلاحيات الدور الفعال (عميد الكلية يرى ويطابق قسمه فقط)
-  const filteredStudentsForRole = currentRoleConfig?.departmentId 
+  // التحقق الشامل من صلاحية رئاسة الجامعة (سواء كان الدور المباشر presidency أو عميد مكتب رئاسة الجامعة أو أي مسمى يتبع الرئاسة)
+  const isPresidencyRole = (roleKey: string | null | undefined): boolean => {
+    if (!roleKey) return false;
+    const lower = roleKey.toLowerCase();
+    if (
+      lower === 'presidency' || 
+      lower.includes('presidency') || 
+      lower.includes('reasa') || 
+      lower.includes('raees') ||
+      lower.includes('رئاس') ||
+      lower.includes('رئيس')
+    ) {
+      return true;
+    }
+    const roleObj = rolesList.find(r => r.role === roleKey);
+    if (roleObj) {
+      const text = `${roleObj.title || ''} ${roleObj.categoryName || ''} ${roleObj.departmentId || ''}`.toLowerCase();
+      if (text.includes('رئاسة') || text.includes('رئيس الجامعة') || text.includes('presidency') || text.includes('الرئاسة') || text.includes('رئاس')) {
+        return true;
+      }
+    }
+    const deptObj = departments.find(d => d.id === roleKey || `head_${d.id}` === roleKey);
+    if (deptObj) {
+      const text = `${deptObj.name || ''} ${deptObj.headOfDepartment || ''}`.toLowerCase();
+      if (text.includes('رئاسة') || text.includes('رئيس الجامعة') || text.includes('presidency') || text.includes('الرئاسة')) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const isSuperAdminOrPresidency = (roleKey: string | null | undefined): boolean => {
+    if (!roleKey) return false;
+    return roleKey === 'admin' || isPresidencyRole(roleKey);
+  };
+
+  // مصفوفات تصفية السجلات حسب صلاحيات الدور الفعال (رئاسة الجامعة والأدمن يشاهدون كافة الكليات، بينما عميد الكلية يرى قسمه فقط)
+  const isPresidencyActive = isPresidencyRole(currentRole);
+
+  const filteredStudentsForRole = (currentRoleConfig?.departmentId && !isPresidencyActive && currentRole !== 'admin')
     ? students.filter(s => s.departmentId === currentRoleConfig.departmentId)
     : students;
 
-  const filteredPaymentsForRole = currentRoleConfig?.departmentId
+  const filteredPaymentsForRole = (currentRoleConfig?.departmentId && !isPresidencyActive && currentRole !== 'admin')
     ? payments.filter(p => {
         const matchingStu = students.find(s => s.id === p.studentId);
         return matchingStu ? matchingStu.departmentId === currentRoleConfig.departmentId : false;
       })
     : payments;
 
-  const filteredDepartmentsForRole = currentRoleConfig?.departmentId
+  const filteredDepartmentsForRole = (currentRoleConfig?.departmentId && !isPresidencyActive && currentRole !== 'admin')
     ? departments.filter(d => d.id === currentRoleConfig.departmentId)
     : departments;
 
@@ -1838,7 +2029,8 @@ export default function App() {
     }
 
     // حذف كافة وصولات الدفع التي تخص هذا الطالب لتنظيف السلسلة الحسابية
-    setPayments(prev => prev.filter(p => p.studentId !== id));
+    const updatedPayments = payments.filter(p => p.studentId !== id);
+    syncPayments(updatedPayments);
 
     if (selectedStudentId === id) {
       setSelectedStudentId(mockStudents[0]?.id || null);
@@ -1847,7 +2039,8 @@ export default function App() {
 
   // إضافة معاملة قبض مالي (وصل جديد)
   const handleAddPayment = (newPayment: Payment) => {
-    setPayments(prev => [newPayment, ...prev]);
+    const updated = [newPayment, ...payments];
+    syncPayments(updated);
     addAuditLog('receipt_add', 'ترحيل وإصدار وصل مالي', `إصدار وترحيل رسم المقبوضات رقم [${newPayment.receiptNumber}] بقيمة [${newPayment.amount.toLocaleString()}] د.ع للطالب [${newPayment.studentName}] بند [${newPayment.category === 'tuition' ? 'الأقساط الدراسية' : 'رسوم التسجيل والخدمات'}]`);
 
     // إذا كان بند المقبوض هو قسط تسجيل أولي، يمكن تحديث حالة الطالب ليصبح "نشط" فوراً
@@ -2079,41 +2272,6 @@ export default function App() {
     }
   }, [activeTab, messages, currentRole, unreadMessagesCount]);
 
-  // التحقق الشامل من صلاحية رئاسة الجامعة (سواء كان الدور المباشر presidency أو عميد مكتب رئاسة الجامعة أو أي مسمى يتبع الرئاسة)
-  const isPresidencyRole = (roleKey: string | null | undefined): boolean => {
-    if (!roleKey) return false;
-    const lower = roleKey.toLowerCase();
-    if (
-      lower === 'presidency' || 
-      lower.includes('presidency') || 
-      lower.includes('reasa') || 
-      lower.includes('raees') ||
-      lower.includes('رئاس') ||
-      lower.includes('رئيس')
-    ) {
-      return true;
-    }
-    const roleObj = rolesList.find(r => r.role === roleKey);
-    if (roleObj) {
-      const text = `${roleObj.title || ''} ${roleObj.categoryName || ''} ${roleObj.departmentId || ''}`.toLowerCase();
-      if (text.includes('رئاسة') || text.includes('رئيس الجامعة') || text.includes('presidency') || text.includes('الرئاسة') || text.includes('رئاس')) {
-        return true;
-      }
-    }
-    const deptObj = departments.find(d => d.id === roleKey || `head_${d.id}` === roleKey);
-    if (deptObj) {
-      const text = `${deptObj.name || ''} ${deptObj.headOfDept || ''}`.toLowerCase();
-      if (text.includes('رئاسة') || text.includes('رئيس الجامعة') || text.includes('presidency') || text.includes('الرئاسة')) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  const isSuperAdminOrPresidency = (roleKey: string | null | undefined): boolean => {
-    if (!roleKey) return false;
-    return roleKey === 'admin' || isPresidencyRole(roleKey);
-  };
 
   const menuItems = [
     
@@ -2133,8 +2291,8 @@ export default function App() {
     if (!currentRole) return [];
     // 👑 مدير النظام الأول
     if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
-    // 🏛️ رئاسة الجامعة (تشمل أي مسمى أو دور يخص رئاسة الجامعة وعميد مكتب رئاسة الجامعة)
-    if (isPresidencyRole(currentRole)) return ['students', 'portal', 'finance', 'letters', 'comms', 'audit_log'];
+    // 🏛️ رئاسة الجامعة ومدير مكتب رئيس الجامعة (رؤية الأرشيف والعمليات والمراقبة فقط)
+    if (currentRole === 'presidency' || currentRole === 'office_director' || isPresidencyRole(currentRole)) return ['letters', 'portal', 'audit_log'];
     // 🎓 شؤون وتسجيل الطلبة (محجوب عنها أرشيف الكتب تماماً بناءً على التوجيه الإداري)
     if (currentRole === 'registration_director') return ['students', 'portal', 'comms'];
     // 💰 المالية والحسابات
@@ -3971,16 +4129,53 @@ export default function App() {
         </div>
 
         {/* كادر فوتر القائمة المنسدلة للجامعة والتحكم بالملفات */}
-        <div className="space-y-4 border-t border-slate-800/80 pt-4 text-xs">
+        <div className="space-y-3.5 border-t border-slate-800/80 pt-4 text-xs">
           
+          {/* حالة المزامنة والاتصال - مخصصة حصراً لمدير النظام (الأدمن) */}
+          {currentRole === 'admin' && (
+            <div className="bg-slate-850/90 p-3 rounded-xl border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                  {cloudStatus === 'connected' ? (
+                    <Cloud className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : cloudStatus === 'syncing' ? (
+                    <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin" />
+                  ) : (
+                    <CloudOff className="w-3.5 h-3.5 text-amber-400" />
+                  )}
+                  <span>المزامنة السحابية:</span>
+                </span>
+                <span className={`font-bold text-[10px] px-2 py-0.5 rounded-full border ${
+                  cloudStatus === 'connected'
+                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                    : cloudStatus === 'syncing'
+                    ? 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+                    : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                }`}>
+                  {cloudStatus === 'connected' ? 'متصل وحي ⚡' : cloudStatus === 'syncing' ? 'جاري الحفظ...' : 'محلي آمن ✔'}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                disabled={isSeedingCloud}
+                onClick={handleSeedCloud}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300 p-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 border border-amber-500/20 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3 h-3 ${isSeedingCloud ? 'animate-spin' : ''}`} />
+                <span>{isSeedingCloud ? 'جاري تهيئة السحابة...' : '🚀 مزامنة وتعبئة السحابة أول مرة'}</span>
+              </button>
+            </div>
+          )}
+
           <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-750/50 space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-700">حالة ترخيص النظام:</span>
+              <span className="text-slate-400">حالة ترخيص النظام:</span>
               <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded-sm">
                 نشط وآمن
               </span>
             </div>
-            <div className="text-[10px] text-slate-700 leading-normal text-right">
+            <div className="text-[10px] text-slate-400 leading-normal text-right">
               صلاحية البرنامج مستمرة لغاية <span className="text-amber-400 font-mono font-bold">1 / 7 / 2027</span>.
             </div>
             <button
@@ -3991,11 +4186,11 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-800/40 p-2.5 rounded-lg border border-slate-800/35 text-[11px] text-slate-700 leading-snug">
-            <Clock className="w-4 h-4 text-slate-700 shrink-0" />
+          <div className="flex items-center gap-2 bg-slate-800/40 p-2.5 rounded-lg border border-slate-800/35 text-[11px] text-slate-400 leading-snug">
+            <Clock className="w-4 h-4 text-slate-400 shrink-0" />
             <div>
               <span>معدل الدورة الفعالة:</span>
-              <span className="font-mono block text-slate-350">v1.2.6 (May 2026)</span>
+              <span className="font-mono block text-slate-350">v1.2.6 (Cloud Live)</span>
             </div>
           </div>
           
@@ -4168,32 +4363,78 @@ export default function App() {
       {/* 3. نافذة العرض الرئيسية ومحتوى الصفحات */}
       <main className="flex-grow p-4 md:p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-6">
         
-        {/* شريط الإدارة للتبديل السريع إذا كان المسجل هو الأدمن */}
+        {/* شريط الإدارة والتدقيق السريع - للأدمن فقط */}
         {currentRole === 'admin' && (
           <div className="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 shadow-lg flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 text-xs font-semibold select-none">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <ShieldAlert className="w-5 h-5 text-amber-500 animate-pulse shrink-0" />
               <div>
-                <span className="font-bold text-slate-200">شريط التدقيق الأمني السريع لمدير النظام:</span>
-                <p className="text-[10px] text-slate-450 mt-0.5">انقر لمعاينة بيئة وصلاحيات أي عميد كلية أو مدير مالي مباشرة للتحقق والمطابقة:</p>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-200">شريط القيادة العليا والتدقيق الأمني:</span>
+                  {currentRole === 'admin' && (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
+                      cloudStatus === 'connected'
+                        ? 'text-emerald-300 bg-emerald-950/80 border-emerald-700/60'
+                        : cloudStatus === 'syncing'
+                        ? 'text-blue-300 bg-blue-950/80 border-blue-700/60 animate-pulse'
+                        : 'text-amber-300 bg-amber-950/80 border-amber-700/60'
+                    }`}>
+                      {cloudStatus === 'connected' ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>سحابة Firebase: متصلة ⚡</span>
+                        </>
+                      ) : cloudStatus === 'syncing' ? (
+                        <>
+                          <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                          <span>جاري المزامنة...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CloudOff className="w-2.5 h-2.5" />
+                          <span>وضع محلي آمن</span>
+                        </>
+                      )}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">انقر لمعاينة بيئة وصلاحيات رئاسة الجامعة، مدير النظام، أو أي عميد كلية مباشرة:</p>
               </div>
             </div>
             
             <div className="flex flex-wrap gap-1.5 justify-end w-full xl:w-auto">
-              {rolesList.map((r) => (
-                <button
-                  key={r.role}
-                  onClick={() => setCurrentRole(r.role)}
-                  className={`font-bold text-[10px] px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
-                    currentRole === r.role
-                      ? 'bg-amber-600 text-white border-amber-600'
-                      : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800 hover:text-white'
-                  }`}
-                  title="تبديل الهوية الفعالة فوراً"
-                >
-                  {r.role === 'admin' ? '⭐ الإدارة العامة' : r.title.replace(/عميد كلية|مدير/g, '').split(' (')[0]}
-                </button>
-              ))}
+              {rolesList.map((r) => {
+                const isSelected = currentRole === r.role;
+                const isHeadAdmin = r.role === 'admin';
+                const isPresidency = r.role === 'presidency';
+                const isOfficeDir = r.role === 'office_director';
+                const isPresidencyGroup = isPresidency || isOfficeDir;
+                
+                const label = isHeadAdmin 
+                  ? '⭐ مدير النظام الأول' 
+                  : isPresidency 
+                  ? '🏛️ رئاسة الجامعة'
+                  : isOfficeDir
+                  ? '🏢 مدير مكتب رئيس الجامعة'
+                  : r.title.replace(/عميد كلية|مدير/g, '').split(' (')[0];
+
+                return (
+                  <button
+                    key={r.role}
+                    onClick={() => setCurrentRole(r.role)}
+                    className={`font-bold text-[10px] px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-amber-600 text-white border-amber-500 shadow-sm shadow-amber-600/20'
+                        : isHeadAdmin || isPresidencyGroup
+                        ? 'bg-slate-950 text-amber-300 border-amber-500/40 hover:bg-slate-800 hover:text-white'
+                        : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800 hover:text-white'
+                    }`}
+                    title={r.title}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
