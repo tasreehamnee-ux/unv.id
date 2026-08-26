@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
-import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg } from './KutLogo';
+import { OfficialKutHeader, getOfficialPrintHeaderHtml, KutLogoSvg, KutHeaderConfig } from './KutLogo';
 import { 
   User, 
   MapPin, 

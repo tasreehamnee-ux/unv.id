@@ -793,7 +793,7 @@ export default function InternalComms({
                           download={msg.attachmentName}
                           className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-colors shrink-0 flex items-center gap-1 shadow-xs cursor-pointer"
                         >
-                          تحميل وتنزيل المرفق السحابي 📥
+                          تحميل وتنزيل الملف المرفق 📥
                         </a>
                       )}
                     </div>
@@ -970,7 +970,7 @@ export default function InternalComms({
                     <div className="text-right">
                       <p className="font-bold text-slate-800 truncate text-xs" title={attachmentName}>{attachmentName}</p>
                       <p className="text-[9px] text-indigo-600 font-mono">
-                        {selectedFile ? `الحجم: ${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • جاهز للرفع السحابي ⚡` : 'جاهز للإرسال والبث ⚡'}
+                        {selectedFile ? `الحجم: ${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • جاهز للإرسال ⚡` : 'جاهز للإرسال والبث ⚡'}
                       </p>
                     </div>
                   </div>
@@ -991,7 +991,7 @@ export default function InternalComms({
                 <div className="flex justify-between text-xs font-bold text-indigo-900">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
-                    جاري رفع الملف إلى مستودع التخزين السحابي...
+                    جاري رفع وإرسال الملف...
                   </span>
                   <span className="font-mono text-indigo-700">{Math.round(uploadProgress)}%</span>
                 </div>

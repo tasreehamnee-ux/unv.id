@@ -190,7 +190,13 @@ export default function LettersArchive({
       return;
     }
 
-    const headerHtml = getOfficialPrintHeaderHtml(headerConfig, universityName);
+    const headerHtml = getOfficialPrintHeaderHtml(
+      headerConfig?.collegeAr || universityName,
+      headerConfig?.collegeEn || 'Kut University College',
+      headerConfig?.officeAr || 'مكتب العميد',
+      headerConfig?.officeEn || 'Dean Office',
+      headerConfig
+    );
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -782,7 +788,7 @@ export default function LettersArchive({
                         }
                       }}
                       className="text-indigo-600 hover:text-indigo-800 hover:underline font-bold flex items-center gap-1 uppercase truncate max-w-[180px]"
-                      title="فتح المرفق السحابي"
+                      title="فتح الملف المرفق"
                     >
                       <ExternalLink className="w-3 h-3 shrink-0" />
                       <span className="truncate">{letItem.attachedFileName}</span>
@@ -833,7 +839,7 @@ export default function LettersArchive({
             
             {/* الترويسة الرسمية */}
             <div className="pb-4 border-b border-slate-200">
-              <OfficialKutHeader config={headerConfig} defaultCollege={universityName} />
+              <OfficialKutHeader {...(headerConfig || {})} collegeAr={headerConfig?.collegeAr || universityName} />
             </div>
 
             {/* تفاصيل الرقم وتاريخ الصدور والصلاحية */}
@@ -899,7 +905,7 @@ export default function LettersArchive({
                     rel="noopener noreferrer"
                     className="bg-purple-700 hover:bg-purple-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                   >
-                    <span>فتح وتنزيل الملف السحابي 📥</span>
+                    <span>فتح وتنزيل الملف المرفق 📥</span>
                   </a>
                 )}
               </div>

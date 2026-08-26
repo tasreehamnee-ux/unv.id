@@ -212,7 +212,7 @@ export default function Dashboard({
                     <span className="text-slate-200 font-black">{activeDept.headOfDepartment}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-700 font-bold">المرور السحابي لعميد:</span>
+                    <span className="text-slate-700 font-bold">رمز المرور المعتمد:</span>
                     <span className="font-mono text-amber-400 font-extrabold font-black bg-slate-950 px-1.5 py-0.5 rounded">
                       AUTHORIZED
                     </span>
@@ -652,7 +652,7 @@ export default function Dashboard({
             </div>
             <div className="text-right">
               <h3 className="font-extrabold text-slate-800 text-sm md:text-base flex items-center justify-start gap-1.5">
-                <span>📡 البث السحابي التلقائي وإرسال معلومات المقبولين فوراً للعمادات</span>
+                <span>📡 البث التلقائي المباشر وإرسال معلومات المقبولين فوراً للعمادات</span>
                 <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-black">نشط فوري</span>
               </h3>
               <p className="text-xs text-slate-700 mt-0.5">تبث المنظومة تلقائياً الاسم والمعلومات فور تسجيل الطالب أو استيراده إلى لوحة كليته المعنية لمدير التسجيل ومدير النظام</p>
