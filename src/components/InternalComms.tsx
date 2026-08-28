@@ -118,6 +118,7 @@ export default function InternalComms({
   const [autoArchiveLetter, setAutoArchiveLetter] = useState(true);
 
   // الاختيار الفعال للدور الحالي المستكشف للبريد للتجربة (CurrentUser role)
+  // نستخدم currentRole مباشرةً لضمان تطابق هوية المُرسِل مع الدور الفعلي دائماً
   const [currentUserRole, setCurrentUserRole] = useState<string>(currentRole || 'admin');
 
   // مزامنة الدور الفعال عند تغييره من الوالد
@@ -130,10 +131,11 @@ export default function InternalComms({
   // تفاصيل الأدوار المعرفة باللغة العربية المستخلصة ديناميكياً من الأدوار المسجلة بالنظام
   const rolesMap = React.useMemo<Record<string, string>>(() => {
     const map: Record<string, string> = {
-      admin: 'الإدارة العامة الأمنية ورئاسة الجامعة (مدير النظام)',
+      admin: 'الإدارة العامة الأمنية (مدير النظام)',
       registration_director: 'مدير التسجيل العام وشؤون القبول وقيد الطلاب',
       finance_director: 'مدير المالية العام والتدقيق الحسابي والموازنة',
-      presidency: 'رئاسة الجامعة - مكتب السري لرئيس الجامعة'
+      presidency: 'رئاسة الجامعة - مكتب رئيس الجامعة',
+      office_director: 'مدير مكتب رئيس الجامعة'
     };
     if (rolesList) {
       rolesList.forEach(r => {
@@ -408,6 +410,7 @@ export default function InternalComms({
   };
 
   // دالة للتحقق من تطابق الأدوار وحل التداخل والتطابق بين التسميات القديمة والجديدة والعمادات
+  // ملاحظة مهمة: admin و presidency أدوار مستقلة تماماً - رئاسة الجامعة جهة مراسلة مستقلة
   const areRolesMatching = (roleA: string, roleB: string): boolean => {
     if (!roleA || !roleB) return false;
     const clean = (r: string) => r.toLowerCase().trim();
@@ -416,11 +419,7 @@ export default function InternalComms({
     
     if (rA === rB) return true;
     
-    // مطابقة: admin <-> presidency
-    if ((rA === 'admin' || rA === 'presidency') && (rB === 'admin' || rB === 'presidency')) {
-      return true;
-    }
-    
+    // ⚠️ لا نُدمج admin مع presidency: كلٌّ منهما جهة مستقلة بصندوق بريد خاص
     // مطابقة: registration_director <-> registration
     if ((rA === 'registration_director' || rA === 'registration') && (rB === 'registration_director' || rB === 'registration')) {
       return true;
@@ -442,7 +441,8 @@ export default function InternalComms({
 
   // تصفية البريد الموجه للمستقبل النشط المختار حالياً مع مطابقة الأدوار المرنة الشاملة
   const userInbox = messages.filter(msg => {
-    // مدير النظام (الأدمن) يمتلك صلاحية سيادية قصوى للاطلاع ومراقبة كافة المراسلات الداخلية للتنسيق العام والتحقق
+    // مدير النظام (الأدمن) فقط يمتلك صلاحية الاطلاع على كافة المراسلات
+    // رئاسة الجامعة لها صندوق بريد خاص ومستقل مثل بقية الأدوار
     if (currentUserRole === 'admin') {
       return true;
     }

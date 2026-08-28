@@ -2292,7 +2292,7 @@ export default function App() {
     // 👑 مدير النظام الأول
     if (currentRole === 'admin') return ['students', 'portal', 'finance', 'letters', 'comms', 'python', 'admin_security', 'audit_log'];
     // 🏛️ رئاسة الجامعة ومدير مكتب رئيس الجامعة (رؤية الأرشيف والعمليات والمراقبة فقط)
-    if (currentRole === 'presidency' || currentRole === 'office_director' || isPresidencyRole(currentRole)) return ['letters', 'portal', 'audit_log'];
+    if (currentRole === 'presidency' || currentRole === 'office_director' || isPresidencyRole(currentRole)) return ['students', 'letters', 'portal', 'comms'];
     // 🎓 شؤون وتسجيل الطلبة (محجوب عنها أرشيف الكتب تماماً بناءً على التوجيه الإداري)
     if (currentRole === 'registration_director') return ['students', 'portal', 'comms'];
     // 💰 المالية والحسابات
