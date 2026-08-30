@@ -65,6 +65,58 @@ import PythonCodeViewer from './components/PythonCodeViewer';
 import AuditLog from './components/AuditLog';
 import { KutLogoSvg, OfficialKutHeader, KutHeaderConfig } from './components/KutLogo';
 
+const DEFAULT_ROLE_TITLES: Record<string, { title: string; categoryName: string }> = {
+  admin: { title: 'مدير النظام الأول', categoryName: 'الإدارة الأمنية العامة' },
+  presidency: { title: 'رئاسة الجامعة (مكتب رئيس الجامعة)', categoryName: 'الرئاسة والعمادة العليا' },
+  office_director: { title: 'مدير مكتب رئيس الجامعة', categoryName: 'الرئاسة والعمادة العليا' },
+  registration_director: { title: 'مدير التسجيل والقبول', categoryName: 'العمادة والتسجيل العام' },
+  finance_director: { title: 'مدير المالية والحسابات', categoryName: 'القسم الحسابي والمالي العام' },
+  labs_director: { title: 'إدارة المختبرات المركزية', categoryName: 'المختبرات والتدريب' },
+  head_dentistry: { title: 'عميد كلية طب الأسنان (أ.د. عادل قاسم الشمري)', categoryName: 'عميد كلية' },
+  head_pharmacy: { title: 'عميد كلية الصيدلة (أ.م.د. لمى هاشم الياسري)', categoryName: 'عميد كلية' },
+  'head_health-med-tech': { title: 'عميد كلية التقنيات الصحية والطبية (أ. د. عبد الحسن مهدي الخفاجي)', categoryName: 'عميد كلية' },
+  head_engineering: { title: 'عميد كلية الهندسة (د. وسام عبد اللطيف الخفاجي)', categoryName: 'عميد كلية' },
+  head_nursing: { title: 'عميد كلية التمريض (د. سحر عبد الحميد الموسوي)', categoryName: 'عميد كلية' },
+  'head_sports-edu': { title: 'عميد كلية التربية البدنية والعلوم الرياضية (أ. م. د. قاسم محمد السهيل)', categoryName: 'عميد كلية' },
+  head_law: { title: 'عميد كلية القانون (أ. د. منذر كامل الهلالي)', categoryName: 'عميد كلية' },
+  head_sciences: { title: 'عميد كلية العلوم الصرفة (أ. د. ساجد رزاق الرفاعي)', categoryName: 'عميد كلية' },
+  'head_eng-tech': { title: 'عميد كلية التقنية الهندسية (د. باسم كريم البهادلي)', categoryName: 'عميد كلية' },
+  'head_admin-econ': { title: 'عميد كلية الإدارة والاقتصاد (د. نادية عبد الرحمن)', categoryName: 'عميد كلية' },
+  head_education: { title: 'عميد كلية التربية والآداب (د. عقيل حسين السلامي)', categoryName: 'عميد كلية' },
+  'head_applied-arts': { title: 'عميد كلية الفنون التطبيقية (أ. م. لمياء عبد الوهاب الطائي)', categoryName: 'عميد كلية' }
+};
+
+const isCorruptedText = (str?: string) => {
+  if (!str) return false;
+  return /[\u00C0-\u00FF][\u0080-\u00BF]|Ù[Ø-Ù]|Ø[§-ي]|Ù†ØµÙˆØµ|\?{3,}/.test(str);
+};
+
+const sanitizeRoleItem = (r: any) => {
+  let item = { ...r };
+  if (DEFAULT_ROLE_TITLES[item.role]) {
+    if (isCorruptedText(item.title)) {
+      item.title = DEFAULT_ROLE_TITLES[item.role].title;
+    }
+    if (isCorruptedText(item.categoryName)) {
+      item.categoryName = DEFAULT_ROLE_TITLES[item.role].categoryName;
+    }
+  }
+  return item;
+};
+
+const sanitizeDepartmentItem = (d: any): Department => {
+  const match = mockDepartments.find(m => m.id === d.id);
+  if (match) {
+    return {
+      ...d,
+      name: isCorruptedText(d.name) ? match.name : d.name,
+      college: isCorruptedText(d.college) ? match.college : d.college,
+      headOfDepartment: isCorruptedText(d.headOfDepartment) ? match.headOfDepartment : d.headOfDepartment
+    };
+  }
+  return d;
+};
+
 export default function App() {
   
   // 1.1 تعريف أدوار العمل ورموزها ومحدودياتها الكلية بالترميز العربي الوطني بصيغة حالة ديناميكية قابلة للتعديل والتحكم بالحذف والإضافة
@@ -79,8 +131,8 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // ترحيل تلقائي: نضمن وجود دور الرئاسة ومدير المكتب مباشرة بعد الأدمن
-          let updated = [...parsed];
+          // ترحيل وتصحيح تلقائي: نضمن تنظيف النصوص والتأكد من وجود دور الرئاسة ومدير المكتب
+          let updated = parsed.map(sanitizeRoleItem);
           let changed = false;
 
           // تأكد أن presidency له departmentId صحيح
@@ -115,7 +167,7 @@ export default function App() {
             changed = true;
           }
 
-          if (changed) {
+          if (changed || JSON.stringify(updated) !== saved) {
             localStorage.setItem('AL_AHLIYA_ROLES_LIST', JSON.stringify(updated));
           }
           return updated;
@@ -208,7 +260,7 @@ export default function App() {
     ];
 
     const ensurePresidencyRoles = (list: any[]): any[] => {
-      let updated = [...list];
+      let updated = list.map(sanitizeRoleItem);
       let changed = false;
 
       const presIdx = updated.findIndex((r: any) => r.role === 'presidency');
@@ -246,7 +298,7 @@ export default function App() {
         changed = true;
       }
 
-      return changed ? updated : list;
+      return updated;
     };
 
     const unsub = onSnapshot(doc(db, "settings", "rolesList"), (docSnap) => {
@@ -356,7 +408,8 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          if (!parsed.some((d: any) => d.id === 'presidency')) {
+          let list = parsed.map(sanitizeDepartmentItem);
+          if (!list.some((d: any) => d.id === 'presidency')) {
             const presidencyDept: Department = {
               id: 'presidency',
               name: 'رئاسة الجامعة (مكتب رئيس الجامعة)',
@@ -368,9 +421,12 @@ export default function App() {
               availableSeats: 0,
               totalEnrolled: 0
             };
-            return [presidencyDept, ...parsed];
+            list = [presidencyDept, ...list];
           }
-          return parsed;
+          if (JSON.stringify(list) !== saved) {
+            localStorage.setItem('AL_AHLIYA_DEPARTMENTS', JSON.stringify(list));
+          }
+          return list;
         }
       }
     } catch (e) {}
@@ -719,7 +775,9 @@ export default function App() {
     const unsub = onSnapshot(doc(db, "appData", "departments"), (docSnap) => {
       try {
         if (docSnap.exists() && Array.isArray(docSnap.data()?.list)) {
-          setDepartments(docSnap.data().list);
+          const list = docSnap.data().list.map(sanitizeDepartmentItem);
+          setDepartments(list);
+          localStorage.setItem('AL_AHLIYA_DEPARTMENTS', JSON.stringify(list));
         }
       } catch (e) {}
     }, (err) => {

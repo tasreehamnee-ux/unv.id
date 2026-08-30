@@ -1,14 +1,14 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { Department, Student, Payment, OfficialLetter, InternalMessage } from '../types';
 
-// ØªØ§Ø±ÙŠØ® ØªØ´ØºÙŠÙ„ Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„Ø­Ø§Ù„ÙŠ Ø§Ù„Ù…Ø¹ØªÙ…Ø¯
+// تاريخ تشغيل النظام الحالي المعتمد
 export const SYSTEM_CURRENT_DATE = '2026-05-27';
 
-// Ø§Ù„Ø¹Ù†Ø§ÙˆÙŠÙ† Ø§Ù„Ø±Ù‚Ù…ÙŠØ© Ø§Ù„ÙØ±Ø¯ÙŠØ© ×œ×—Ø§Ø³Ø¨Ø§Øª Ø§Ù„ÙƒÙ„ÙŠØ§Øª Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø© Ø¨Ù…Ø±ÙƒØ² Ø§Ù„Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ø£Ù‡Ù„ÙŠØ©
+// العناوين الرقمية الفردية لحاسبات الكليات المعتمدة بمركز الجامعة
 export const COLLEGE_IPS: { [key: string]: string } = {
   presidency: '192.168.10.1',
   dentistry: '192.168.12.10',
@@ -28,162 +28,162 @@ export const COLLEGE_IPS: { [key: string]: string } = {
 export const mockDepartments: Department[] = [
   {
     id: 'presidency',
-    name: 'Ø±Ø¦Ø§Ø³Ø© Ø§Ù„Ø¬Ø§Ù…Ø¹Ø© (Ù…ÙƒØªØ¨ Ø±Ø¦ÙŠØ³ Ø§Ù„Ø¬Ø§Ù…Ø¹Ø©)',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„ÙƒÙˆØª Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'رئاسة الجامعة (مكتب رئيس الجامعة)',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 0,
     annualFeeEvening: 0,
     durationYears: 0,
-    headOfDepartment: 'Ø£.Ø¯. Ø·Ø§Ù„Ø¨ Ø§Ù„Ù…ÙˆØ³ÙˆÙŠ (Ø±Ø¦ÙŠØ³ Ø§Ù„Ø¬Ø§Ù…Ø¹Ø©)',
+    headOfDepartment: 'أ.د. طالب الموسوي (رئيس مجلس الإدارة)',
     availableSeats: 0,
     totalEnrolled: 0
   },
   {
     id: 'dentistry',
-    name: 'ÙƒÙ„ÙŠØ© Ø·Ø¨ Ø§Ù„Ø£Ø³Ù†Ø§Ù†',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية طب الأسنان',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 8000000,
     annualFeeEvening: 9500000,
     durationYears: 5,
-    headOfDepartment: 'Ø£.Ø¯. Ø¹Ø§Ø¯Ù„ Ù‚Ø§Ø³Ù… Ø§Ù„Ø´Ù…Ø±ÙŠ',
+    headOfDepartment: 'أ.د. عادل قاسم الشمري',
     availableSeats: 150,
     totalEnrolled: 138
   },
   {
     id: 'pharmacy',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„ØµÙŠØ¯Ù„Ø©',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية الصيدلة',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 7000000,
     annualFeeEvening: 8200000,
     durationYears: 5,
-    headOfDepartment: 'Ø£.Ù….Ø¯. Ù„Ù…Ù‰ Ù‡Ø§Ø´Ù… Ø§Ù„ÙŠØ§Ø³Ø±ÙŠ',
+    headOfDepartment: 'أ.م.د. لمى هاشم الياسري',
     availableSeats: 120,
     totalEnrolled: 112
   },
   {
     id: 'health-med-tech',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„ØªÙ‚Ù†ÙŠØ§Øª Ø§Ù„ØµØ­ÙŠØ© ÙˆØ§Ù„Ø·Ø¨ÙŠØ©',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية التقنيات الصحية والطبية',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 4000000,
     annualFeeEvening: 4800000,
     durationYears: 4,
-    headOfDepartment: 'Ø£. Ø¯. Ø¹Ø¨Ø¯ Ø§Ù„Ø­Ø³Ù† Ù…Ù‡Ø¯ÙŠ Ø§Ù„Ø®ÙØ§Ø¬ÙŠ',
+    headOfDepartment: 'أ. د. عبد الحسن مهدي الخفاجي',
     availableSeats: 180,
     totalEnrolled: 145
   },
   {
     id: 'engineering',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„Ù‡Ù†Ø¯Ø³Ø©',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية الهندسة',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 3800000,
     annualFeeEvening: 4500000,
     durationYears: 4,
-    headOfDepartment: 'Ø¯. ÙˆØ³Ø§Ù… Ø¹Ø¨Ø¯ Ø§Ù„Ù„Ø·ÙŠÙ Ø§Ù„Ø®ÙØ§Ø¬ÙŠ',
+    headOfDepartment: 'د. وسام عبد اللطيف الخفاجي',
     availableSeats: 100,
     totalEnrolled: 82
   },
   {
     id: 'nursing',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„ØªÙ…Ø±ÙŠØ¶',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية التمريض',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 3000500,
     annualFeeEvening: 3600000,
     durationYears: 4,
-    headOfDepartment: 'Ø¯. Ø³Ø­Ø± Ø¹Ø¨Ø¯ Ø§Ù„Ø­Ù…ÙŠØ¯ Ø§Ù„Ù…ÙˆØ³ÙˆÙŠ',
+    headOfDepartment: 'د. سحر عبد الحميد الموسوي',
     availableSeats: 120,
     totalEnrolled: 98
   },
   {
     id: 'sports-edu',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„ØªØ±Ø¨ÙŠØ© Ø§Ù„Ø¨Ø¯Ù†ÙŠØ©',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية التربية البدنية وعلوم الرياضة',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 1800000,
     annualFeeEvening: 2200000,
     durationYears: 4,
-    headOfDepartment: 'Ø£. Ù…. Ø¯. Ù‚Ø§Ø³Ù… Ù…Ø­Ù…Ø¯ Ø§Ù„Ø³Ù‡ÙŠÙ„',
+    headOfDepartment: 'أ. م. د. قاسم محمد السهيل',
     availableSeats: 80,
     totalEnrolled: 64
   },
   {
     id: 'law',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„Ù‚Ø§Ù†ÙˆÙ†',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية القانون',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 2800000,
     annualFeeEvening: 3400000,
     durationYears: 4,
-    headOfDepartment: 'Ø£.Ø¯. Ù…Ù†Ø°Ø± ÙƒØ§Ù…Ù„ Ø§Ù„Ø¹Ø¨ÙŠØ¯ÙŠ',
+    headOfDepartment: 'أ.د. منذر كامل الهلالي',
     availableSeats: 200,
     totalEnrolled: 185
   },
   {
     id: 'sciences',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„Ø¹Ù„ÙˆÙ…',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية العلوم',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 2500000,
     annualFeeEvening: 3000000,
     durationYears: 4,
-    headOfDepartment: 'Ø£. Ø¯. Ø³Ø§Ø¬Ø¯ Ø±Ø²Ø§Ù‚ Ø§Ù„Ø±ÙØ§Ø¹ÙŠ',
+    headOfDepartment: 'أ. د. ساجد رزاق الرفاعي',
     availableSeats: 150,
     totalEnrolled: 110
   },
   {
     id: 'eng-tech',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„ØªÙ‚Ù†ÙŠØ© Ø§Ù„Ù‡Ù†Ø¯Ø³ÙŠØ©',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية التقنية الهندسية',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 3500000,
     annualFeeEvening: 4200000,
     durationYears: 4,
-    headOfDepartment: 'Ø¯. Ø¨Ø§Ø³Ù… ÙƒØ±ÙŠÙ… Ø§Ù„Ø¨Ù‡Ø§Ø¯Ù„ÙŠ',
+    headOfDepartment: 'د. باسم كريم البهادلي',
     availableSeats: 100,
     totalEnrolled: 75
   },
   {
     id: 'admin-econ',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„Ø¥Ø¯Ø§Ø±Ø© ÙˆØ§Ù„Ø§Ù‚ØªØµØ§Ø¯',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية الإدارة والاقتصاد',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 1900000,
     annualFeeEvening: 2300000,
     durationYears: 4,
-    headOfDepartment: 'Ø¯. Ù†Ø§Ø¯ÙŠØ© Ø¹Ø¨Ø¯ Ø§Ù„Ø±Ø­Ù…Ù† Ø§Ù„Ø­Ø¯ÙŠØ«ÙŠ',
+    headOfDepartment: 'د. نادية عبد الرحمن الحديثي',
     availableSeats: 150,
     totalEnrolled: 142
   },
   {
     id: 'education',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„ØªØ±Ø¨ÙŠØ©',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية التربية',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 1600000,
     annualFeeEvening: 2000000,
     durationYears: 4,
-    headOfDepartment: 'Ø¯. Ø¹Ù‚ÙŠÙ„ Ø­Ø³ÙŠÙ† Ø§Ù„Ø³Ù„Ø§Ù…ÙŠ',
+    headOfDepartment: 'د. عقيل حسين السلامي',
     availableSeats: 150,
     totalEnrolled: 112
   },
   {
     id: 'applied-arts',
-    name: 'ÙƒÙ„ÙŠØ© Ø§Ù„ÙÙ†ÙˆÙ† Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ÙŠØ©',
-    college: 'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ Ø§Ù„Ø£Ù‡Ù„ÙŠØ©',
+    name: 'كلية الفنون التطبيقية',
+    college: 'جامعة الكوت الجامعة',
     annualFeeMorning: 2200000,
     annualFeeEvening: 2700000,
     durationYears: 4,
-    headOfDepartment: 'Ø£. Ù…. Ù„Ù…ÙŠØ§Ø¡ Ø¹Ø¨Ø¯ Ø§Ù„ÙˆÙ‡Ø§Ø¨ Ø§Ù„Ø·Ø§Ø¦ÙŠ',
+    headOfDepartment: 'أ. م. لمياء عبد الوهاب الطائي',
     availableSeats: 100,
     totalEnrolled: 78
   }
 ];
 
-// ØªÙ… ØªÙØ±ÙŠØº Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø·Ù„Ø¨Ø© Ø§Ù„ØªØ¬Ø±ÙŠØ¨ÙŠØ© - Ø§Ù„Ù†Ø¸Ø§Ù… Ø¬Ø§Ù‡Ø² Ù„Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ©
+// تم تفريغ بيانات الطلبة التجريبية - النظام جاهز للبيانات الحقيقية
 export const mockStudents: Student[] = [];
 
-// ØªÙ… ØªÙØ±ÙŠØº Ø§Ù„Ø¯ÙØ¹Ø§Øª Ø§Ù„ØªØ¬Ø±ÙŠØ¨ÙŠØ© - Ø§Ù„Ù†Ø¸Ø§Ù… Ø¬Ø§Ù‡Ø² Ù„Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ©
+// تم تفريغ الدفعات التجريبية - النظام جاهز للبيانات الحقيقية
 export const mockPayments: Payment[] = [];
 
-// Ø£Ø±Ø´ÙŠÙ Ø§Ù„ÙƒØªØ¨ Ø§Ù„Ø±Ø³Ù…ÙŠØ© - ÙØ§Ø±Øº Ø¬Ø§Ù‡Ø² Ù„Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ©
+// أرشيف الكتب الرسمية - فارغ جاهز للبيانات الحقيقية
 export const mockLetters: OfficialLetter[] = [];
 
-// Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ Ø§Ù„Ø¯Ø§Ø®Ù„ÙŠØ© - ÙØ§Ø±ØºØ© Ø¬Ø§Ù‡Ø²Ø© Ù„Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ©
+// الرسائل الداخلية - فارغة جاهزة للبيانات الحقيقية
 export const mockMessages: InternalMessage[] = [];
 
-// Ø¯Ø§Ù„Ø© Ù„Ù…Ø¹Ø§Ù„Ø¬Ø© Ø£Ùˆ ØªØµÙ†ÙŠÙ ØµÙ„Ø§Ø­ÙŠØ© Ø§Ù„ÙƒØªØ§Ø¨ Ø§Ù„Ø±Ø³Ù…ÙŠ Ù†Ø³Ø¨Ø© Ù„Ù„ØªØ§Ø±ÙŠØ® Ø§Ù„Ø­Ø§Ù„ÙŠ
+// دالة لمعالجة أو تصنيف صلاحية الكتاب الرسمي نسبة للتاريخ الحالي
 export function getLetterExpiryStatus(expiryDate?: string): 'active' | 'expired' | 'expiring_soon' {
   if (!expiryDate) return 'active';
   const curr = new Date(SYSTEM_CURRENT_DATE);
@@ -192,11 +192,11 @@ export function getLetterExpiryStatus(expiryDate?: string): 'active' | 'expired'
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays < 0) return 'expired';
-  if (diffDays <= 15) return 'expiring_soon'; // Ø§Ù„ØªØ­Ø°ÙŠØ± ÙÙŠ ØºØ¶ÙˆÙ† 15 ÙŠÙˆÙ…
+  if (diffDays <= 15) return 'expiring_soon'; // التحذير في غضون 15 يوم
   return 'active';
 }
 
-// Ø¯Ø§Ù„Ø© Ù„Ø­Ø³Ø§Ø¨ Ø§Ù„Ù…Ø¨Ø§Ù„Øº Ø§Ù„Ù…Ø¯ÙÙˆØ¹Ø© ÙˆØ§Ù„Ù…ØªØ¨Ù‚ÙŠØ© Ù„Ø·Ø§Ù„Ø¨ Ù…Ø¹ÙŠÙ†
+// دالة لحساب المبالغ المدفوعة والمتبقية لطالب معين
 export function calculateStudentFees(student: Student, payments: Payment[]): { total: number; paid: number; remaining: number } {
   const studentPayments = payments.filter(p => p.studentId === student.id && (p.category === 'tuition' || p.category === 'registration_fee'));
   const paid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
@@ -207,4 +207,3 @@ export function calculateStudentFees(student: Student, payments: Payment[]): { t
     remaining: Math.max(0, total - paid)
   };
 }
-
